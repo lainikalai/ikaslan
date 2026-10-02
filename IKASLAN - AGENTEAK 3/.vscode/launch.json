@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BC SaaS - Sandbox",
+      "type": "al",
+      "request": "launch",
+      "environmentType": "Sandbox",
+      "environmentName": "<NOMBRE_ENTORNO_SANDBOX>",
+      "tenant": "<TENANT_ID>",
+      "startupObjectId": 50230,
+      "startupObjectType": "Page",
+      "breakOnError": "All",
+      "launchBrowser": true,
+      "enableLongRunningSqlStatements": true,
+      "enableSqlInformationDebugger": true,
+      "usePublicURLWithDebugger": true
+    },
+    {
+      "name": "BC On-Prem",
+      "type": "al",
+      "request": "launch",
+      "server": "http://<SERVIDOR>",
+      "serverInstance": "<INSTANCIA>",
+      "authentication": "Windows",
+      "startupObjectId": 50230,
+      "startupObjectType": "Page",
+      "breakOnError": "All",
+      "launchBrowser": true,
+      "enableLongRunningSqlStatements": true,
+      "enableSqlInformationDebugger": true
+    }
+  ]
+}

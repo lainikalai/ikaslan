@@ -1,0 +1,43 @@
+permissionset 50200 "IKA DN Agent"
+{
+    Caption = 'Agente de albaranes (Claude)';
+    Assignable = true;
+
+    Permissions =
+        tabledata "IKA DN Setup" = RIMD,
+        tabledata "IKA DN Vendor Template" = RIMD,
+        tabledata "IKA DN Field Alias" = RIMD,
+        tabledata "IKA DN Document" = RIMD,
+        tabledata "IKA DN Document Line" = RIMD,
+        tabledata "IKA DN File" = RIMD,
+        tabledata "IKA DN Log" = RIMD,
+        table "IKA DN Setup" = X,
+        table "IKA DN Vendor Template" = X,
+        table "IKA DN Field Alias" = X,
+        table "IKA DN Document" = X,
+        table "IKA DN Document Line" = X,
+        table "IKA DN File" = X,
+        table "IKA DN Log" = X,
+        codeunit "IKA DN Claude Client" = X,
+        codeunit "IKA DN Graph Client" = X,
+        codeunit "IKA DN Extraction" = X,
+        codeunit "IKA DN Vendor Item Resolver" = X,
+        codeunit "IKA DN PO Matcher" = X,
+        codeunit "IKA DN Receipt Applier" = X,
+        codeunit "IKA DN Json Helper" = X,
+        codeunit "IKA DN Log Mgt." = X,
+        codeunit "IKA DN File To Text" = X,
+        codeunit "IKA DN Process" = X,
+        codeunit "IKA DN Move Source" = X,
+        codeunit "IKA DN Job" = X,
+        page "IKA DN Setup" = X,
+        page "IKA DN Vendor Templates" = X,
+        page "IKA DN Vendor Template" = X,
+        page "IKA DN Field Aliases" = X,
+        page "IKA DN Documents" = X,
+        page "IKA DN Document" = X,
+        page "IKA DN Document Subform" = X,
+        page "IKA DN Files" = X,
+        page "IKA DN Log" = X,
+        page "IKA DN Secret Input" = X;
+}
