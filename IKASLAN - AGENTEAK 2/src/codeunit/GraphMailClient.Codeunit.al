@@ -13,6 +13,7 @@ codeunit 50010 "IKA Graph Mail Client"
 
     var
         Setup: Record "IKA Sales Agent Setup";
+        MailAccount: Record "IKA Sales Mail Account";
         JsonHelper: Codeunit "IKA Sales Agent Json Helper";
         LogMgt: Codeunit "IKA Sales Agent Log Mgt.";
         UriHelper: Codeunit Uri;
@@ -42,7 +43,8 @@ codeunit 50010 "IKA Graph Mail Client"
         PageCount: Integer;
     begin
         Setup.TestSetupForGraph();
-        FolderId := GetFolderId(Setup."Source Folder");
+        LoadMailAccount();
+        FolderId := GetFolderId(MailAccount.Folder);
 
         Filter := 'receivedDateTime ge 2000-01-01T00:00:00Z';
         if Setup."Only Unread" then
@@ -203,15 +205,39 @@ codeunit 50010 "IKA Graph Mail Client"
     end;
 
     procedure TestConnection(): Text
+    begin
+        Setup.TestSetupForGraph();
+        LoadMailAccount();
+        exit(TestAccount(MailAccount));
+    end;
+
+    /// <summary>
+    /// Prueba una cuenta concreta (desde la página "Cuentas de Outlook 365").
+    /// </summary>
+    procedure TestAccount(Account: Record "IKA Sales Mail Account"): Text
     var
         ResponseJson: JsonObject;
     begin
-        Setup.TestSetupForGraph();
-        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + GetFolderId(Setup."Source Folder") + '?$select=displayName,totalItemCount,unreadItemCount', '', 0);
-        exit(StrSubstNo('%1: %2 emails (%3 sin leer)',
+        Setup.GetSetup();
+        MailAccount := Account;
+        MailAccount.TestField(Address);
+        AccessToken := '';
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + GetFolderId(MailAccount.Folder) + '?$select=displayName,totalItemCount,unreadItemCount', '', 0);
+        exit(StrSubstNo('%1 - %2: %3 emails (%4 sin leer)',
+            MailAccount.Address,
             JsonHelper.GetText(ResponseJson, 'displayName'),
             JsonHelper.GetText(ResponseJson, 'totalItemCount'),
             JsonHelper.GetText(ResponseJson, 'unreadItemCount')));
+    end;
+
+    local procedure LoadMailAccount()
+    begin
+        if MailAccount.Code <> '' then
+            exit;
+        Setup.TestSetupForGraph();
+        MailAccount.Get(Setup."Mail Account Code");
+        MailAccount.TestField(Address);
+        MailAccount.TestField(Enabled);
     end;
 
     /// <summary>
@@ -250,12 +276,13 @@ codeunit 50010 "IKA Graph Mail Client"
             foreach FolderToken in FolderArray do
                 exit(JsonHelper.GetText(FolderToken.AsObject(), 'id'));
 
-        Error(FolderNotFoundErr, FolderName, Setup."Mailbox Address");
+        Error(FolderNotFoundErr, FolderName, MailAccount.Address);
     end;
 
     local procedure GetMailboxUrl(): Text
     begin
-        exit(GraphBaseUrlTok + UriHelper.EscapeDataString(Setup."Mailbox Address"));
+        LoadMailAccount();
+        exit(GraphBaseUrlTok + UriHelper.EscapeDataString(MailAccount.Address));
     end;
 
     local procedure SendGraphRequest(Method: Text; Url: Text; BodyText: Text; RequestEntryNo: Integer) ResponseJson: JsonObject
@@ -316,10 +343,28 @@ codeunit 50010 "IKA Graph Mail Client"
         ResponseJson: JsonObject;
         ResponseText: Text;
         BodyText: Text;
+        TenantId: Text;
+        ClientId: Text;
+        ClientSecret: Text;
     begin
+        // Credenciales propias de la cuenta (otro tenant) o las generales de la configuración
+        LoadMailAccount();
+        if MailAccount."Use Own Credentials" then begin
+            MailAccount.TestField("Tenant Id");
+            MailAccount.TestField("Client Id");
+            TenantId := MailAccount."Tenant Id";
+            ClientId := MailAccount."Client Id";
+            ClientSecret := MailAccount.GetClientSecret();
+        end else begin
+            Setup.TestGeneralCredentials();
+            TenantId := Setup."Graph Tenant Id";
+            ClientId := Setup."Graph Client Id";
+            ClientSecret := Setup.GetGraphClientSecret();
+        end;
+
         BodyText := 'grant_type=client_credentials' +
-            '&client_id=' + UriHelper.EscapeDataString(Setup."Graph Client Id") +
-            '&client_secret=' + UriHelper.EscapeDataString(Setup.GetGraphClientSecret()) +
+            '&client_id=' + UriHelper.EscapeDataString(ClientId) +
+            '&client_secret=' + UriHelper.EscapeDataString(ClientSecret) +
             '&scope=' + UriHelper.EscapeDataString('https://graph.microsoft.com/.default');
         Content.WriteFrom(BodyText);
         Content.GetHeaders(ContentHeaders);
@@ -327,7 +372,7 @@ codeunit 50010 "IKA Graph Mail Client"
             ContentHeaders.Remove('Content-Type');
         ContentHeaders.Add('Content-Type', 'application/x-www-form-urlencoded');
 
-        if not Client.Post(StrSubstNo(TokenUrlTok, Setup."Graph Tenant Id"), Content, Response) then
+        if not Client.Post(StrSubstNo(TokenUrlTok, TenantId), Content, Response) then
             Error(TokenErr, GetLastErrorText());
         Response.Content.ReadAs(ResponseText);
         if not Response.IsSuccessStatusCode() then

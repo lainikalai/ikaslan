@@ -150,13 +150,10 @@ page 50200 "IKA DN Setup"
                 {
                     ApplicationArea = All;
                 }
-                field("Mailbox Address"; Rec."Mailbox Address")
+                field("Mail Account Code"; Rec."Mail Account Code")
                 {
                     ApplicationArea = All;
-                }
-                field("Mail Source Folder"; Rec."Mail Source Folder")
-                {
-                    ApplicationArea = All;
+                    ToolTip = 'Cuenta de Outlook 365 de la que se leen los albaranes.';
                 }
                 field("Mail Processed Folder"; Rec."Mail Processed Folder")
                 {
@@ -337,6 +334,14 @@ page 50200 "IKA DN Setup"
         }
         area(Navigation)
         {
+            action(MailAccounts)
+            {
+                ApplicationArea = All;
+                Caption = 'Cuentas de Outlook 365';
+                Image = Email;
+                RunObject = page "IKA DN Mail Accounts";
+                ToolTip = 'Cuentas de correo (la suya u otras) que puede usar el agente.';
+            }
             action(Templates)
             {
                 ApplicationArea = All;
@@ -388,6 +393,7 @@ page 50200 "IKA DN Setup"
             {
                 Caption = 'Navegar';
 
+                actionref(MailAccounts_Promoted; MailAccounts) { }
                 actionref(Templates_Promoted; Templates) { }
                 actionref(GlobalAliases_Promoted; GlobalAliases) { }
                 actionref(Documents_Promoted; Documents) { }

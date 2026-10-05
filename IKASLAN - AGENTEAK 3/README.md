@@ -73,8 +73,9 @@ Es independiente de la extensión de ventas (AGENTEAK 2), así que se pueden ins
 | Table | 50240 | IKA DN Document Line |
 | Table | 50250 | IKA DN File |
 | Table | 50260 | IKA DN Log |
+| Table | 50270 | IKA DN Mail Account (cuentas de Outlook 365) |
 | TableExt | 50200 | IKA DN Purchase Header |
-| Enum | 50200–50260 | Status, Match Status, Source, Log Type, Claude Effort, Alias Field, Item Code Type |
+| Enum | 50200–50270 | Status, Match Status, Source, Log Type, Claude Effort, Alias Field, Item Code Type, Mail Account Type |
 | Codeunit | 50200 | IKA DN Claude Client (prompt + plantilla + esquema JSON) |
 | Codeunit | 50210 | IKA DN Graph Client (correo + SharePoint/OneDrive) |
 | Codeunit | 50220 | IKA DN Extraction |
@@ -94,6 +95,7 @@ Es independiente de la extensión de ventas (AGENTEAK 2), así que se pueden ins
 | Page | 50260 | IKA DN Files |
 | Page | 50270 | IKA DN Log |
 | Page | 50280 | IKA DN Secret Input |
+| Page | 50290 | IKA DN Mail Accounts |
 | PageExt | 50200 | IKA DN Purchase Order |
 | PermissionSet | 50200 | IKA DN Agent |
 
@@ -107,7 +109,10 @@ Es independiente de la extensión de ventas (AGENTEAK 2), así que se pueden ins
    - correo: `Mail.ReadWrite`, limitado al buzón de albaranes con RBAC for Applications de Exchange;
    - carpeta: `Sites.Selected`, concediendo a la app acceso de escritura solo al sitio de compras
      (`POST /sites/{site-id}/permissions`), o `Files.ReadWrite.All`, que da acceso a todo y no se recomienda.
-4. **Correo**: buzón, carpetas, y decidir si se aceptan remitentes sin plantilla (filtro de asunto genérico).
+4. **Correo**: en *Cuentas de Outlook 365* dar de alta el buzón de albaranes (o *Añadir mi cuenta*)
+   con su carpeta origen; una cuenta de otro tenant puede llevar credenciales propias. En la configuración
+   elegir la *Cuenta de Outlook 365*, las carpetas de procesados/errores y si se aceptan remitentes sin
+   plantilla (filtro de asunto genérico). La carpeta de SharePoint usa siempre las credenciales generales.
 5. **Carpeta**: *Sitio SharePoint* (`empresa.sharepoint.com:/sites/Compras`) → *Obtener Drive Id*;
    rutas de entrada, procesados y errores dentro de la biblioteca (crearlas antes).
    > BC en la nube no puede leer una carpeta de red local. Si los albaranes se dejan en una carpeta del

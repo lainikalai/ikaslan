@@ -64,15 +64,11 @@ table 50200 "IKA DN Setup"
         {
             Caption = 'Leer buzón de correo';
         }
-        field(121; "Mailbox Address"; Text[250])
+        field(121; "Mail Account Code"; Code[20])
         {
-            Caption = 'Buzón a leer';
-            ExtendedDatatype = EMail;
-        }
-        field(122; "Mail Source Folder"; Text[100])
-        {
-            Caption = 'Carpeta origen (correo)';
-            InitValue = 'inbox';
+            Caption = 'Cuenta de Outlook 365';
+            TableRelation = "IKA DN Mail Account";
+            ToolTip = 'Cuenta (buzón) de la que se leen los albaranes. Se configura en "Cuentas de Outlook 365"; la carpeta origen es la de la cuenta.';
         }
         field(123; "Mail Processed Folder"; Text[100])
         {
@@ -228,6 +224,15 @@ table 50200 "IKA DN Setup"
     end;
 
     procedure TestSetupForGraph()
+    begin
+        GetSetup();
+    end;
+
+    /// <summary>
+    /// Credenciales generales de Graph: las usan la carpeta de SharePoint y las cuentas de correo
+    /// que no tienen credenciales propias.
+    /// </summary>
+    procedure TestGeneralCredentials()
     begin
         GetSetup();
         TestField("Graph Tenant Id");

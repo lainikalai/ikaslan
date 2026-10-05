@@ -59,15 +59,11 @@ table 50000 "IKA Sales Agent Setup"
         {
             Caption = 'Client Id (registro de aplicación)';
         }
-        field(120; "Mailbox Address"; Text[250])
+        field(120; "Mail Account Code"; Code[20])
         {
-            Caption = 'Buzón a leer';
-            ExtendedDatatype = EMail;
-        }
-        field(130; "Source Folder"; Text[100])
-        {
-            Caption = 'Carpeta origen';
-            InitValue = 'inbox';
+            Caption = 'Cuenta de Outlook 365';
+            TableRelation = "IKA Sales Mail Account";
+            ToolTip = 'Cuenta (buzón) de la que se leen los pedidos. Se configura en "Cuentas de Outlook 365".';
         }
         field(140; "Processed Folder"; Text[100])
         {
@@ -163,10 +159,17 @@ table 50000 "IKA Sales Agent Setup"
     procedure TestSetupForGraph()
     begin
         GetSetup();
+        TestField("Mail Account Code");
+    end;
+
+    /// <summary>
+    /// Credenciales generales de Graph (las usan las cuentas que no tienen credenciales propias).
+    /// </summary>
+    procedure TestGeneralCredentials()
+    begin
+        GetSetup();
         TestField("Graph Tenant Id");
         TestField("Graph Client Id");
-        TestField("Mailbox Address");
-        TestField("Source Folder");
         if not HasGraphClientSecret() then
             Error(NotConfiguredErr, TableCaption());
     end;

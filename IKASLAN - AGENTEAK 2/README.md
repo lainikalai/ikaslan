@@ -63,8 +63,9 @@ Si `Crear pedidos automáticamente` está desactivado (recomendado al principio)
 | Table | 50030 | IKA Sales Request Line |
 | Table | 50040 | IKA Sales Request Attachment |
 | Table | 50050 | IKA Sales Agent Log |
+| Table | 50060 | IKA Sales Mail Account (cuentas de Outlook 365) |
 | TableExt | 50000 | IKA Sales Header (campo `IKA Sales Request Entry No.`) |
-| Enum | 50000–50040 | Status, Match Status, Log Type, Claude Effort, Source |
+| Enum | 50000–50050 | Status, Match Status, Log Type, Claude Effort, Source, Mail Account Type |
 | Codeunit | 50000 | IKA Claude API Client |
 | Codeunit | 50010 | IKA Graph Mail Client |
 | Codeunit | 50020 | IKA Sales Req. Extraction |
@@ -84,6 +85,7 @@ Si `Crear pedidos automáticamente` está desactivado (recomendado al principio)
 | Page | 50050 | IKA Sales Req. Attachments |
 | Page | 50060 | IKA Sales Agent Log |
 | Page | 50070 | IKA Secret Input |
+| Page | 50080 | IKA Sales Mail Accounts |
 | PageExt | 50000 | IKA Sales Order |
 | PermissionSet | 50000 | IKA Sales Agent |
 
@@ -125,9 +127,17 @@ por pedido**. El registro guarda los tokens de cada llamada.
    New-ManagementRoleAssignment -App <ClientId> -Role "Application Mail.ReadWrite" -CustomResourceScope "BC Sales Agent"
    ```
    (y entonces quitar el permiso `Mail.ReadWrite` de Entra ID, que concede acceso global).
-5. En BC: Tenant Id, Client Id, *Establecer secreto de Graph*, buzón, carpeta origen (`inbox` o el
-   nombre de una subcarpeta), carpetas de procesados/errores (crearlas antes en Outlook).
-6. *Probar conexión con Outlook*.
+5. En BC, *Configuración agente de ventas*: Tenant Id, Client Id y *Establecer secreto de Graph*
+   (credenciales generales).
+6. *Cuentas de Outlook 365*: dar de alta el buzón de pedidos (o *Añadir mi cuenta* para usar el del
+   usuario) con su carpeta origen (`inbox` o el nombre de una subcarpeta). Una cuenta de **otro tenant**
+   de Microsoft 365 puede llevar sus propias credenciales (*Credenciales propias* + Tenant Id, Client Id
+   y *Establecer secreto propio*). *Probar conexión*.
+7. En la configuración, elegir la *Cuenta de Outlook 365* y las carpetas de procesados/errores
+   (crearlas antes en Outlook). *Probar conexión con Outlook*.
+
+> La tabla y la página de cuentas tienen la misma estructura en AGENTEAK 2, 3 y 4, para poder dejar una
+> sola si se unifican las extensiones.
 
 ### 4. Filtros y cola de proyectos
 1. *Filtros de correo*: p.ej. remitente `*@cliente.com` y asunto `*pedido*`; si cada dominio es un

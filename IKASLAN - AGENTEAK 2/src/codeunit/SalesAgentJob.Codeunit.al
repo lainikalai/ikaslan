@@ -34,7 +34,7 @@ codeunit 50090 "IKA Sales Agent Job"
             exit;
         end;
 
-        if Setup."Mailbox Address" <> '' then begin
+        if Setup."Mail Account Code" <> '' then begin
             Commit();
             ClearLastError();
             // Codeunit.Run (y no TryFunction) porque la importación hace Commit por cada email

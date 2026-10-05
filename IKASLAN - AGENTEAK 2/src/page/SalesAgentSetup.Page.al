@@ -97,7 +97,7 @@ page 50000 "IKA Sales Agent Setup"
             }
             group(Outlook)
             {
-                Caption = 'Outlook (Microsoft Graph)';
+                Caption = 'Outlook 365 (Microsoft Graph)';
 
                 field("Graph Tenant Id"; Rec."Graph Tenant Id")
                 {
@@ -116,15 +116,10 @@ page 50000 "IKA Sales Agent Setup"
                     Editable = false;
                     ToolTip = 'El secreto se guarda cifrado en Isolated Storage. Use la acción "Establecer secreto de Graph".';
                 }
-                field("Mailbox Address"; Rec."Mailbox Address")
+                field("Mail Account Code"; Rec."Mail Account Code")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Buzón del que se leen los pedidos (p.ej. pedidos@empresa.com).';
-                }
-                field("Source Folder"; Rec."Source Folder")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Carpeta a leer: inbox, el nombre de una subcarpeta de la bandeja de entrada o de primer nivel, o su id.';
+                    ToolTip = 'Cuenta de Outlook 365 de la que se leen los pedidos (la carpeta origen es la de la cuenta).';
                 }
                 field("Processed Folder"; Rec."Processed Folder")
                 {
@@ -263,6 +258,14 @@ page 50000 "IKA Sales Agent Setup"
         }
         area(Navigation)
         {
+            action(MailAccounts)
+            {
+                ApplicationArea = All;
+                Caption = 'Cuentas de Outlook 365';
+                Image = Email;
+                RunObject = page "IKA Sales Mail Accounts";
+                ToolTip = 'Cuentas de correo (la suya u otras) que puede usar el agente.';
+            }
             action(MailFilters)
             {
                 ApplicationArea = All;
@@ -305,6 +308,7 @@ page 50000 "IKA Sales Agent Setup"
             {
                 Caption = 'Navegar';
 
+                actionref(MailAccounts_Promoted; MailAccounts) { }
                 actionref(MailFilters_Promoted; MailFilters) { }
                 actionref(Requests_Promoted; Requests) { }
                 actionref(Log_Promoted; Log) { }

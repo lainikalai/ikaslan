@@ -1,0 +1,137 @@
+/* IKA Mail Workspace */
+html, body { margin: 0; padding: 0; height: 100%; }
+
+.ika-root {
+    --ika-accent: #00838f;
+    --ika-accent-soft: #e0f2f1;
+    --ika-border: #d0d7de;
+    --ika-text: #212121;
+    --ika-muted: #616161;
+    --ika-bg: #ffffff;
+    --ika-panel: #f7f8fa;
+    --ika-ok: #2e7d32;
+    --ika-error: #c62828;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: "Segoe UI", "Segoe WPC", Tahoma, Arial, sans-serif;
+    font-size: 13px;
+    color: var(--ika-text);
+    background: var(--ika-bg);
+}
+.ika-root *, .ika-root *::before, .ika-root *::after { box-sizing: border-box; }
+
+.ika-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 12px;
+    padding: 8px;
+}
+@media (max-width: 760px) {
+    .ika-main { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 1fr) auto; }
+}
+
+.ika-left, .ika-right { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+
+.ika-body {
+    flex: 1 1 auto;
+    min-height: 200px;
+    width: 100%;
+    border: 1px solid var(--ika-border);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.ika-section-title {
+    margin: 10px 0 6px;
+    font-weight: 600;
+    color: var(--ika-muted);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .04em;
+}
+.ika-right .ika-section-title { margin-top: 0; }
+
+.ika-items { display: flex; flex-wrap: wrap; gap: 6px; max-height: 40%; overflow: auto; }
+
+.ika-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--ika-border);
+    border-radius: 4px;
+    background: var(--ika-panel);
+    cursor: grab;
+    user-select: none;
+}
+.ika-item:hover { border-color: var(--ika-accent); }
+.ika-item:focus { outline: 2px solid var(--ika-accent); outline-offset: 1px; }
+.ika-item.ika-selected { border-color: var(--ika-accent); background: var(--ika-accent-soft); }
+.ika-item.ika-dragging { opacity: .5; }
+.ika-item.ika-kind-reference { cursor: not-allowed; opacity: .7; }
+.ika-kind-email { border-style: dashed; }
+
+.ika-icon { font-size: 16px; }
+.ika-item-text { display: flex; flex-direction: column; min-width: 0; }
+.ika-item-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.ika-item-size { color: var(--ika-muted); font-size: 11px; }
+.ika-item-links { color: var(--ika-ok); font-size: 11px; }
+
+.ika-targets { flex: 1 1 auto; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+
+.ika-target {
+    padding: 8px 10px;
+    border: 2px dashed var(--ika-border);
+    border-radius: 6px;
+    background: var(--ika-panel);
+    transition: border-color .1s, background .1s;
+}
+.ika-target-selected { border-color: var(--ika-accent); }
+.ika-drag-active .ika-target { border-color: var(--ika-accent); }
+.ika-target.ika-over { background: var(--ika-accent-soft); border-style: solid; }
+
+.ika-target-head { display: flex; align-items: center; gap: 4px; }
+.ika-badge {
+    flex: 1 1 auto;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ika-accent);
+    font-weight: 600;
+}
+.ika-target-type { font-weight: 600; margin-top: 2px; }
+.ika-target-name { color: var(--ika-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ika-drop-hint { margin-top: 4px; font-size: 11px; color: var(--ika-muted); }
+
+.ika-btn {
+    border: 1px solid var(--ika-border);
+    background: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    font: inherit;
+    padding: 2px 8px;
+}
+.ika-btn:hover { border-color: var(--ika-accent); }
+.ika-btn-icon { padding: 0 5px; line-height: 20px; }
+.ika-btn-primary { margin-top: 6px; background: var(--ika-accent); border-color: var(--ika-accent); color: #fff; }
+.ika-pinned { background: var(--ika-accent-soft); border-color: var(--ika-accent); }
+
+.ika-hint, .ika-empty { margin-top: 8px; font-size: 11px; color: var(--ika-muted); }
+
+.ika-status {
+    display: none;
+    padding: 6px 10px;
+    border-top: 1px solid var(--ika-border);
+    background: #e8f5e9;
+    color: var(--ika-ok);
+}
+.ika-status-visible { display: block; }
+.ika-status-error { background: #ffebee; color: var(--ika-error); }
+
+.ika-busy { cursor: progress; }
+.ika-busy .ika-main { opacity: .6; pointer-events: none; }

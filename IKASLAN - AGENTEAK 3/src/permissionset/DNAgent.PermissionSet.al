@@ -11,6 +11,8 @@ permissionset 50200 "IKA DN Agent"
         tabledata "IKA DN Document Line" = RIMD,
         tabledata "IKA DN File" = RIMD,
         tabledata "IKA DN Log" = RIMD,
+        tabledata "IKA DN Mail Account" = RIMD,
+        table "IKA DN Mail Account" = X,
         table "IKA DN Setup" = X,
         table "IKA DN Vendor Template" = X,
         table "IKA DN Field Alias" = X,
@@ -39,5 +41,6 @@ permissionset 50200 "IKA DN Agent"
         page "IKA DN Document Subform" = X,
         page "IKA DN Files" = X,
         page "IKA DN Log" = X,
+        page "IKA DN Mail Accounts" = X,
         page "IKA DN Secret Input" = X;
 }

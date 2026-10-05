@@ -10,6 +10,8 @@ permissionset 50000 "IKA Sales Agent"
         tabledata "IKA Sales Request Line" = RIMD,
         tabledata "IKA Sales Request Attachment" = RIMD,
         tabledata "IKA Sales Agent Log" = RIMD,
+        tabledata "IKA Sales Mail Account" = RIMD,
+        table "IKA Sales Mail Account" = X,
         table "IKA Sales Agent Setup" = X,
         table "IKA Sales Agent Mail Filter" = X,
         table "IKA Sales Request Header" = X,
@@ -34,5 +36,6 @@ permissionset 50000 "IKA Sales Agent"
         page "IKA Sales Request Subform" = X,
         page "IKA Sales Req. Attachments" = X,
         page "IKA Sales Agent Log" = X,
+        page "IKA Sales Mail Accounts" = X,
         page "IKA Secret Input" = X;
 }
