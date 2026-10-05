@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "WA_VERIFY_TOKEN": "texto-secreto-que-tambien-se-pone-en-meta",
+    "WA_APP_SECRET": "secreto-de-la-app-de-meta (App settings > Basic > App secret)",
+
+    "BC_TENANT_ID": "00000000-0000-0000-0000-000000000000",
+    "BC_CLIENT_ID": "id-del-registro-de-aplicacion-para-la-api-de-bc",
+    "BC_CLIENT_SECRET": "secreto-del-registro-de-aplicacion",
+    "BC_ENVIRONMENT": "Production",
+    "BC_COMPANY_ID": "id-de-la-empresa (GET .../api/v2.0/companies)",
+    "BC_API_BASE": "https://api.businesscentral.dynamics.com/v2.0"
+  }
+}

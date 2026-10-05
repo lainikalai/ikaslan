@@ -1,0 +1,16 @@
+{
+  "name": "ikaslan-whatsapp-bridge",
+  "version": "1.0.0",
+  "description": "Puente entre el webhook de WhatsApp (Meta Cloud API) y Business Central",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0"
+  }
+}

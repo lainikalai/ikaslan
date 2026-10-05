@@ -1,0 +1,147 @@
+# Ikaslan WhatsApp Connector
+
+Extensión AL para Business Central 28 que integra **WhatsApp Business (Cloud API de Meta)**:
+
+- **Enviar desde BC** facturas, pedidos, albaranes, ofertas y pedidos de compra en PDF, mensajes con
+  **plantillas aprobadas** (con variables rellenadas desde los campos del documento) y texto libre.
+- **Recibir** los mensajes de clientes y proveedores mediante una **Azure Function** (incluida) que entrega
+  cada mensaje a una página API de BC.
+- **Conversaciones en BC**: bandeja, historial, respuesta, descarga de las fotos/PDF/audios recibidos y
+  adjuntarlos a la ficha; vinculación automática al cliente, proveedor o contacto por el teléfono.
+- **Sin API**: botón *Abrir en mi WhatsApp* (enlace `wa.me`) en fichas, conversaciones y diálogo de envío.
+
+> ⚠️ Código AL generado sin compilar: `AL: Download Symbols` + `Ctrl+Shift+B` y corregir lo que indique
+> el compilador. La Azure Function sí tiene pruebas (`npm test`) de la normalización y de la firma.
+
+## Arquitectura
+
+```
+                    ENVÍO                                         RECEPCIÓN
+BC ── HttpClient ──► graph.facebook.com          Cliente ──► Meta ──► Azure Function ──► API de BC
+   /{phone-id}/messages (texto, plantilla, doc)                      (firma + normaliza)   inboundEvents
+   /{phone-id}/media (sube el PDF)                                                         │
+                                                                                           ▼
+                                               Cola de proyectos / al abrir la bandeja: "IKA WA Inbound Processor"
+                                               → conversaciones + mensajes + estados (entregado/leído/error)
+                                               → descarga de ficheros → vincular por teléfono
+```
+
+¿Por qué una Azure Function? Meta entrega los mensajes por **webhook**, que exige responder a una verificación
+(`hub.challenge`) y comprobar la firma `X-Hub-Signature-256`. BC no puede exponer un endpoint así, pero sí
+una **página API**. La función, unas 200 líneas, hace de puente. En el plan de consumo de Azure su coste es
+prácticamente nulo para estos volúmenes.
+
+## Reglas de WhatsApp que la extensión respeta
+
+| Situación | Qué se puede enviar |
+|---|---|
+| El cliente ha escrito en las **últimas 24 h** (ventana abierta) | Texto libre, PDF, imágenes y también plantillas |
+| Ventana cerrada, o el cliente nunca ha escrito | **Solo plantillas aprobadas por Meta** |
+
+- La ventana se muestra en cada conversación y en el diálogo de envío. Si está cerrada, el diálogo obliga a usar plantilla.
+- **Coste**: Meta cobra por mensaje de plantilla según su categoría (*utility*, *marketing*, *authentication*) y el país.
+  Las respuestas dentro de la ventana suelen ser gratuitas. **Revise la tarifa vigente de Meta**, porque ha cambiado varias veces.
+- **Consentimiento (opt-in)**: hace falta permiso del cliente para escribirle por WhatsApp (también por RGPD).
+- **IA**: Meta restringe en la API los *chatbots de IA de propósito general*. El punto de extensión
+  `OnAfterInboundMessage` permite conectar el agente de pedidos con Claude (AGENTEAK 2), con revisión humana.
+  Revise la política vigente de Meta antes de responder automáticamente con IA.
+
+## Plantillas y variables
+
+Las plantillas se crean en **WhatsApp Manager** (Meta) y se traen a BC con *Sincronizar plantillas*. Ejemplo de
+plantilla `factura_emitida`, categoría *Utility*, idioma `es`, **cabecera de tipo Documento**:
+
+> Hola {{1}}, le enviamos la factura {{2}} por importe de {{3}} €. Gracias por su confianza.
+
+Con *Variables* se indica de dónde sale cada `{{n}}` según el documento desde el que se envía:
+
+| Tabla | Variable | Origen | Campo |
+|---|---|---|---|
+| 112 Hist. cab. factura venta | 1 | Nombre del destinatario | |
+| 112 | 2 | Campo del documento | 3 "Nº" |
+| 112 | 3 | Campo del documento | 61 "Importe IVA incl." |
+
+Con `Id tabla = 0` la variable vale para cualquier documento. En el diálogo de envío los valores se pueden revisar
+y corregir antes de enviar. El PDF sale del informe configurado en **Selección de informes** (el mismo que se
+usa para enviar por email).
+
+## Objetos (rango 50600–50799, prefijo `IKA WA`)
+
+| Tipo | ID | Nombre |
+|---|---|---|
+| Table | 50600 | IKA WA Setup |
+| Table | 50610 | IKA WA Account (número de WhatsApp Business; token en Isolated Storage) |
+| Table | 50620 / 50630 | IKA WA Template / Template Param |
+| Table | 50640 | IKA WA Conversation (ventana de 24 h, entidad vinculada) |
+| Table | 50650 | IKA WA Message (enviados y recibidos, estado, fichero) |
+| Table | 50660 | IKA WA Inbound Event (cola de entrada de la API) |
+| Enum | 50600–50670 | Direction, Message Status, Message Type, Entity Type, Template Status, Header Type, Param Source, Event Kind |
+| Codeunit | 50600 | IKA WA Cloud API (texto, ficheros, plantillas, media, leído, sincronizar plantillas) |
+| Codeunit | 50610 | IKA WA Inbound Processor (cola → mensajes; evento `OnAfterInboundMessage`) |
+| Codeunit | 50615 | IKA WA Media Downloader |
+| Codeunit | 50620 | IKA WA Phone Mgt. (normalizar teléfonos, buscar entidad, `wa.me`, adjuntar) |
+| Codeunit | 50630 | IKA WA Document Sender (PDF con Selección de informes + variables) |
+| Codeunit | 50640 | IKA WA Json Helper |
+| Codeunit | 50660 | IKA WA Job (cola de proyectos) |
+| Page | 50600 / 50610 | IKA WA Setup / Accounts |
+| Page | 50620 / 50625 | IKA WA Templates / Template Params |
+| Page | 50630 / 50635 | IKA WA Conversations / Entity Conversations (FactBox) |
+| Page | 50640 / 50645 | IKA WA Conversation / Messages Part |
+| Page | 50650 | IKA WA Send (diálogo de envío) |
+| Page | 50660 | IKA WA Inbound Events |
+| Page | 50670 | IKA WA Secret Input |
+| Page (API) | 50690 | IKA WA Inbound API — `api/ikaslan/whatsapp/v1.0/inboundEvents` |
+| PageExt | 50600–50602 | Ficha cliente, proveedor, contacto: FactBox + *Enviar WhatsApp* + *Abrir en mi WhatsApp* |
+| PageExt | 50603–50607 | *Enviar por WhatsApp* en Hist. factura venta, Pedido venta, Hist. albarán venta, Oferta venta, Pedido compra |
+| PermissionSet | 50600 | IKA WA User (usuarios) |
+| PermissionSet | 50610 | IKA WA Inbound (solo para la aplicación de la Azure Function) |
+| Azure Function | — | `azure-function/` (Node.js 20+, Azure Functions v4) |
+
+## Puesta en marcha
+
+### 1. Meta (WhatsApp Business Platform)
+1. Cuenta de **Meta Business** verificada (Business Manager).
+2. En **developers.facebook.com** crear una app de tipo *Business* y añadir el producto **WhatsApp**.
+3. Dar de alta el **número de teléfono** de la empresa (un número dedicado es lo más sencillo) y que Meta apruebe el nombre visible.
+4. Anotar el **Phone Number ID** y el **WhatsApp Business Account ID** (WhatsApp > API Setup).
+5. En Business Manager crear un **usuario del sistema**, asignarle la app y la cuenta de WhatsApp, y generar un
+   **token permanente** con permisos `whatsapp_business_messaging` y `whatsapp_business_management`.
+6. Crear las **plantillas** en WhatsApp Manager y esperar a que estén aprobadas.
+
+### 2. Business Central
+1. Copiar la carpeta a `C:\Users\IAU\Documents\BEZEROAK\IKASLAN\IKASLAN - AGENTEAK 5`, ajustar `publisher`,
+   `launch.json`, `Download Symbols`, compilar y publicar (en sandbox: permitir HttpClient).
+2. *Cuentas de WhatsApp Business*: código, número visible, Phone Number ID, Business Account ID →
+   *Establecer token* → *Probar conexión* → *Sincronizar plantillas*.
+3. *Configuración WhatsApp*: cuenta por defecto y prefijo de país (34).
+4. *Plantillas* → *Variables* para cada plantilla y documento.
+5. Asignar el conjunto de permisos **IKA WA User**.
+6. Probar: en una factura registrada, *Enviar por WhatsApp*.
+
+### 3. Recepción (Azure Function)
+1. **Entra ID**: nuevo registro de aplicación para la API de BC, con permiso de aplicación
+   *Dynamics 365 Business Central > API.ReadWrite.All* (consentimiento de administrador) y un secreto.
+2. En BC, página **Aplicaciones de Microsoft Entra**: dar de alta ese Client Id, estado *Habilitado*, y asignarle
+   **solo** el conjunto de permisos **IKA WA Inbound**.
+3. Obtener el **Id de la empresa**: `GET https://api.businesscentral.dynamics.com/v2.0/{tenant}/{entorno}/api/v2.0/companies`.
+4. Desplegar `azure-function/` en una Function App (Node 20, plan de consumo) desde VS Code (extensión Azure Functions)
+   y configurar en *Configuración de la aplicación* las variables de `local.settings.sample.json`.
+   El **App Secret** está en Meta: *App settings > Basic*.
+5. En Meta: *WhatsApp > Configuration > Webhook*: URL `https://<function-app>.azurewebsites.net/api/whatsapp`,
+   *Verify token* = `WA_VERIFY_TOKEN`, y suscribirse al campo **messages**.
+6. En BC: *Crear entrada de cola de proyectos* (cada 2 min). La bandeja también procesa lo pendiente al abrirse.
+7. Escribir al número desde un móvil y comprobar *Eventos recibidos* y *WhatsApp* (conversaciones).
+
+> BC **on-premises**: la URL de la API es `https://<servidor>:<puerto>/<instancia>/api/ikaslan/whatsapp/v1.0/...`,
+> y hay que exponerla de forma segura (o usar la Function para dejar los eventos en una cola que BC consulte).
+
+Pruebas locales de la función: `cd azure-function && npm install && npm test`.
+
+## Siguientes pasos posibles
+
+- **Pedidos por WhatsApp**: suscribirse a `OnAfterInboundMessage` y crear una solicitud en la bandeja del agente de
+  ventas (AGENTEAK 2), para que Claude extraiga cliente, productos y cantidades del texto o de la foto.
+- **Envío masivo** de recordatorios de cobro (plantilla *utility*) desde *Movs. clientes* vencidos.
+- **Vista de chat con burbujas** mediante un control add-in, como el de AGENTEAK 4.
+- **Cuentas comunes**: si se unifican AGENTEAK 2–5, la cuenta de WhatsApp sigue el mismo patrón que las cuentas de
+  Outlook 365 (código + credencial en Isolated Storage + acceso por usuario + probar conexión).

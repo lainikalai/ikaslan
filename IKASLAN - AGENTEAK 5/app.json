@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/al-appjson",
+  "id": "1b510fd8-7176-463a-bb2c-4b34e8ba404d",
+  "name": "Ikaslan WhatsApp Connector",
+  "publisher": "PUBLISHER",
+  "version": "1.0.0.0",
+  "brief": "WhatsApp Business (Cloud API de Meta) en Business Central: envío de documentos y plantillas, conversaciones y mensajes entrantes.",
+  "description": "Envía desde Business Central facturas, pedidos, albaranes y ofertas en PDF y mensajes con plantillas aprobadas por WhatsApp (Cloud API de Meta), recibe mensajes mediante una Azure Function que los entrega a una página API, y muestra las conversaciones vinculadas a clientes, proveedores y contactos.",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "28.0.0.0",
+  "application": "28.0.0.0",
+  "idRanges": [
+    {
+      "from": 50600,
+      "to": 50799
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": false,
+    "includeSourceInSymbolFile": false
+  },
+  "features": [
+    "NoImplicitWith",
+    "TranslationFile"
+  ],
+  "runtime": "15.0",
+  "target": "Cloud"
+}
