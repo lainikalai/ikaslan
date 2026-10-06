@@ -308,10 +308,10 @@ codeunit 50200 "IKA DN Claude Client"
     [NonDebuggable]
     local procedure AddAuthHeaders(var Client: HttpClient)
     begin
-        Client.DefaultDNDocuments.Add('x-api-key', Setup.GetClaudeApiKey());
-        Client.DefaultDNDocuments.Add('anthropic-version', AnthropicVersionTok);
+        Client.DefaultRequestHeaders.Add('x-api-key', Setup.GetClaudeApiKey());
+        Client.DefaultRequestHeaders.Add('anthropic-version', AnthropicVersionTok);
         if Setup."Use Refusal Fallback" then
-            Client.DefaultDNDocuments.Add('anthropic-beta', FallbackBetaTok);
+            Client.DefaultRequestHeaders.Add('anthropic-beta', FallbackBetaTok);
     end;
 
     /// <summary>

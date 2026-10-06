@@ -174,7 +174,7 @@ page 50430 "IKA Mail Message"
             {
                 ApplicationArea = All;
                 Caption = 'Responder';
-                Image = Reply;
+                Image = Email;
                 ToolTip = 'Responde al remitente desde la cuenta de Outlook.';
 
                 trigger OnAction()
@@ -186,7 +186,7 @@ page 50430 "IKA Mail Message"
             {
                 ApplicationArea = All;
                 Caption = 'Responder a todos';
-                Image = ReplyAll;
+                Image = SendMail;
                 ToolTip = 'Responde al remitente y al resto de destinatarios.';
 
                 trigger OnAction()
@@ -198,7 +198,7 @@ page 50430 "IKA Mail Message"
             {
                 ApplicationArea = All;
                 Caption = 'Reenviar';
-                Image = Forward;
+                Image = SendTo;
                 ToolTip = 'Reenvía el email (con sus adjuntos).';
 
                 trigger OnAction()
@@ -240,7 +240,7 @@ page 50430 "IKA Mail Message"
             {
                 ApplicationArea = All;
                 Caption = 'Fijar destino';
-                Image = Bookmark;
+                Image = Link;
                 ToolTip = 'Mantiene la entidad de Destino como zona fija en todos los emails.';
 
                 trigger OnAction()

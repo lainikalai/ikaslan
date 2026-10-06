@@ -166,7 +166,7 @@ page 50250 "IKA DN Document Subform"
             {
                 ApplicationArea = All;
                 Caption = 'Guardar como referencia de proveedor';
-                Image = ItemCrossReference;
+                Image = Item;
                 ToolTip = 'Crea una referencia de producto de tipo Proveedor con su código y el producto asignado, para que la próxima vez se identifique automáticamente.';
 
                 trigger OnAction()

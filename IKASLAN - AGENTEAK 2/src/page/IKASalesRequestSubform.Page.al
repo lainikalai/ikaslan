@@ -82,7 +82,7 @@ page 50040 "IKA Sales Request Subform"
             {
                 ApplicationArea = All;
                 Caption = 'Guardar como referencia de cliente';
-                Image = ItemCrossReference;
+                Image = Item;
                 ToolTip = 'Crea una referencia de producto de tipo Cliente con el código del cliente y el producto asignado, para que la próxima vez se identifique automáticamente.';
 
                 trigger OnAction()
