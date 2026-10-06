@@ -82,7 +82,7 @@ table 99031 "IKA Sales Mail Account"
 
     var
         NoAccessErr: Label 'No tiene acceso al buzón %1.', Comment = '%1 = mailbox code';
-        NoUserEmailErr: Label 'El usuario %1 no tiene email de autenticación ni de contacto en la ficha de usuario.', Comment = '%1 = user id';
+        NoUserEmailErr: Label 'No se encuentra un email válido para el usuario %1. Rellene "Email de autenticación" o "Email de contacto" en la ficha de Usuarios, o "Correo electrónico" en Configuración de usuarios; o dé de alta la cuenta a mano con su dirección.', Comment = '%1 = user id';
         AccountExistsMsg: Label 'Ya existe la cuenta %1 para %2.', Comment = '%1 = code, %2 = address';
         SecretTok: Label 'IKA-SALES-MAIL-SECRET-%1', Locked = true, Comment = '%1 = mailbox code';
 
@@ -98,12 +98,7 @@ table 99031 "IKA Sales Mail Account"
         BaseCode: Code[20];
         Counter: Integer;
     begin
-        User.SetRange("User Security ID", UserSecurityId());
-        if User.FindFirst() then begin
-            Email := User."Authentication Email";
-            if Email = '' then
-                Email := User."Contact Email";
-        end;
+        Email := GetCurrentUserEmail();
         if Email = '' then
             Error(NoUserEmailErr, UserId());
 
@@ -113,15 +108,20 @@ table 99031 "IKA Sales Mail Account"
             exit(Mailbox.Code);
         end;
 
-        NewCode := CopyStr(UpperCase(DelChr(CopyStr(Email, 1, StrPos(Email, '@') - 1), '=', '.-_ ')), 1, MaxStrLen(NewCode));
+        // Código a partir de la parte anterior a la @ (solo letras y números)
+        NewCode := CopyStr(OnlyLettersAndDigits(CopyStr(Email, 1, StrPos(Email, '@') - 1)), 1, MaxStrLen(NewCode));
         if NewCode = '' then
-            NewCode := CopyStr(UpperCase(UserId()), 1, MaxStrLen(NewCode));
+            NewCode := CopyStr(OnlyLettersAndDigits(UserId()), 1, MaxStrLen(NewCode));
+        if NewCode = '' then
+            NewCode := 'MICUENTA';
         BaseCode := CopyStr(NewCode, 1, 17);
         while Mailbox.Get(NewCode) do begin
             Counter += 1;
             NewCode := CopyStr(BaseCode + Format(Counter), 1, MaxStrLen(NewCode));
         end;
 
+        User.SetRange("User Security ID", UserSecurityId());
+        if User.FindFirst() then;
         Mailbox.Init();
         Mailbox.Code := NewCode;
         Mailbox.Address := CopyStr(Email, 1, MaxStrLen(Mailbox.Address));
@@ -130,6 +130,52 @@ table 99031 "IKA Sales Mail Account"
         Mailbox."Restricted to User ID" := CopyStr(UpperCase(UserId()), 1, MaxStrLen(Mailbox."Restricted to User ID"));
         Mailbox.Insert(true);
         exit(Mailbox.Code);
+    end;
+
+    /// <summary>
+    /// Primer email válido (con @) del usuario actual: email de autenticación, email de contacto
+    /// o el correo electrónico de "Configuración de usuarios". '' si no tiene ninguno.
+    /// </summary>
+    procedure GetCurrentUserEmail(): Text
+    var
+        User: Record User;
+        UserSetup: Record "User Setup";
+    begin
+        User.SetRange("User Security ID", UserSecurityId());
+        if User.FindFirst() then begin
+            if IsValidEmail(User."Authentication Email") then
+                exit(DelChr(User."Authentication Email", '<>', ' '));
+            if IsValidEmail(User."Contact Email") then
+                exit(DelChr(User."Contact Email", '<>', ' '));
+        end;
+        if UserSetup.Get(UserId()) then
+            if IsValidEmail(UserSetup."E-Mail") then
+                exit(DelChr(UserSetup."E-Mail", '<>', ' '));
+        exit('');
+    end;
+
+    local procedure IsValidEmail(Email: Text): Boolean
+    var
+        AtPos: Integer;
+    begin
+        Email := DelChr(Email, '<>', ' ');
+        AtPos := StrPos(Email, '@');
+        exit((AtPos > 1) and (AtPos < StrLen(Email)) and (StrPos(Email, ' ') = 0));
+    end;
+
+    local procedure OnlyLettersAndDigits(Value: Text): Text
+    var
+        Result: Text;
+        Ch: Text[1];
+        i: Integer;
+    begin
+        Value := UpperCase(Value);
+        for i := 1 to StrLen(Value) do begin
+            Ch := CopyStr(Value, i, 1);
+            if Ch in ['A' .. 'Z', '0' .. '9'] then
+                Result += Ch;
+        end;
+        exit(Result);
     end;
 
     [NonDebuggable]
