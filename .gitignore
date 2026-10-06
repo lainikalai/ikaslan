@@ -1,0 +1,19 @@
+# --- Proyectos AL (se aplica a todas las carpetas del repositorio) ---
+# Símbolos descargados con "AL: Download Symbols" (se regeneran en cada equipo)
+.alpackages/
+# Paquetes compilados
+*.app
+# Snapshots del depurador y caché del compilador
+.snapshots/
+rad.json
+*.g.xlf
+.vs/
+
+# --- Azure Functions / Node.js ---
+node_modules/
+local.settings.json
+
+# --- Windows / VS Code ---
+Thumbs.db
+desktop.ini
+*.code-workspace.bak
