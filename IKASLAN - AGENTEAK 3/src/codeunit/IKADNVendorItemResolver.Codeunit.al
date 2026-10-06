@@ -1,4 +1,4 @@
-codeunit 50230 "IKA DN Vendor Item Resolver"
+codeunit 99116 "IKA DN Vendor Item Resolver"
 {
     // Identifica en BC el proveedor y los productos de un albarán extraído por Claude.
     // Lógica determinista: no interviene la IA.

@@ -1,4 +1,4 @@
-permissionset 50200 "IKA DN Agent"
+permissionset 99101 "IKA DN Agent"
 {
     Caption = 'Agente de albaranes (Claude)';
     Assignable = true;

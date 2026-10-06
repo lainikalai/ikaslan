@@ -1,4 +1,4 @@
-page 50060 "IKA Sales Agent Log"
+page 99031 "IKA Sales Agent Log"
 {
     Caption = 'Registro agente de ventas';
     PageType = List;

@@ -1,4 +1,4 @@
-codeunit 50060 "IKA Sales Agent Log Mgt."
+codeunit 99031 "IKA Sales Agent Log Mgt."
 {
     procedure LogInfo(RequestEntryNo: Integer; MessageText: Text)
     begin

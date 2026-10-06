@@ -1,4 +1,4 @@
-pageextension 50603 "IKA WA Posted Sales Invoice" extends "Posted Sales Invoice"
+pageextension 99316 "IKA WA Posted Sales Invoice" extends "Posted Sales Invoice"
 {
     actions
     {

@@ -1,4 +1,4 @@
-table 50000 "IKA Sales Agent Setup"
+table 99001 "IKA Sales Agent Setup"
 {
     Caption = 'Configuración agente de ventas (Claude)';
     DataClassification = CustomerContent;

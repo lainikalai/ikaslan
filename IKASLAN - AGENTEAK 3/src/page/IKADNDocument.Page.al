@@ -1,4 +1,4 @@
-page 50240 "IKA DN Document"
+page 99126 "IKA DN Document"
 {
     Caption = 'Albarán de proveedor (Claude)';
     PageType = Document;

@@ -1,4 +1,4 @@
-enum 50010 "IKA Match Status"
+enum 99006 "IKA Match Status"
 {
     Caption = 'Estado de coincidencia';
     Extensible = true;

@@ -1,4 +1,4 @@
-codeunit 50010 "IKA Graph Mail Client"
+codeunit 99006 "IKA Graph Mail Client"
 {
     // Lectura del buzón de Outlook / Exchange Online mediante Microsoft Graph (v1.0),
     // con autenticación de aplicación (client credentials) de un registro de aplicación en Entra ID.

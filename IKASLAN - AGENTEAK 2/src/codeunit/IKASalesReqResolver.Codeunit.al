@@ -1,4 +1,4 @@
-codeunit 50030 "IKA Sales Req. Resolver"
+codeunit 99016 "IKA Sales Req. Resolver"
 {
     // Convierte los datos "en bruto" extraídos por Claude en registros de Business Central:
     // cliente, dirección de envío, productos, variantes y unidades de medida.

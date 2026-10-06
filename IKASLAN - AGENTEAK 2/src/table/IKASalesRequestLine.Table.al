@@ -1,4 +1,4 @@
-table 50030 "IKA Sales Request Line"
+table 99016 "IKA Sales Request Line"
 {
     Caption = 'Línea solicitud de venta (agente)';
     DataClassification = CustomerContent;

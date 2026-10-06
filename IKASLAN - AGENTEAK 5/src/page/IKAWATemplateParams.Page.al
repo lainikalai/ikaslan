@@ -1,4 +1,4 @@
-page 50625 "IKA WA Template Params"
+page 99316 "IKA WA Template Params"
 {
     Caption = 'Variables de la plantilla';
     PageType = List;

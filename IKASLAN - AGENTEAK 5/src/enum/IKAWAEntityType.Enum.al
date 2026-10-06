@@ -1,4 +1,4 @@
-enum 50630 "IKA WA Entity Type"
+enum 99316 "IKA WA Entity Type"
 {
     Caption = 'Tipo de entidad';
     Extensible = true;

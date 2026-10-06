@@ -1,4 +1,4 @@
-page 50420 "IKA Mail Messages"
+page 99211 "IKA Mail Messages"
 {
     Caption = 'Correo Outlook 365';
     PageType = List;

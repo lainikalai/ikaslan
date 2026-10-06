@@ -1,4 +1,4 @@
-table 50660 "IKA WA Inbound Event"
+table 99331 "IKA WA Inbound Event"
 {
     // Cola de entrada. La Azure Function recibe el webhook de Meta, comprueba la firma, lo divide en
     // eventos sencillos (un mensaje o un cambio de estado) y los inserta aquí a través de la página API

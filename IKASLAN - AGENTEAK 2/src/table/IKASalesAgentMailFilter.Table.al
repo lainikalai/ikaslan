@@ -1,4 +1,4 @@
-table 50010 "IKA Sales Agent Mail Filter"
+table 99006 "IKA Sales Agent Mail Filter"
 {
     Caption = 'Filtro de correo agente de ventas';
     DataClassification = CustomerContent;

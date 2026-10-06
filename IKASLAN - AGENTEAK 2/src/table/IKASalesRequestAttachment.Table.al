@@ -1,4 +1,4 @@
-table 50040 "IKA Sales Request Attachment"
+table 99021 "IKA Sales Request Attachment"
 {
     Caption = 'Adjunto solicitud de venta (agente)';
     DataClassification = CustomerContent;

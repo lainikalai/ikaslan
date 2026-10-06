@@ -1,4 +1,4 @@
-codeunit 50620 "IKA WA Phone Mgt."
+codeunit 99316 "IKA WA Phone Mgt."
 {
     // Teléfonos (normalización a formato internacional de WhatsApp) y todo lo que depende del tipo
     // de entidad: nombre, teléfono, ficha, enlace wa.me y adjuntos.

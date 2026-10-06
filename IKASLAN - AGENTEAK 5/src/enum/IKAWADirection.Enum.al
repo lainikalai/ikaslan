@@ -1,4 +1,4 @@
-enum 50600 "IKA WA Direction"
+enum 99301 "IKA WA Direction"
 {
     Caption = 'Dirección';
     Extensible = true;

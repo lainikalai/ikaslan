@@ -1,4 +1,4 @@
-pageextension 50600 "IKA WA Customer Card" extends "Customer Card"
+pageextension 99301 "IKA WA Customer Card" extends "Customer Card"
 {
     layout
     {

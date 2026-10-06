@@ -61,32 +61,32 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 - *Bloquear imágenes externas* (activado por defecto) añade una Content-Security-Policy que solo permite imágenes
   incrustadas, para evitar píxeles de seguimiento.
 
-## Objetos (rango 50400–50599, prefijo `IKA Mail`)
+## Objetos (rango 99201–99300, prefijo `IKA Mail`)
 
 | Tipo | ID | Nombre |
 |---|---|---|
-| Table | 50400 | IKA Mail Setup |
-| Table | 50410 | IKA Mail Mailbox (cuentas de Outlook 365) |
-| Table | 50420 | IKA Mail Message (caché local del listado + cuerpo) |
-| Table | 50430 | IKA Mail Attachment |
-| Table | 50440 | IKA Mail Link (email/adjunto → entidad) |
-| Table | 50450 | IKA Mail Pinned Target (destinos fijados por usuario) |
-| Table | 50460 / 50470 | IKA Mail Drop Target / Compose File (temporales) |
-| Enum | 50400–50430 | Entity Type, Compose Mode, Target Kind, Account Type |
-| Codeunit | 50400 | IKA Mail Graph Client (sincronizar, detalle, adjuntos, .eml, leído, responder/reenviar) |
-| Codeunit | 50410 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
-| Codeunit | 50420 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
-| Codeunit | 50430 | IKA Mail Json Helper |
+| Table | 99201 | IKA Mail Setup |
+| Table | 99206 | IKA Mail Mailbox (cuentas de Outlook 365) |
+| Table | 99211 | IKA Mail Message (caché local del listado + cuerpo) |
+| Table | 99216 | IKA Mail Attachment |
+| Table | 99221 | IKA Mail Link (email/adjunto → entidad) |
+| Table | 99226 | IKA Mail Pinned Target (destinos fijados por usuario) |
+| Table | 99231 / 99236 | IKA Mail Drop Target / Compose File (temporales) |
+| Enum | 99201–99216 | Entity Type, Compose Mode, Target Kind, Account Type |
+| Codeunit | 99201 | IKA Mail Graph Client (sincronizar, detalle, adjuntos, .eml, leído, responder/reenviar) |
+| Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
+| Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
+| Codeunit | 99216 | IKA Mail Json Helper |
 | ControlAddIn | — | IKA Mail Workspace (`src/controladdin/MailWorkspace`) |
-| Page | 50400 | IKA Mail Setup |
-| Page | 50410 | IKA Mail Mailboxes (*Cuentas de Outlook 365*) |
-| Page | 50420 | IKA Mail Messages (*Correo Outlook 365*) |
-| Page | 50430 | IKA Mail Message (ficha con el área de trabajo) |
-| Page | 50440 | IKA Mail Compose (responder / reenviar) |
-| Page | 50450 / 50455 | IKA Mail Links / Linked Emails (FactBox) |
-| Page | 50470 | IKA Mail Secret Input |
-| PageExt | 50400–50408 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
-| PermissionSet | 50400 | IKA Mail Workspace |
+| Page | 99201 | IKA Mail Setup |
+| Page | 99206 | IKA Mail Mailboxes (*Cuentas de Outlook 365*) |
+| Page | 99211 | IKA Mail Messages (*Correo Outlook 365*) |
+| Page | 99216 | IKA Mail Message (ficha con el área de trabajo) |
+| Page | 99221 | IKA Mail Compose (responder / reenviar) |
+| Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
+| Page | 99236 | IKA Mail Secret Input |
+| PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
+| PermissionSet | 99201 | IKA Mail Workspace |
 
 Para añadir otro tipo de entidad: un valor en el enum `IKA Mail Entity Type` y un caso en cada procedimiento de
 `IKA Mail Entity Mgt.`. Si su tabla no la soporta *Document Attachment* de serie, añadirla también en el
@@ -125,9 +125,9 @@ credenciales propias opcionales y *Probar conexión*):
 
 | Extensión | Tabla | Página |
 |---|---|---|
-| AGENTEAK 2 (pedidos de venta) | 50060 IKA Sales Mail Account | 50080 IKA Sales Mail Accounts |
-| AGENTEAK 3 (albaranes) | 50270 IKA DN Mail Account | 50290 IKA DN Mail Accounts |
-| AGENTEAK 4 (correo) | 50410 IKA Mail Mailbox | 50410 IKA Mail Mailboxes |
+| AGENTEAK 2 (pedidos de venta) | 99031 IKA Sales Mail Account | 99041 IKA Sales Mail Accounts |
+| AGENTEAK 3 (albaranes) | 99136 IKA DN Mail Account | 99151 IKA DN Mail Accounts |
+| AGENTEAK 4 (correo) | 99206 IKA Mail Mailbox | 99206 IKA Mail Mailboxes |
 
 Si se unifican en una única extensión, se deja una sola tabla y página de cuentas (la de AGENTEAK 4, que tiene
 además el control de acceso por usuario en la bandeja) y una sola configuración de Graph. Los agentes solo

@@ -1,4 +1,4 @@
-page 50020 "IKA Sales Requests"
+page 99011 "IKA Sales Requests"
 {
     Caption = 'Bandeja de solicitudes de venta (Claude)';
     PageType = List;

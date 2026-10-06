@@ -1,4 +1,4 @@
-codeunit 50410 "IKA Mail Entity Mgt."
+codeunit 99206 "IKA Mail Entity Mgt."
 {
     // Todo lo que depende del tipo de entidad (cliente, proveedor, banco...) está aquí.
     // Para añadir un tipo nuevo: valor en el enum "IKA Mail Entity Type" + un caso en cada procedimiento.

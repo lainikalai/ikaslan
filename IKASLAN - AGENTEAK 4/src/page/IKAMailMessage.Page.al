@@ -1,4 +1,4 @@
-page 50430 "IKA Mail Message"
+page 99216 "IKA Mail Message"
 {
     // Ficha del email: cabecera, destino seleccionado y el área de trabajo (control add-in) con
     // el cuerpo, los elementos arrastrables (email .eml y adjuntos) y las zonas de destino.

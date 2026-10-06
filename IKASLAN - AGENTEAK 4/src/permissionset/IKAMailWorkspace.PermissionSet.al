@@ -1,4 +1,4 @@
-permissionset 50400 "IKA Mail Workspace"
+permissionset 99201 "IKA Mail Workspace"
 {
     Caption = 'Correo Outlook 365 en BC';
     Assignable = true;

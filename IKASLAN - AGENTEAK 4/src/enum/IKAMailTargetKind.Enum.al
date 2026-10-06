@@ -1,4 +1,4 @@
-enum 50420 "IKA Mail Target Kind"
+enum 99211 "IKA Mail Target Kind"
 {
     Caption = 'Tipo de destino';
     Extensible = false;

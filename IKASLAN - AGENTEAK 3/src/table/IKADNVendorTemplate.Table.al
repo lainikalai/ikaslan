@@ -1,4 +1,4 @@
-table 50210 "IKA DN Vendor Template"
+table 99106 "IKA DN Vendor Template"
 {
     // "Plantilla" de proveedor: en lugar de coordenadas de campos (frágiles ante cambios de
     // formato), guarda CONOCIMIENTO que se pasa a Claude: cómo identificar los documentos del

@@ -1,4 +1,4 @@
-table 50020 "IKA Sales Request Header"
+table 99011 "IKA Sales Request Header"
 {
     Caption = 'Solicitud de venta (agente)';
     DataClassification = CustomerContent;

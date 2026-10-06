@@ -1,4 +1,4 @@
-page 50440 "IKA Mail Compose"
+page 99221 "IKA Mail Compose"
 {
     // Responder / responder a todos / reenviar. Outlook genera el borrador con el email original
     // citado (y, al reenviar, con sus adjuntos); aquí solo se escribe el texto, se ajustan los

@@ -1,4 +1,4 @@
-page 50280 "IKA DN Secret Input"
+page 99146 "IKA DN Secret Input"
 {
     Caption = 'Introducir clave';
     PageType = StandardDialog;

@@ -1,4 +1,4 @@
-page 50610 "IKA WA Accounts"
+page 99306 "IKA WA Accounts"
 {
     Caption = 'Cuentas de WhatsApp Business';
     PageType = List;

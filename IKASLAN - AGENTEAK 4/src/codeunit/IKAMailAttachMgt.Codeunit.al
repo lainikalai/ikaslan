@@ -1,4 +1,4 @@
-codeunit 50420 "IKA Mail Attach Mgt."
+codeunit 99211 "IKA Mail Attach Mgt."
 {
     // Adjunta el email completo (.eml) o sus ficheros a una entidad de BC usando los adjuntos
     // estándar (tabla "Document Attachment"), de modo que aparecen en el FactBox "Documentos adjuntos"

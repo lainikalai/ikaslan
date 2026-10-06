@@ -1,34 +1,20 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "BC SaaS - Sandbox",
-      "type": "al",
-      "request": "launch",
-      "environmentType": "Sandbox",
-      "environmentName": "<NOMBRE_ENTORNO_SANDBOX>",
-      "tenant": "<TENANT_ID>",
-      "startupObjectId": 50230,
-      "startupObjectType": "Page",
-      "breakOnError": "All",
-      "launchBrowser": true,
-      "enableLongRunningSqlStatements": true,
-      "enableSqlInformationDebugger": true,
-      "usePublicURLWithDebugger": true
-    },
-    {
-      "name": "BC On-Prem",
-      "type": "al",
-      "request": "launch",
-      "server": "http://<SERVIDOR>",
-      "serverInstance": "<INSTANCIA>",
-      "authentication": "Windows",
-      "startupObjectId": 50230,
-      "startupObjectType": "Page",
-      "breakOnError": "All",
-      "launchBrowser": true,
-      "enableLongRunningSqlStatements": true,
-      "enableSqlInformationDebugger": true
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TEST_Ikaslan",
+            "request": "launch",
+            "type": "al",
+            "environmentType": "Sandbox",
+            "environmentName": "TEST_Ikaslan",
+            "breakOnError": true,
+            "startupObjectType": "Page",
+            "startupObjectId": 99121,
+            "launchBrowser": true,
+            "enableLongRunningSqlStatements": true,
+            "enableSqlInformationDebugger": true,
+            "schemaUpdateMode":  "ForceSync",   // "ForceSync",  // "Synchronize",
+            "tenant": "50dc272f-06d9-46ee-aa19-bbeddd5311e9"
+        }
+    ]
 }

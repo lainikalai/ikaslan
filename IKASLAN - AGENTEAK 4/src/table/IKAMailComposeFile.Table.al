@@ -1,4 +1,4 @@
-table 50470 "IKA Mail Compose File"
+table 99236 "IKA Mail Compose File"
 {
     // Ficheros que el usuario añade al responder o reenviar (tabla temporal).
     Caption = 'Fichero a enviar';

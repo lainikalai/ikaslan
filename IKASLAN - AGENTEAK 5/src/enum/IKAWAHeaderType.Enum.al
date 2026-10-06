@@ -1,4 +1,4 @@
-enum 50650 "IKA WA Header Type"
+enum 99326 "IKA WA Header Type"
 {
     Caption = 'Cabecera de plantilla';
     Extensible = true;

@@ -1,4 +1,4 @@
-enum 50640 "IKA WA Template Status"
+enum 99321 "IKA WA Template Status"
 {
     Caption = 'Estado plantilla';
     Extensible = true;

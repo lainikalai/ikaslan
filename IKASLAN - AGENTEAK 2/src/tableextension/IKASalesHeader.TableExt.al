@@ -1,8 +1,8 @@
-tableextension 50000 "IKA Sales Header" extends "Sales Header"
+tableextension 99001 "IKA Sales Header" extends "Sales Header"
 {
     fields
     {
-        field(50000; "IKA Sales Request Entry No."; Integer)
+        field(99001; "IKA Sales Request Entry No."; Integer)
         {
             Caption = 'Nº solicitud agente de ventas';
             DataClassification = CustomerContent;

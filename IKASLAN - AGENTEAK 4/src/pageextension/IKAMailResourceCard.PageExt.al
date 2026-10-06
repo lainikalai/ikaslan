@@ -1,4 +1,4 @@
-pageextension 50404 "IKA Mail Resource Card" extends "Resource Card"
+pageextension 99221 "IKA Mail Resource Card" extends "Resource Card"
 {
     layout
     {

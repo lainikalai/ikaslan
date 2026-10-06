@@ -1,4 +1,4 @@
-permissionset 50610 "IKA WA Inbound"
+permissionset 99306 "IKA WA Inbound"
 {
     // Para el registro de aplicación que usa la Azure Function: solo puede insertar eventos
     // en la cola de entrada a través de la página API.

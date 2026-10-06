@@ -1,4 +1,4 @@
-page 50230 "IKA DN Documents"
+page 99121 "IKA DN Documents"
 {
     Caption = 'Bandeja de albaranes de proveedor (Claude)';
     PageType = List;

@@ -1,4 +1,4 @@
-page 50220 "IKA DN Field Aliases"
+page 99116 "IKA DN Field Aliases"
 {
     Caption = 'Alias de campos de albarán';
     PageType = List;

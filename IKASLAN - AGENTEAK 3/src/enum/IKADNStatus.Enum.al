@@ -1,4 +1,4 @@
-enum 50200 "IKA DN Status"
+enum 99101 "IKA DN Status"
 {
     Caption = 'Estado albarán';
     Extensible = true;

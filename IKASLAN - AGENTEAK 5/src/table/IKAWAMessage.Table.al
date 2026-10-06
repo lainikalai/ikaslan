@@ -1,4 +1,4 @@
-table 50650 "IKA WA Message"
+table 99326 "IKA WA Message"
 {
     Caption = 'Mensaje de WhatsApp';
     DataClassification = CustomerContent;

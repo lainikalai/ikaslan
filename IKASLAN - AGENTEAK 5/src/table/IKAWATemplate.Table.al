@@ -1,4 +1,4 @@
-table 50620 "IKA WA Template"
+table 99311 "IKA WA Template"
 {
     // Plantilla de mensaje aprobada por Meta. Se crean en WhatsApp Manager y aquí se sincronizan.
     // Son obligatorias para escribir primero a un cliente o fuera de la ventana de 24 horas.

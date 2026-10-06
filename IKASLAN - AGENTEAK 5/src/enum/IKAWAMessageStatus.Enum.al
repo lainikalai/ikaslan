@@ -1,4 +1,4 @@
-enum 50610 "IKA WA Message Status"
+enum 99306 "IKA WA Message Status"
 {
     Caption = 'Estado mensaje';
     Extensible = true;

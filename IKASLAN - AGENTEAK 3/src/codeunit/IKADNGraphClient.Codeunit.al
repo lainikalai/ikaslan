@@ -1,4 +1,4 @@
-codeunit 50210 "IKA DN Graph Client"
+codeunit 99106 "IKA DN Graph Client"
 {
     // Origen de los albaranes mediante Microsoft Graph (v1.0), con autenticación de aplicación
     // (client credentials) de un registro de aplicación en Entra ID:

@@ -1,4 +1,4 @@
-table 50250 "IKA DN File"
+table 99126 "IKA DN File"
 {
     Caption = 'Fichero de albarán (agente)';
     DataClassification = CustomerContent;

@@ -1,4 +1,4 @@
-codeunit 50430 "IKA Mail Json Helper"
+codeunit 99216 "IKA Mail Json Helper"
 {
     Access = Internal;
 

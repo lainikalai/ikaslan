@@ -1,4 +1,4 @@
-pageextension 50407 "IKA Mail Fixed Asset Card" extends "Fixed Asset Card"
+pageextension 99236 "IKA Mail Fixed Asset Card" extends "Fixed Asset Card"
 {
     layout
     {

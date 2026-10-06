@@ -1,4 +1,4 @@
-page 50270 "IKA DN Log"
+page 99141 "IKA DN Log"
 {
     Caption = 'Registro agente de albaranes';
     PageType = List;

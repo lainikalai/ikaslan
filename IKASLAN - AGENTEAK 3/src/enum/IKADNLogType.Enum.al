@@ -1,4 +1,4 @@
-enum 50230 "IKA DN Log Type"
+enum 99116 "IKA DN Log Type"
 {
     Caption = 'Tipo de registro';
     Extensible = true;

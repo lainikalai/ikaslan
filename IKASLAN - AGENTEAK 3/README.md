@@ -60,44 +60,44 @@ Outlook / SharePoint ──► Bandeja de albaranes ──► Claude (JSON con e
 6. **Duplicados**: mismo proveedor + nº de albarán ya procesado o con recepción registrada.
 7. **Estado**: *Conciliado* si todo cuadra y la confianza supera el mínimo; si no, *Requiere revisión*.
 
-## Objetos (rango 50200–50399, prefijo `IKA DN`)
+## Objetos (rango 99101–99200, prefijo `IKA DN`)
 
 Es independiente de la extensión de ventas (AGENTEAK 2), así que se pueden instalar las dos.
 
 | Tipo | ID | Nombre |
 |---|---|---|
-| Table | 50200 | IKA DN Setup |
-| Table | 50210 | IKA DN Vendor Template |
-| Table | 50220 | IKA DN Field Alias |
-| Table | 50230 | IKA DN Document |
-| Table | 50240 | IKA DN Document Line |
-| Table | 50250 | IKA DN File |
-| Table | 50260 | IKA DN Log |
-| Table | 50270 | IKA DN Mail Account (cuentas de Outlook 365) |
-| TableExt | 50200 | IKA DN Purchase Header |
-| Enum | 50200–50270 | Status, Match Status, Source, Log Type, Claude Effort, Alias Field, Item Code Type, Mail Account Type |
-| Codeunit | 50200 | IKA DN Claude Client (prompt + plantilla + esquema JSON) |
-| Codeunit | 50210 | IKA DN Graph Client (correo + SharePoint/OneDrive) |
-| Codeunit | 50220 | IKA DN Extraction |
-| Codeunit | 50230 | IKA DN Vendor Item Resolver |
-| Codeunit | 50240 | IKA DN PO Matcher |
-| Codeunit | 50250 | IKA DN Receipt Applier (eventos `OnBeforeModifyPurchaseHeader/Line`) |
-| Codeunit | 50260 | IKA DN Json Helper |
-| Codeunit | 50270 | IKA DN Log Mgt. |
-| Codeunit | 50280 | IKA DN File To Text (Excel → CSV) |
-| Codeunit | 50290 | IKA DN Process |
-| Codeunit | 50295 | IKA DN Move Source |
-| Codeunit | 50300 | IKA DN Job (cola de proyectos) |
-| Page | 50200 | IKA DN Setup |
-| Page | 50210 / 50215 | IKA DN Vendor Templates / Template |
-| Page | 50220 | IKA DN Field Aliases |
-| Page | 50230 / 50240 / 50250 | IKA DN Documents / Document / Document Subform |
-| Page | 50260 | IKA DN Files |
-| Page | 50270 | IKA DN Log |
-| Page | 50280 | IKA DN Secret Input |
-| Page | 50290 | IKA DN Mail Accounts |
-| PageExt | 50200 | IKA DN Purchase Order |
-| PermissionSet | 50200 | IKA DN Agent |
+| Table | 99101 | IKA DN Setup |
+| Table | 99106 | IKA DN Vendor Template |
+| Table | 99111 | IKA DN Field Alias |
+| Table | 99116 | IKA DN Document |
+| Table | 99121 | IKA DN Document Line |
+| Table | 99126 | IKA DN File |
+| Table | 99131 | IKA DN Log |
+| Table | 99136 | IKA DN Mail Account (cuentas de Outlook 365) |
+| TableExt | 99101 | IKA DN Purchase Header |
+| Enum | 99101–99136 | Status, Match Status, Source, Log Type, Claude Effort, Alias Field, Item Code Type, Mail Account Type |
+| Codeunit | 99101 | IKA DN Claude Client (prompt + plantilla + esquema JSON) |
+| Codeunit | 99106 | IKA DN Graph Client (correo + SharePoint/OneDrive) |
+| Codeunit | 99111 | IKA DN Extraction |
+| Codeunit | 99116 | IKA DN Vendor Item Resolver |
+| Codeunit | 99121 | IKA DN PO Matcher |
+| Codeunit | 99126 | IKA DN Receipt Applier (eventos `OnBeforeModifyPurchaseHeader/Line`) |
+| Codeunit | 99131 | IKA DN Json Helper |
+| Codeunit | 99136 | IKA DN Log Mgt. |
+| Codeunit | 99141 | IKA DN File To Text (Excel → CSV) |
+| Codeunit | 99146 | IKA DN Process |
+| Codeunit | 99151 | IKA DN Move Source |
+| Codeunit | 99156 | IKA DN Job (cola de proyectos) |
+| Page | 99101 | IKA DN Setup |
+| Page | 99106 / 99111 | IKA DN Vendor Templates / Template |
+| Page | 99116 | IKA DN Field Aliases |
+| Page | 99121 / 99126 / 99131 | IKA DN Documents / Document / Document Subform |
+| Page | 99136 | IKA DN Files |
+| Page | 99141 | IKA DN Log |
+| Page | 99146 | IKA DN Secret Input |
+| Page | 99151 | IKA DN Mail Accounts |
+| PageExt | 99101 | IKA DN Purchase Order |
+| PermissionSet | 99101 | IKA DN Agent |
 
 ## Puesta en marcha
 

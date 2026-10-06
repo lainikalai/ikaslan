@@ -1,4 +1,4 @@
-codeunit 50085 "IKA Move Request Mail"
+codeunit 99046 "IKA Move Request Mail"
 {
     // Mueve el email de una solicitud a otra carpeta del buzón. Se ejecuta con Codeunit.Run
     // para que un fallo de Graph no detenga el procesamiento del resto de emails.

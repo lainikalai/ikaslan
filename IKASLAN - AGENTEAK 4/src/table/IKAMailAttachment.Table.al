@@ -1,4 +1,4 @@
-table 50430 "IKA Mail Attachment"
+table 99216 "IKA Mail Attachment"
 {
     Caption = 'Adjunto de email';
     DataClassification = CustomerContent;

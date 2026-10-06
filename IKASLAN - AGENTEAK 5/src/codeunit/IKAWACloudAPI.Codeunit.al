@@ -1,4 +1,4 @@
-codeunit 50600 "IKA WA Cloud API"
+codeunit 99301 "IKA WA Cloud API"
 {
     // Cliente de la WhatsApp Business Platform - Cloud API de Meta (graph.facebook.com).
     // Envío: POST /{phone-number-id}/messages. Ficheros: POST /{phone-number-id}/media (multipart).

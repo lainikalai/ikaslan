@@ -1,4 +1,4 @@
-pageextension 50604 "IKA WA Sales Order" extends "Sales Order"
+pageextension 99321 "IKA WA Sales Order" extends "Sales Order"
 {
     actions
     {

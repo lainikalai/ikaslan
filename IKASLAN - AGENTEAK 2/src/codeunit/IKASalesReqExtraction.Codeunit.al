@@ -1,4 +1,4 @@
-codeunit 50020 "IKA Sales Req. Extraction"
+codeunit 99011 "IKA Sales Req. Extraction"
 {
     var
         JsonHelper: Codeunit "IKA Sales Agent Json Helper";

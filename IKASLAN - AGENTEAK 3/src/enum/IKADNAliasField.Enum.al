@@ -1,4 +1,4 @@
-enum 50250 "IKA DN Alias Field"
+enum 99126 "IKA DN Alias Field"
 {
     Caption = 'Campo del albarán';
     Extensible = true;

@@ -1,4 +1,4 @@
-codeunit 50080 "IKA Sales Req. Process"
+codeunit 99041 "IKA Sales Req. Process"
 {
     // Procesa UNA solicitud: extracción con Claude -> resolución en BC -> (opcional) creación del pedido.
     // Se ejecuta con Codeunit.Run para que un error en una solicitud no pare el resto.

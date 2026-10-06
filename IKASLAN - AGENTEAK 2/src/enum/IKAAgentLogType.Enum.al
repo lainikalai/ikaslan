@@ -1,4 +1,4 @@
-enum 50020 "IKA Agent Log Type"
+enum 99011 "IKA Agent Log Type"
 {
     Caption = 'Tipo de registro';
     Extensible = true;

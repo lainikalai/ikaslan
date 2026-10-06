@@ -1,4 +1,4 @@
-table 50610 "IKA WA Account"
+table 99306 "IKA WA Account"
 {
     // Número de WhatsApp Business dado de alta en la plataforma de Meta (Cloud API).
     // Misma filosofía que las cuentas de Outlook 365 de AGENTEAK 2/3/4: código, datos de la cuenta,

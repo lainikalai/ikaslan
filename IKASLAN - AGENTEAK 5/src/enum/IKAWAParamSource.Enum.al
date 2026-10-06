@@ -1,4 +1,4 @@
-enum 50660 "IKA WA Param Source"
+enum 99331 "IKA WA Param Source"
 {
     Caption = 'Origen del parámetro';
     Extensible = true;

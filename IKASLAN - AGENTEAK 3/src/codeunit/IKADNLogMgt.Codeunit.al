@@ -1,4 +1,4 @@
-codeunit 50270 "IKA DN Log Mgt."
+codeunit 99136 "IKA DN Log Mgt."
 {
     procedure LogInfo(DocumentEntryNo: Integer; MessageText: Text)
     begin

@@ -1,4 +1,4 @@
-page 50635 "IKA WA Entity Conversations"
+page 99326 "IKA WA Entity Conversations"
 {
     // FactBox para las fichas de cliente, proveedor y contacto.
     Caption = 'WhatsApp';

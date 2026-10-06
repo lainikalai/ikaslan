@@ -1,4 +1,4 @@
-codeunit 50610 "IKA WA Inbound Processor"
+codeunit 99306 "IKA WA Inbound Processor"
 {
     // Convierte los eventos de la cola de entrada (insertados por la Azure Function a través de la
     // página API) en mensajes y conversaciones, y actualiza el estado de los mensajes enviados.

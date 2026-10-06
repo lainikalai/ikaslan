@@ -1,4 +1,4 @@
-codeunit 50260 "IKA DN Json Helper"
+codeunit 99131 "IKA DN Json Helper"
 {
     Access = Internal;
 

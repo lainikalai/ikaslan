@@ -1,4 +1,4 @@
-page 50450 "IKA Mail Links"
+page 99226 "IKA Mail Links"
 {
     Caption = 'Emails vinculados a entidades';
     PageType = List;

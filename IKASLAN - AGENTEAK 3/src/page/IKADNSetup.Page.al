@@ -1,4 +1,4 @@
-page 50200 "IKA DN Setup"
+page 99101 "IKA DN Setup"
 {
     Caption = 'Configuración agente de albaranes (Claude)';
     PageType = Card;

@@ -1,4 +1,4 @@
-page 50030 "IKA Sales Request"
+page 99016 "IKA Sales Request"
 {
     Caption = 'Solicitud de venta (Claude)';
     PageType = Document;

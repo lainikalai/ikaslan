@@ -1,4 +1,4 @@
-page 50050 "IKA Sales Req. Attachments"
+page 99026 "IKA Sales Req. Attachments"
 {
     Caption = 'Adjuntos';
     PageType = ListPart;

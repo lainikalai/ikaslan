@@ -1,4 +1,4 @@
-codeunit 50615 "IKA WA Media Downloader"
+codeunit 99311 "IKA WA Media Downloader"
 {
     // Descarga el fichero de un mensaje recibido. Se ejecuta con Codeunit.Run para que un fallo
     // (fichero caducado en Meta, red...) no impida registrar el mensaje.

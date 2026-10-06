@@ -1,4 +1,4 @@
-permissionset 50000 "IKA Sales Agent"
+permissionset 99001 "IKA Sales Agent"
 {
     Caption = 'Agente de ventas (Claude)';
     Assignable = true;

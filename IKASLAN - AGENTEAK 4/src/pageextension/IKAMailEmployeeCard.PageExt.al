@@ -1,4 +1,4 @@
-pageextension 50406 "IKA Mail Employee Card" extends "Employee Card"
+pageextension 99231 "IKA Mail Employee Card" extends "Employee Card"
 {
     layout
     {

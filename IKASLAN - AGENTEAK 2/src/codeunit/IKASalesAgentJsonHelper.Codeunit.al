@@ -1,4 +1,4 @@
-codeunit 50050 "IKA Sales Agent Json Helper"
+codeunit 99026 "IKA Sales Agent Json Helper"
 {
     Access = Internal;
 

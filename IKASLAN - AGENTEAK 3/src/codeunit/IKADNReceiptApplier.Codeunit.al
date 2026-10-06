@@ -1,4 +1,4 @@
-codeunit 50250 "IKA DN Receipt Applier"
+codeunit 99126 "IKA DN Receipt Applier"
 {
     // Aplica un albarán conciliado a los pedidos de compra:
     //  - "Nº albarán proveedor" (Vendor Shipment No.) en la cabecera de cada pedido afectado.

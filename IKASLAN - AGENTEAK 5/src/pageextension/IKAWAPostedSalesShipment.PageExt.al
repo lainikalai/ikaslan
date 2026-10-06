@@ -1,4 +1,4 @@
-pageextension 50605 "IKA WA Posted Sales Shipment" extends "Posted Sales Shipment"
+pageextension 99326 "IKA WA Posted Sales Shipment" extends "Posted Sales Shipment"
 {
     actions
     {

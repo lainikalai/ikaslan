@@ -1,4 +1,4 @@
-enum 50260 "IKA DN Item Code Type"
+enum 99131 "IKA DN Item Code Type"
 {
     Caption = 'Tipo de código de artículo';
     Extensible = true;

@@ -1,4 +1,4 @@
-codeunit 50640 "IKA WA Json Helper"
+codeunit 99326 "IKA WA Json Helper"
 {
     Access = Internal;
 

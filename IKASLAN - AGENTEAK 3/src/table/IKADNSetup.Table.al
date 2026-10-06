@@ -1,4 +1,4 @@
-table 50200 "IKA DN Setup"
+table 99101 "IKA DN Setup"
 {
     Caption = 'Configuración agente de albaranes (Claude)';
     DataClassification = CustomerContent;

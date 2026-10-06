@@ -1,4 +1,4 @@
-page 50690 "IKA WA Inbound API"
+page 99356 "IKA WA Inbound API"
 {
     // Endpoint donde la Azure Function inserta cada mensaje o cambio de estado recibido de WhatsApp:
     // POST https://api.businesscentral.dynamics.com/v2.0/{tenant}/{entorno}/api/ikaslan/whatsapp/v1.0/companies({id})/inboundEvents

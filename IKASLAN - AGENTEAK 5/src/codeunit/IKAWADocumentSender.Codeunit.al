@@ -1,4 +1,4 @@
-codeunit 50630 "IKA WA Document Sender"
+codeunit 99321 "IKA WA Document Sender"
 {
     // Envío de documentos de BC por WhatsApp: genera el PDF con el informe configurado en
     // "Selección de informes" (el mismo que se usa para el email) y abre el diálogo de envío.

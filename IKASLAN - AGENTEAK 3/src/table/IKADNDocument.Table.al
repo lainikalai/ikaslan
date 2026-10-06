@@ -1,4 +1,4 @@
-table 50230 "IKA DN Document"
+table 99116 "IKA DN Document"
 {
     Caption = 'Albarán de proveedor (agente)';
     DataClassification = CustomerContent;

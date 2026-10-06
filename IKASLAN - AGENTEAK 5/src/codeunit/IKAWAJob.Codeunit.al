@@ -1,4 +1,4 @@
-codeunit 50660 "IKA WA Job"
+codeunit 99331 "IKA WA Job"
 {
     // Cola de proyectos: procesa los eventos que ha dejado la Azure Function (cada 1-5 minutos).
     TableNo = "Job Queue Entry";

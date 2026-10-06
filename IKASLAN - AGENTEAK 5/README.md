@@ -65,36 +65,36 @@ Con `Id tabla = 0` la variable vale para cualquier documento. En el diálogo de 
 y corregir antes de enviar. El PDF sale del informe configurado en **Selección de informes** (el mismo que se
 usa para enviar por email).
 
-## Objetos (rango 50600–50799, prefijo `IKA WA`)
+## Objetos (rango 99301–99400, prefijo `IKA WA`)
 
 | Tipo | ID | Nombre |
 |---|---|---|
-| Table | 50600 | IKA WA Setup |
-| Table | 50610 | IKA WA Account (número de WhatsApp Business; token en Isolated Storage) |
-| Table | 50620 / 50630 | IKA WA Template / Template Param |
-| Table | 50640 | IKA WA Conversation (ventana de 24 h, entidad vinculada) |
-| Table | 50650 | IKA WA Message (enviados y recibidos, estado, fichero) |
-| Table | 50660 | IKA WA Inbound Event (cola de entrada de la API) |
-| Enum | 50600–50670 | Direction, Message Status, Message Type, Entity Type, Template Status, Header Type, Param Source, Event Kind |
-| Codeunit | 50600 | IKA WA Cloud API (texto, ficheros, plantillas, media, leído, sincronizar plantillas) |
-| Codeunit | 50610 | IKA WA Inbound Processor (cola → mensajes; evento `OnAfterInboundMessage`) |
-| Codeunit | 50615 | IKA WA Media Downloader |
-| Codeunit | 50620 | IKA WA Phone Mgt. (normalizar teléfonos, buscar entidad, `wa.me`, adjuntar) |
-| Codeunit | 50630 | IKA WA Document Sender (PDF con Selección de informes + variables) |
-| Codeunit | 50640 | IKA WA Json Helper |
-| Codeunit | 50660 | IKA WA Job (cola de proyectos) |
-| Page | 50600 / 50610 | IKA WA Setup / Accounts |
-| Page | 50620 / 50625 | IKA WA Templates / Template Params |
-| Page | 50630 / 50635 | IKA WA Conversations / Entity Conversations (FactBox) |
-| Page | 50640 / 50645 | IKA WA Conversation / Messages Part |
-| Page | 50650 | IKA WA Send (diálogo de envío) |
-| Page | 50660 | IKA WA Inbound Events |
-| Page | 50670 | IKA WA Secret Input |
-| Page (API) | 50690 | IKA WA Inbound API — `api/ikaslan/whatsapp/v1.0/inboundEvents` |
-| PageExt | 50600–50602 | Ficha cliente, proveedor, contacto: FactBox + *Enviar WhatsApp* + *Abrir en mi WhatsApp* |
-| PageExt | 50603–50607 | *Enviar por WhatsApp* en Hist. factura venta, Pedido venta, Hist. albarán venta, Oferta venta, Pedido compra |
-| PermissionSet | 50600 | IKA WA User (usuarios) |
-| PermissionSet | 50610 | IKA WA Inbound (solo para la aplicación de la Azure Function) |
+| Table | 99301 | IKA WA Setup |
+| Table | 99306 | IKA WA Account (número de WhatsApp Business; token en Isolated Storage) |
+| Table | 99311 / 99316 | IKA WA Template / Template Param |
+| Table | 99321 | IKA WA Conversation (ventana de 24 h, entidad vinculada) |
+| Table | 99326 | IKA WA Message (enviados y recibidos, estado, fichero) |
+| Table | 99331 | IKA WA Inbound Event (cola de entrada de la API) |
+| Enum | 99301–99336 | Direction, Message Status, Message Type, Entity Type, Template Status, Header Type, Param Source, Event Kind |
+| Codeunit | 99301 | IKA WA Cloud API (texto, ficheros, plantillas, media, leído, sincronizar plantillas) |
+| Codeunit | 99306 | IKA WA Inbound Processor (cola → mensajes; evento `OnAfterInboundMessage`) |
+| Codeunit | 99311 | IKA WA Media Downloader |
+| Codeunit | 99316 | IKA WA Phone Mgt. (normalizar teléfonos, buscar entidad, `wa.me`, adjuntar) |
+| Codeunit | 99321 | IKA WA Document Sender (PDF con Selección de informes + variables) |
+| Codeunit | 99326 | IKA WA Json Helper |
+| Codeunit | 99331 | IKA WA Job (cola de proyectos) |
+| Page | 99301 / 99306 | IKA WA Setup / Accounts |
+| Page | 99311 / 99316 | IKA WA Templates / Template Params |
+| Page | 99321 / 99326 | IKA WA Conversations / Entity Conversations (FactBox) |
+| Page | 99331 / 99336 | IKA WA Conversation / Messages Part |
+| Page | 99341 | IKA WA Send (diálogo de envío) |
+| Page | 99346 | IKA WA Inbound Events |
+| Page | 99351 | IKA WA Secret Input |
+| Page (API) | 99356 | IKA WA Inbound API — `api/ikaslan/whatsapp/v1.0/inboundEvents` |
+| PageExt | 99301–99311 | Ficha cliente, proveedor, contacto: FactBox + *Enviar WhatsApp* + *Abrir en mi WhatsApp* |
+| PageExt | 99316–99336 | *Enviar por WhatsApp* en Hist. factura venta, Pedido venta, Hist. albarán venta, Oferta venta, Pedido compra |
+| PermissionSet | 99301 | IKA WA User (usuarios) |
+| PermissionSet | 99306 | IKA WA Inbound (solo para la aplicación de la Azure Function) |
 | Azure Function | — | `azure-function/` (Node.js 20+, Azure Functions v4) |
 
 ## Puesta en marcha

@@ -1,4 +1,4 @@
-codeunit 50240 "IKA DN PO Matcher"
+codeunit 99121 "IKA DN PO Matcher"
 {
     // Concilia un albarán (ya extraído) con los pedidos de compra abiertos:
     //  1. Proveedor y productos (codeunit "IKA DN Vendor Item Resolver").

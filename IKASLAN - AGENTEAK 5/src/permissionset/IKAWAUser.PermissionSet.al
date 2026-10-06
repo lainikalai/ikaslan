@@ -1,4 +1,4 @@
-permissionset 50600 "IKA WA User"
+permissionset 99301 "IKA WA User"
 {
     Caption = 'WhatsApp - usuarios';
     Assignable = true;

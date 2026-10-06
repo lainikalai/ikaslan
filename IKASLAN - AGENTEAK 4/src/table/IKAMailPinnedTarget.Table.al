@@ -1,4 +1,4 @@
-table 50450 "IKA Mail Pinned Target"
+table 99226 "IKA Mail Pinned Target"
 {
     // Entidades que cada usuario fija como zona de destino permanente en la ficha del email.
     Caption = 'Destino fijado';

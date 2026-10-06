@@ -1,4 +1,4 @@
-enum 50670 "IKA WA Event Kind"
+enum 99336 "IKA WA Event Kind"
 {
     Caption = 'Tipo de evento';
     Extensible = true;

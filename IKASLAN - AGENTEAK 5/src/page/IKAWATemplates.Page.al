@@ -1,4 +1,4 @@
-page 50620 "IKA WA Templates"
+page 99311 "IKA WA Templates"
 {
     Caption = 'Plantillas de WhatsApp';
     PageType = List;

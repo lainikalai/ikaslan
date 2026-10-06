@@ -1,4 +1,4 @@
-codeunit 50200 "IKA DN Claude Client"
+codeunit 99101 "IKA DN Claude Client"
 {
     // Cliente de la Messages API de Anthropic (https://docs.claude.com).
     // Se usa "structured outputs" (output_config.format = json_schema) para que la respuesta

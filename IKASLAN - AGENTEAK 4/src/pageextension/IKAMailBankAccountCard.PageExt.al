@@ -1,4 +1,4 @@
-pageextension 50403 "IKA Mail Bank Account Card" extends "Bank Account Card"
+pageextension 99216 "IKA Mail Bank Account Card" extends "Bank Account Card"
 {
     layout
     {

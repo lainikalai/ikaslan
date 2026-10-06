@@ -1,4 +1,4 @@
-page 50010 "IKA Sales Agent Mail Filters"
+page 99006 "IKA Sales Agent Mail Filters"
 {
     Caption = 'Filtros de correo agente de ventas';
     PageType = List;

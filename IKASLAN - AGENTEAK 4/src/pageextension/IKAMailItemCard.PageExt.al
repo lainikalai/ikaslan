@@ -1,4 +1,4 @@
-pageextension 50405 "IKA Mail Item Card" extends "Item Card"
+pageextension 99226 "IKA Mail Item Card" extends "Item Card"
 {
     layout
     {

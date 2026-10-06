@@ -1,4 +1,4 @@
-enum 50050 "IKA Sales Mail Account Type"
+enum 99026 "IKA Sales Mail Account Type"
 {
     Caption = 'Tipo de cuenta';
     Extensible = false;

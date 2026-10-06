@@ -1,4 +1,4 @@
-codeunit 50040 "IKA Sales Order Creator"
+codeunit 99021 "IKA Sales Order Creator"
 {
     // Crea el pedido de venta estándar a partir de una solicitud resuelta.
     // Todo se hace con Validate para que BC aplique su lógica: precios, descuentos,

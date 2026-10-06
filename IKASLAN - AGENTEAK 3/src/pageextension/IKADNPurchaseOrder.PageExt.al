@@ -1,4 +1,4 @@
-pageextension 50200 "IKA DN Purchase Order" extends "Purchase Order"
+pageextension 99101 "IKA DN Purchase Order" extends "Purchase Order"
 {
     layout
     {

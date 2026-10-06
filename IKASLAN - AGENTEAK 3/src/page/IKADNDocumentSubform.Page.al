@@ -1,4 +1,4 @@
-page 50250 "IKA DN Document Subform"
+page 99131 "IKA DN Document Subform"
 {
     Caption = 'Líneas';
     PageType = ListPart;

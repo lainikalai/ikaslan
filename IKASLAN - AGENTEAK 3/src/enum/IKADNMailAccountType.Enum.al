@@ -1,4 +1,4 @@
-enum 50270 "IKA DN Mail Account Type"
+enum 99136 "IKA DN Mail Account Type"
 {
     Caption = 'Tipo de cuenta';
     Extensible = false;

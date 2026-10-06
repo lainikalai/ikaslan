@@ -1,4 +1,4 @@
-pageextension 50601 "IKA WA Vendor Card" extends "Vendor Card"
+pageextension 99306 "IKA WA Vendor Card" extends "Vendor Card"
 {
     layout
     {

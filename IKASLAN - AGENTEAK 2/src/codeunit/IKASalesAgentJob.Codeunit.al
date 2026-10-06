@@ -1,4 +1,4 @@
-codeunit 50090 "IKA Sales Agent Job"
+codeunit 99051 "IKA Sales Agent Job"
 {
     // Punto de entrada para la cola de proyectos (Job Queue Entry):
     //   1. Importa los emails nuevos del buzón que cumplen los filtros.

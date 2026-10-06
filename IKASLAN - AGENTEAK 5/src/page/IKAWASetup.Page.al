@@ -1,4 +1,4 @@
-page 50600 "IKA WA Setup"
+page 99301 "IKA WA Setup"
 {
     Caption = 'Configuración WhatsApp';
     PageType = Card;

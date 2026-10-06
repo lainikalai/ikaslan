@@ -1,4 +1,4 @@
-table 50050 "IKA Sales Agent Log"
+table 99026 "IKA Sales Agent Log"
 {
     Caption = 'Registro agente de ventas';
     DataClassification = CustomerContent;

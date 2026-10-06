@@ -53,43 +53,43 @@ Si `Crear pedidos automáticamente` está desactivado (recomendado al principio)
 | Corrección | En la ficha: asignar cliente/producto a mano → *Volver a resolver* (no llama a Claude) |
 | Aprendizaje | En una línea: *Guardar como referencia de cliente*, y la próxima vez se reconoce sola |
 
-## Objetos (rango 50000–50199, prefijo `IKA`)
+## Objetos (rango 99001–99100, prefijo `IKA`)
 
 | Tipo | ID | Nombre |
 |---|---|---|
-| Table | 50000 | IKA Sales Agent Setup |
-| Table | 50010 | IKA Sales Agent Mail Filter |
-| Table | 50020 | IKA Sales Request Header |
-| Table | 50030 | IKA Sales Request Line |
-| Table | 50040 | IKA Sales Request Attachment |
-| Table | 50050 | IKA Sales Agent Log |
-| Table | 50060 | IKA Sales Mail Account (cuentas de Outlook 365) |
-| TableExt | 50000 | IKA Sales Header (campo `IKA Sales Request Entry No.`) |
-| Enum | 50000–50050 | Status, Match Status, Log Type, Claude Effort, Source, Mail Account Type |
-| Codeunit | 50000 | IKA Claude API Client |
-| Codeunit | 50010 | IKA Graph Mail Client |
-| Codeunit | 50020 | IKA Sales Req. Extraction |
-| Codeunit | 50030 | IKA Sales Req. Resolver |
-| Codeunit | 50040 | IKA Sales Order Creator (eventos `OnBeforeModifySalesHeader`, `OnBeforeInsertSalesLine`) |
-| Codeunit | 50050 | IKA Sales Agent Json Helper |
-| Codeunit | 50060 | IKA Sales Agent Log Mgt. |
-| Codeunit | 50070 | IKA Attachment To Text |
-| Codeunit | 50080 | IKA Sales Req. Process |
-| Codeunit | 50085 | IKA Move Request Mail |
-| Codeunit | 50090 | IKA Sales Agent Job (cola de proyectos) |
-| Page | 50000 | IKA Sales Agent Setup |
-| Page | 50010 | IKA Sales Agent Mail Filters |
-| Page | 50020 | IKA Sales Requests (bandeja) |
-| Page | 50030 | IKA Sales Request (ficha) |
-| Page | 50040 | IKA Sales Request Subform |
-| Page | 50050 | IKA Sales Req. Attachments |
-| Page | 50060 | IKA Sales Agent Log |
-| Page | 50070 | IKA Secret Input |
-| Page | 50080 | IKA Sales Mail Accounts |
-| PageExt | 50000 | IKA Sales Order |
-| PermissionSet | 50000 | IKA Sales Agent |
+| Table | 99001 | IKA Sales Agent Setup |
+| Table | 99006 | IKA Sales Agent Mail Filter |
+| Table | 99011 | IKA Sales Request Header |
+| Table | 99016 | IKA Sales Request Line |
+| Table | 99021 | IKA Sales Request Attachment |
+| Table | 99026 | IKA Sales Agent Log |
+| Table | 99031 | IKA Sales Mail Account (cuentas de Outlook 365) |
+| TableExt | 99001 | IKA Sales Header (campo `IKA Sales Request Entry No.`) |
+| Enum | 99001–99026 | Status, Match Status, Log Type, Claude Effort, Source, Mail Account Type |
+| Codeunit | 99001 | IKA Claude API Client |
+| Codeunit | 99006 | IKA Graph Mail Client |
+| Codeunit | 99011 | IKA Sales Req. Extraction |
+| Codeunit | 99016 | IKA Sales Req. Resolver |
+| Codeunit | 99021 | IKA Sales Order Creator (eventos `OnBeforeModifySalesHeader`, `OnBeforeInsertSalesLine`) |
+| Codeunit | 99026 | IKA Sales Agent Json Helper |
+| Codeunit | 99031 | IKA Sales Agent Log Mgt. |
+| Codeunit | 99036 | IKA Attachment To Text |
+| Codeunit | 99041 | IKA Sales Req. Process |
+| Codeunit | 99046 | IKA Move Request Mail |
+| Codeunit | 99051 | IKA Sales Agent Job (cola de proyectos) |
+| Page | 99001 | IKA Sales Agent Setup |
+| Page | 99006 | IKA Sales Agent Mail Filters |
+| Page | 99011 | IKA Sales Requests (bandeja) |
+| Page | 99016 | IKA Sales Request (ficha) |
+| Page | 99021 | IKA Sales Request Subform |
+| Page | 99026 | IKA Sales Req. Attachments |
+| Page | 99031 | IKA Sales Agent Log |
+| Page | 99036 | IKA Secret Input |
+| Page | 99041 | IKA Sales Mail Accounts |
+| PageExt | 99001 | IKA Sales Order |
+| PermissionSet | 99001 | IKA Sales Agent |
 
-> Si el cliente ya tiene objetos en 50000–50199, cambia el rango en `app.json` y renumera.
+> Si el cliente ya tiene objetos en 99001–99100, cambia el rango en `app.json` y renumera.
 > Cambia también `"publisher"` en `app.json` (ahora `PUBLISHER`).
 
 ## Puesta en marcha

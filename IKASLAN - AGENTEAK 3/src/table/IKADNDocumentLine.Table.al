@@ -1,4 +1,4 @@
-table 50240 "IKA DN Document Line"
+table 99121 "IKA DN Document Line"
 {
     Caption = 'Línea albarán de proveedor (agente)';
     DataClassification = CustomerContent;

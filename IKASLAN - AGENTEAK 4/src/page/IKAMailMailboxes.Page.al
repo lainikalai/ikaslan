@@ -1,4 +1,4 @@
-page 50410 "IKA Mail Mailboxes"
+page 99206 "IKA Mail Mailboxes"
 {
     Caption = 'Cuentas de Outlook 365';
     PageType = List;

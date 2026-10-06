@@ -1,4 +1,4 @@
-page 50645 "IKA WA Messages Part"
+page 99336 "IKA WA Messages Part"
 {
     Caption = 'Mensajes';
     PageType = ListPart;

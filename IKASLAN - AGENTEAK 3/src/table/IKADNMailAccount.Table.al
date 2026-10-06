@@ -1,4 +1,4 @@
-table 50270 "IKA DN Mail Account"
+table 99136 "IKA DN Mail Account"
 {
     // Cuenta de Outlook 365 que se muestra en BC: la del propio usuario o un buzón compartido.
     // Por defecto usa el registro de aplicación de la configuración general; una cuenta de otro

@@ -1,4 +1,4 @@
-enum 50400 "IKA Mail Entity Type"
+enum 99201 "IKA Mail Entity Type"
 {
     Caption = 'Tipo de entidad';
     Extensible = true;

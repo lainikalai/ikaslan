@@ -1,4 +1,4 @@
-table 50420 "IKA Mail Message"
+table 99211 "IKA Mail Message"
 {
     // Copia local (caché) de los datos básicos de cada email. El cuerpo y los adjuntos se descargan
     // de Graph al abrir el email, no al sincronizar, para que la sincronización sea rápida.

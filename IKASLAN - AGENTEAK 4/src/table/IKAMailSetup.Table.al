@@ -1,4 +1,4 @@
-table 50400 "IKA Mail Setup"
+table 99201 "IKA Mail Setup"
 {
     Caption = 'Configuración correo Outlook';
     DataClassification = CustomerContent;

@@ -1,4 +1,4 @@
-enum 50410 "IKA Mail Compose Mode"
+enum 99206 "IKA Mail Compose Mode"
 {
     Caption = 'Modo de redacción';
     Extensible = false;

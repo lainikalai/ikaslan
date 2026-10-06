@@ -1,4 +1,4 @@
-page 50040 "IKA Sales Request Subform"
+page 99021 "IKA Sales Request Subform"
 {
     Caption = 'Líneas';
     PageType = ListPart;

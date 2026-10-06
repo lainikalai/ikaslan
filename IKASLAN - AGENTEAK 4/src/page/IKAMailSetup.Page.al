@@ -1,4 +1,4 @@
-page 50400 "IKA Mail Setup"
+page 99201 "IKA Mail Setup"
 {
     Caption = 'Configuración correo Outlook 365';
     PageType = Card;

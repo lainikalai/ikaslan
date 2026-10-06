@@ -1,4 +1,4 @@
-page 50630 "IKA WA Conversations"
+page 99321 "IKA WA Conversations"
 {
     Caption = 'WhatsApp';
     PageType = List;

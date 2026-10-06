@@ -1,4 +1,4 @@
-table 50640 "IKA WA Conversation"
+table 99321 "IKA WA Conversation"
 {
     // Una conversación = un número de teléfono de cliente/proveedor/contacto en una cuenta de WhatsApp.
     Caption = 'Conversación de WhatsApp';

@@ -1,4 +1,4 @@
-table 50220 "IKA DN Field Alias"
+table 99111 "IKA DN Field Alias"
 {
     // Nombres con los que aparece cada campo en los albaranes ("Su pedido", "Vuestra ref.", "Lote"...).
     // Con "Nº proveedor" vacío el alias es global (vale para todos los proveedores).

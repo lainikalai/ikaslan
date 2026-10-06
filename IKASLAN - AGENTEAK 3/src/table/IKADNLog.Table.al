@@ -1,4 +1,4 @@
-table 50260 "IKA DN Log"
+table 99131 "IKA DN Log"
 {
     Caption = 'Registro agente de albaranes';
     DataClassification = CustomerContent;

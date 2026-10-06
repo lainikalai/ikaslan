@@ -1,4 +1,4 @@
-codeunit 50400 "IKA Mail Graph Client"
+codeunit 99201 "IKA Mail Graph Client"
 {
     // Acceso a Outlook 365 mediante Microsoft Graph v1.0 con autenticación de aplicación
     // (client credentials). Permisos de aplicación necesarios: Mail.ReadWrite y Mail.Send.

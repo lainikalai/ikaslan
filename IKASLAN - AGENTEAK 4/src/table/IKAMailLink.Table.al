@@ -1,4 +1,4 @@
-table 50440 "IKA Mail Link"
+table 99221 "IKA Mail Link"
 {
     // Registro de cada fichero (email completo o adjunto) que se ha adjuntado a una entidad de BC.
     // El fichero en sí se guarda en los adjuntos estándar (Document Attachment).

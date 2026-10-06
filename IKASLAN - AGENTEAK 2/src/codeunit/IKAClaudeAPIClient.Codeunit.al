@@ -1,4 +1,4 @@
-codeunit 50000 "IKA Claude API Client"
+codeunit 99001 "IKA Claude API Client"
 {
     // Cliente de la Messages API de Anthropic (https://docs.claude.com).
     // Se usa "structured outputs" (output_config.format = json_schema) para que la respuesta

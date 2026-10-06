@@ -1,4 +1,4 @@
-page 50215 "IKA DN Vendor Template"
+page 99111 "IKA DN Vendor Template"
 {
     Caption = 'Plantilla de albarán de proveedor';
     PageType = Card;

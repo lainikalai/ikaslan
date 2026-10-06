@@ -1,4 +1,4 @@
-codeunit 50070 "IKA Attachment To Text"
+codeunit 99036 "IKA Attachment To Text"
 {
     Access = Internal;
 

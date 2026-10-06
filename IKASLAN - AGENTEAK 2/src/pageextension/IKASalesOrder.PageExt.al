@@ -1,4 +1,4 @@
-pageextension 50000 "IKA Sales Order" extends "Sales Order"
+pageextension 99001 "IKA Sales Order" extends "Sales Order"
 {
     layout
     {

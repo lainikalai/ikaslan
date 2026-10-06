@@ -1,4 +1,4 @@
-page 50650 "IKA WA Send"
+page 99341 "IKA WA Send"
 {
     // Diálogo de envío por WhatsApp. Si la ventana de 24 h está cerrada (o no hay conversación),
     // solo se puede usar una plantilla aprobada; si está abierta, también texto libre y el documento.

@@ -1,4 +1,4 @@
-codeunit 50290 "IKA DN Process"
+codeunit 99146 "IKA DN Process"
 {
     // Procesa UN documento: extracción con Claude -> conciliación con pedidos ->
     // (opcional) aplicación a pedidos y registro de la recepción.

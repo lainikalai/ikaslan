@@ -1,4 +1,4 @@
-codeunit 50300 "IKA DN Job"
+codeunit 99156 "IKA DN Job"
 {
     // Punto de entrada de la cola de proyectos:
     //   1. Importa emails y ficheros nuevos.

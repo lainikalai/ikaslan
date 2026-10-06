@@ -1,4 +1,4 @@
-codeunit 50280 "IKA DN File To Text"
+codeunit 99141 "IKA DN File To Text"
 {
     Access = Internal;
 

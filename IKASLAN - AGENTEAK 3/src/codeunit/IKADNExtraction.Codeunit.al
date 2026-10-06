@@ -1,4 +1,4 @@
-codeunit 50220 "IKA DN Extraction"
+codeunit 99111 "IKA DN Extraction"
 {
     var
         JsonHelper: Codeunit "IKA DN Json Helper";

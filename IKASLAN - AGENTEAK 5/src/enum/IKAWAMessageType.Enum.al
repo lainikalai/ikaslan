@@ -1,4 +1,4 @@
-enum 50620 "IKA WA Message Type"
+enum 99311 "IKA WA Message Type"
 {
     Caption = 'Tipo de mensaje';
     Extensible = true;

@@ -1,4 +1,4 @@
-pageextension 50408 "IKA Mail Job Card" extends "Job Card"
+pageextension 99241 "IKA Mail Job Card" extends "Job Card"
 {
     layout
     {

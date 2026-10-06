@@ -1,4 +1,4 @@
-table 50600 "IKA WA Setup"
+table 99301 "IKA WA Setup"
 {
     Caption = 'Configuración WhatsApp';
     DataClassification = CustomerContent;

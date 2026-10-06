@@ -1,4 +1,4 @@
-page 50660 "IKA WA Inbound Events"
+page 99346 "IKA WA Inbound Events"
 {
     Caption = 'Eventos recibidos de WhatsApp';
     PageType = List;

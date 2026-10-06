@@ -1,4 +1,4 @@
-table 50460 "IKA Mail Drop Target"
+table 99231 "IKA Mail Drop Target"
 {
     // Tabla temporal con las zonas de destino que se muestran en la ficha del email.
     Caption = 'Zona de destino';

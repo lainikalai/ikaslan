@@ -1,4 +1,4 @@
-page 50455 "IKA Mail Linked Emails"
+page 99231 "IKA Mail Linked Emails"
 {
     // FactBox para las fichas de cliente, proveedor, banco, etc.
     Caption = 'Emails vinculados';

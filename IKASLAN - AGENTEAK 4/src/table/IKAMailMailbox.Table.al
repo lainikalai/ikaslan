@@ -1,4 +1,4 @@
-table 50410 "IKA Mail Mailbox"
+table 99206 "IKA Mail Mailbox"
 {
     // Cuenta de Outlook 365 que se muestra en BC: la del propio usuario o un buzón compartido.
     // Por defecto usa el registro de aplicación de la configuración general; una cuenta de otro

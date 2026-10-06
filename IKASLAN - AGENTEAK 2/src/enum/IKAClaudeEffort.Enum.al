@@ -1,4 +1,4 @@
-enum 50030 "IKA Claude Effort"
+enum 99016 "IKA Claude Effort"
 {
     Caption = 'Esfuerzo de Claude';
     Extensible = false;

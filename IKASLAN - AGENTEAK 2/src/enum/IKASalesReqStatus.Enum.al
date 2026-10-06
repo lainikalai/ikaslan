@@ -1,4 +1,4 @@
-enum 50000 "IKA Sales Req. Status"
+enum 99001 "IKA Sales Req. Status"
 {
     Caption = 'Estado solicitud de venta';
     Extensible = true;

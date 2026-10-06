@@ -1,4 +1,4 @@
-enum 50220 "IKA DN Source"
+enum 99111 "IKA DN Source"
 {
     Caption = 'Origen albarán';
     Extensible = true;

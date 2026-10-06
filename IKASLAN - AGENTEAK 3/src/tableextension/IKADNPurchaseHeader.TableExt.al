@@ -1,15 +1,15 @@
-tableextension 50200 "IKA DN Purchase Header" extends "Purchase Header"
+tableextension 99101 "IKA DN Purchase Header" extends "Purchase Header"
 {
     fields
     {
-        field(50200; "IKA DN Document Entry No."; Integer)
+        field(99101; "IKA DN Document Entry No."; Integer)
         {
             Caption = 'Último albarán aplicado (agente)';
             DataClassification = CustomerContent;
             TableRelation = "IKA DN Document";
             Editable = false;
         }
-        field(50201; "IKA DN No. of Documents"; Integer)
+        field(99102; "IKA DN No. of Documents"; Integer)
         {
             Caption = 'Albaranes de proveedor (agente)';
             FieldClass = FlowField;

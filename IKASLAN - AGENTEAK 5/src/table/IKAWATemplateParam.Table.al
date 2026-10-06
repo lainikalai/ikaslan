@@ -1,4 +1,4 @@
-table 50630 "IKA WA Template Param"
+table 99316 "IKA WA Template Param"
 {
     // De dónde sale cada variable {{n}} de una plantilla cuando se envía desde un tipo de documento.
     // Ej.: plantilla "factura_emitida" desde "Hist. cab. factura venta" (112):
