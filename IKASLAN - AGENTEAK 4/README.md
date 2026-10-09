@@ -33,7 +33,8 @@ y en la bandeja en lista. Es un control add-in (`src/controladdin/MailExplorer`)
 - **Navegación**: clic o flechas ↑↓ para seleccionar; doble clic o Intro abre la ficha del email (la del arrastre
   de adjuntos a clientes, proveedores...). *Adjuntar a BC…* también abre esa ficha.
 - **Acciones**: *Responder*, *A todos*, *Reenviar*, *Mover…*, *Eliminar*, *Marcar leído/no leído*, *Outlook* (Outlook Web) y *.eml*.
-- **Eliminar** (botón 🗑 o tecla **Supr** en la lista), como en Outlook:
+- **Eliminar**, como en Outlook: acción *Eliminar* de la barra de BC, papelera de cada email de la lista (al pasar
+  el ratón o en el seleccionado), botón *Eliminar* del panel de lectura o tecla **Supr** en la lista:
   - Fuera de *Elementos eliminados*, mueve el email a esa carpeta (se puede recuperar).
   - En *Elementos eliminados*, lo borra de Outlook y de BC, previa confirmación. Lo que se adjuntó a entidades de BC
     se conserva: los ficheros siguen en los documentos adjuntos y el vínculo guarda asunto, remitente y fecha.

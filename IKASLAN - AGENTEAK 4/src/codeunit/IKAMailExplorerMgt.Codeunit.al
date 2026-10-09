@@ -98,6 +98,32 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         exit(not MailMessage.IsEmpty());
     end;
 
+    /// <summary>
+    /// Email que se selecciona después de eliminar EntryNo: el siguiente de la lista (más antiguo) o, si era el
+    /// último, el anterior. 0 si no queda ninguno.
+    /// </summary>
+    procedure GetNextEntryNo(MailboxCode: Code[20]; FolderId: Text; DefaultFolderId: Text; EntryNo: Integer): Integer
+    var
+        CurrentMessage: Record "IKA Mail Message";
+        MailMessage: Record "IKA Mail Message";
+    begin
+        if not CurrentMessage.Get(EntryNo) then
+            exit(0);
+        MailMessage.SetCurrentKey("Mailbox Code", "Received At");
+        MailMessage.Ascending(false);
+        SetFolderFilter(MailMessage, MailboxCode, FolderId, DefaultFolderId);
+        MailMessage := CurrentMessage;
+        if not MailMessage.Find('=') then
+            exit(0);
+        if MailMessage.Next(1) <> 0 then
+            exit(MailMessage."Entry No.");
+        MailMessage := CurrentMessage;
+        if MailMessage.Find('=') then
+            if MailMessage.Next(-1) <> 0 then
+                exit(MailMessage."Entry No.");
+        exit(0);
+    end;
+
     local procedure SetFolderFilter(var MailMessage: Record "IKA Mail Message"; MailboxCode: Code[20]; FolderId: Text; DefaultFolderId: Text)
     begin
         MailMessage.SetRange("Mailbox Code", MailboxCode);

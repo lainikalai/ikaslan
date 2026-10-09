@@ -423,6 +423,10 @@
             icons.appendChild(linked);
         }
         line1.appendChild(icons);
+        // Papelera de la fila (visible al pasar el ratón y en el email seleccionado), como en Outlook
+        var trash = button('mx-row-delete', '', 'Eliminar (Supr)', function () { requestDelete(m.id); });
+        trash.appendChild(svgIcon('trash'));
+        line1.appendChild(trash);
         var date = el('span', 'mx-date', m.date);
         date.title = m.dateFull;
         line1.appendChild(date);

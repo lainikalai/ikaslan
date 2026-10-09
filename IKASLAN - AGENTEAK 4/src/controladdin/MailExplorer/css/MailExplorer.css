@@ -195,6 +195,19 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 .mx-icons { flex: 0 0 auto; display: flex; gap: 3px; font-size: 12px; }
 .mx-important { color: var(--mx-error); font-weight: 700; }
 .mx-date { flex: 0 0 auto; color: var(--mx-muted); font-size: 12px; }
+.mx-row-delete {
+    flex: 0 0 auto;
+    visibility: hidden;
+    padding: 0 3px;
+    border: none;
+    background: none;
+    color: var(--mx-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+.mx-message:hover .mx-row-delete,
+.mx-message.mx-selected .mx-row-delete { visibility: visible; }
+.mx-row-delete:hover { color: var(--mx-error); }
 .mx-subject, .mx-preview {
     overflow: hidden;
     text-overflow: ellipsis;

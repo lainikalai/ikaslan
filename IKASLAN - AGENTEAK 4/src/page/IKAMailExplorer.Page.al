@@ -5,6 +5,9 @@ page 99251 "IKA Mail Explorer"
     // panel de lectura está visible. La ficha del email (doble clic) sigue siendo la del arrastre a BC.
     Caption = 'Correo Outlook 365 (vista Outlook)';
     PageType = Card;
+    // La tabla de preferencias del usuario solo sirve para que BC no muestre en la cabecera los iconos de
+    // editar, nuevo y eliminar registro, que aquí no tienen sentido (la papelera de BC no borra emails).
+    SourceTable = "IKA Mail User Setting";
     UsageCategory = Lists;
     ApplicationArea = All;
     Editable = false;
@@ -94,25 +97,8 @@ page 99251 "IKA Mail Explorer"
                 end;
 
                 trigger DeleteRequested(EntryNo: Integer; NextEntryNo: Integer)
-                var
-                    Permanent: Boolean;
                 begin
-                    if not ExplorerMgt.DeleteMessage(EntryNo, Permanent) then begin
-                        CurrPage.Explorer.SetBusy(false);
-                        exit;
-                    end;
-                    // Se selecciona el siguiente email, para poder eliminar varios seguidos
-                    SelectedEntryNo := NextEntryNo;
-                    RenderFolders();
-                    RenderMessages();
-                    if ReadingPaneVisible and (SelectedEntryNo <> 0) then
-                        ShowSelectedMessage()
-                    else
-                        CurrPage.Explorer.SetMessage('');
-                    if Permanent then
-                        CurrPage.Explorer.ShowStatus(DeletedForeverMsg, false)
-                    else
-                        CurrPage.Explorer.ShowStatus(MovedToDeletedMsg, false);
+                    DeleteMessage(EntryNo, NextEntryNo);
                 end;
 
                 trigger ToggleReadRequested(EntryNo: Integer)
@@ -187,6 +173,20 @@ page 99251 "IKA Mail Explorer"
                     RefreshFolders();
                 end;
             }
+            action(DeleteMessageAction)
+            {
+                ApplicationArea = All;
+                Caption = 'Eliminar';
+                Image = Delete;
+                ToolTip = 'Mueve el email seleccionado a Elementos eliminados. Si ya está en Elementos eliminados, lo borra definitivamente (pide confirmación). En la lista de emails también funciona la tecla Supr.';
+
+                trigger OnAction()
+                begin
+                    if SelectedEntryNo = 0 then
+                        Error(NoMessageSelectedErr);
+                    DeleteMessage(SelectedEntryNo, ExplorerMgt.GetNextEntryNo(CurrentMailboxCode, CurrentFolderId, DefaultFolderId, SelectedEntryNo));
+                end;
+            }
             action(ToggleReadingPane)
             {
                 ApplicationArea = All;
@@ -237,6 +237,7 @@ page 99251 "IKA Mail Explorer"
                 actionref(Sync_Promoted; Sync) { }
                 actionref(LoadOlder_Promoted; LoadOlder) { }
                 actionref(RefreshFolders_Promoted; RefreshFoldersAction) { }
+                actionref(DeleteMessage_Promoted; DeleteMessageAction) { }
                 actionref(ToggleReadingPane_Promoted; ToggleReadingPane) { }
             }
             group(Category_Navigate)
@@ -263,6 +264,7 @@ page 99251 "IKA Mail Explorer"
         MovedMsg: Label 'Email movido.';
         MovedToDeletedMsg: Label 'Email movido a Elementos eliminados.';
         DeletedForeverMsg: Label 'Email eliminado definitivamente.';
+        NoMessageSelectedErr: Label 'Seleccione primero un email de la lista.';
 
     trigger OnOpenPage()
     var
@@ -276,6 +278,34 @@ page 99251 "IKA Mail Explorer"
         end;
         UserSetting.GetForCurrentUser();
         ReadingPaneVisible := not UserSetting."Hide Reading Pane";
+        Rec.FilterGroup(2);
+        Rec.SetRange("User ID", UserSetting."User ID");
+        Rec.FilterGroup(0);
+    end;
+
+    /// <summary>
+    /// Elimina el email (a Elementos eliminados o definitivamente) y selecciona NextEntryNo, para poder
+    /// eliminar varios seguidos.
+    /// </summary>
+    local procedure DeleteMessage(EntryNo: Integer; NextEntryNo: Integer)
+    var
+        Permanent: Boolean;
+    begin
+        if not ExplorerMgt.DeleteMessage(EntryNo, Permanent) then begin
+            CurrPage.Explorer.SetBusy(false);
+            exit;
+        end;
+        SelectedEntryNo := NextEntryNo;
+        RenderFolders();
+        RenderMessages();
+        if ReadingPaneVisible and (SelectedEntryNo <> 0) then
+            ShowSelectedMessage()
+        else
+            CurrPage.Explorer.SetMessage('');
+        if Permanent then
+            CurrPage.Explorer.ShowStatus(DeletedForeverMsg, false)
+        else
+            CurrPage.Explorer.ShowStatus(MovedToDeletedMsg, false);
     end;
 
     local procedure OpenMailbox(MailboxCode: Code[20]; WantedFolderId: Text)
