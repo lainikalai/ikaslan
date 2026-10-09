@@ -8,6 +8,9 @@
 rad.json
 *.g.xlf
 .vs/
+# Caché de la extensión AL y configuración local de AL Test Runner
+.alcache/
+.altestrunner/
 
 # --- Azure Functions / Node.js ---
 node_modules/
