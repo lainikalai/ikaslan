@@ -6,6 +6,7 @@ Extensión AL para Business Central 28 que trae el correo de **Outlook 365** a B
   otro tenant con credenciales propias. Cada usuario ve las cuentas compartidas y las suyas.
 - **Bandeja de correo**: listado de emails (no leídos en negrita), sincronización, *Cargar anteriores*,
   vistas *No leídos*, *Con adjuntos* y *Con adjuntos sin vincular*.
+- **Vista Outlook**: carpetas, emails y panel de lectura (que se puede ocultar) en una sola página.
 - **Carpetas de Outlook**: selector con el árbol completo de carpetas (subcarpetas a cualquier nivel, con sus
   no leídos) y *Mover a carpeta* desde la bandeja o la ficha del email.
 - **Ficha del email**: cabecera, cuerpo HTML (con imágenes incrustadas), adjuntos, descarga del email en
@@ -16,6 +17,33 @@ Extensión AL para Business Central 28 que trae el correo de **Outlook 365** a B
 > ⚠️ Compilado con el compilador AL 18 (CodeCop, UICop y PerTenantExtensionCop) contra versiones **simuladas**
 > de los objetos estándar, no con los símbolos reales de BC 28: hacer `AL: Download Symbols` + `Ctrl+Shift+B` y
 > corregir lo que indique el compilador.
+
+## Vista Outlook
+
+Página **Correo Outlook 365 (vista Outlook)** (`IKA Mail Explorer`), en el menú *Correo Outlook 365 > Vista Outlook*
+y en la bandeja en lista. Es un control add-in (`src/controladdin/MailExplorer`) con tres paneles:
+
+| Carpetas | Emails de la carpeta | Panel de lectura |
+|---|---|---|
+| Árbol de Outlook con subcarpetas plegables y no leídos | Remitente, asunto, vista previa, fecha, 📎, ❗, 🔗 (adjuntado a BC); no leídos en negrita | Cabecera, adjuntos (clic = descargar), cuerpo en iframe aislado y acciones |
+
+- **Panel de lectura**: se muestra u oculta con el botón *Ocultar/Mostrar lectura* de la barra o con la acción
+  *Panel de lectura* (`Ctrl+Mayús+R`). Se recuerda por usuario. Con el panel oculto, las acciones del email
+  seleccionado aparecen encima de la lista y el email se abre con doble clic o Intro.
+- **Navegación**: clic o flechas ↑↓ para seleccionar; doble clic o Intro abre la ficha del email (la del arrastre
+  de adjuntos a clientes, proveedores...). *Adjuntar a BC…* también abre esa ficha.
+- **Acciones**: *Responder*, *A todos*, *Reenviar*, *Mover…*, *Marcar leído/no leído*, *Outlook* (Outlook Web) y *.eml*.
+- **Sincronizar** descarga los últimos emails de la carpeta; *Cargar anteriores* (al final de la lista) los más antiguos.
+  La primera vez que se abre una carpeta se descargan solos.
+- **Buscar** filtra al momento los emails ya descargados de la carpeta (remitente, asunto y vista previa, sin
+  distinguir mayúsculas ni acentos).
+- Si hay varias cuentas, se elige en el desplegable de la barra. Se recuerdan la cuenta y la carpeta de cada usuario
+  (tabla `IKA Mail User Setting`).
+- Al abrir un email en el panel de lectura se marca como leído si así está en la configuración (*Marcar como leído al
+  abrir*), igual que en la ficha.
+- En pantallas estrechas (tablet, móvil) las carpetas se despliegan con ☰ y el email se lee a pantalla completa con
+  *← Volver a la lista*.
+- Se muestran los 500 emails más recientes de la carpeta.
 
 ## Carpetas
 
@@ -94,12 +122,15 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Table | 99226 | IKA Mail Pinned Target (destinos fijados por usuario) |
 | Table | 99231 / 99236 | IKA Mail Drop Target / Compose File (temporales) |
 | Table | 99241 | IKA Mail Folder (árbol de carpetas de Outlook de cada cuenta) |
+| Table | 99251 | IKA Mail User Setting (panel de lectura, última cuenta y carpeta de cada usuario) |
 | Enum | 99201–99216 | Entity Type, Compose Mode, Target Kind, Account Type |
 | Codeunit | 99201 | IKA Mail Graph Client (sincronizar, carpetas, mover, detalle, adjuntos, .eml, leído, responder/reenviar) |
 | Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
 | Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
 | Codeunit | 99216 | IKA Mail Json Helper |
+| Codeunit | 99221 | IKA Mail Explorer Mgt. (datos y acciones de la vista Outlook) |
 | ControlAddIn | — | IKA Mail Workspace (`src/controladdin/MailWorkspace`) |
+| ControlAddIn | — | IKA Mail Explorer (`src/controladdin/MailExplorer`) |
 | Page | 99201 | IKA Mail Setup |
 | Page | 99206 | IKA Mail Mailboxes (*Cuentas de Outlook 365*) |
 | Page | 99211 | IKA Mail Messages (*Correo Outlook 365*) |
@@ -108,7 +139,8 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
 | Page | 99241 | IKA Mail Folders (selector de carpetas en árbol) |
-| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (configuración, bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas), junto a la de *Agentes (Claude)* de AGENTEAK |
+| Page | 99251 | IKA Mail Explorer (*Correo Outlook 365 (vista Outlook)*) |
+| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (configuración, vista Outlook, bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas), junto a la de *Agentes (Claude)* de AGENTEAK |
 | PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
 | PermissionSet | 99201 | IKA Mail Workspace |
 

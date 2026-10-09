@@ -213,6 +213,14 @@ page 99211 "IKA Mail Messages"
         }
         area(Navigation)
         {
+            action(Explorer)
+            {
+                ApplicationArea = All;
+                Caption = 'Vista Outlook';
+                Image = ViewDetails;
+                RunObject = page "IKA Mail Explorer";
+                ToolTip = 'Carpetas, emails y panel de lectura en una sola página, como en Outlook.';
+            }
             action(Accounts)
             {
                 ApplicationArea = All;
@@ -259,6 +267,7 @@ page 99211 "IKA Mail Messages"
             {
                 Caption = 'Navegar';
 
+                actionref(Explorer_Promoted; Explorer) { }
                 actionref(Accounts_Promoted; Accounts) { }
                 actionref(Links_Promoted; Links) { }
                 actionref(Setup_Promoted; Setup) { }

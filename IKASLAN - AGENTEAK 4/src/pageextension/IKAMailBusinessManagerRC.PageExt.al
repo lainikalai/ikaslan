@@ -16,6 +16,13 @@ pageextension 99246 "IKA Mail Business Manager RC" extends "Business Manager Rol
                     RunObject = page "IKA Mail Setup";
                     ToolTip = 'Credenciales de Microsoft Graph (registro de aplicación), cuenta por defecto y opciones del visor de correo.';
                 }
+                action("IKA Mail Explorer")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Vista Outlook';
+                    RunObject = page "IKA Mail Explorer";
+                    ToolTip = 'Carpetas, emails y panel de lectura en una sola página, como en Outlook.';
+                }
                 action("IKA Mail Messages")
                 {
                     ApplicationArea = All;
