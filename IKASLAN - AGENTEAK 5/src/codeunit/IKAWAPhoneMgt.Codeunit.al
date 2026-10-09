@@ -1,7 +1,7 @@
 codeunit 99316 "IKA WA Phone Mgt."
 {
     // Teléfonos (normalización a formato internacional de WhatsApp) y todo lo que depende del tipo
-    // de entidad: nombre, teléfono, ficha, enlace wa.me y adjuntos.
+    // de entidad: nombre, teléfono, comercial, ficha, enlace wa.me y adjuntos.
 
     var
         Setup: Record "IKA WA Setup";
@@ -42,7 +42,7 @@ codeunit 99316 "IKA WA Phone Mgt."
     end;
 
     /// <summary>
-    /// Busca el cliente, proveedor o contacto con ese teléfono (móvil o fijo). Recorre los registros
+    /// Busca el cliente, proveedor, contacto o vendedor/comprador con ese teléfono (móvil o fijo). Recorre los registros
     /// con teléfono porque en BC los números se guardan con formatos variados (espacios, guiones...).
     /// </summary>
     procedure FindEntityByPhone(Phone: Text; var EntityType: Enum "IKA WA Entity Type"; var EntityNo: Code[20]): Boolean
@@ -50,6 +50,7 @@ codeunit 99316 "IKA WA Phone Mgt."
         Customer: Record Customer;
         Vendor: Record Vendor;
         Contact: Record Contact;
+        SalespersonPurchaser: Record "Salesperson/Purchaser";
     begin
         if NormalizePhone(Phone) = '' then
             exit(false);
@@ -98,6 +99,14 @@ codeunit 99316 "IKA WA Phone Mgt."
                 if SamePhone(Contact."Phone No.", Phone) then
                     exit(SetEntity(EntityType, EntityNo, EntityType::Contact, Contact."No."));
             until Contact.Next() = 0;
+
+        SalespersonPurchaser.SetLoadFields(Code, "Phone No.");
+        SalespersonPurchaser.SetFilter("Phone No.", '<>%1', '');
+        if SalespersonPurchaser.FindSet() then
+            repeat
+                if SamePhone(SalespersonPurchaser."Phone No.", Phone) then
+                    exit(SetEntity(EntityType, EntityNo, EntityType::SalespersonPurchaser, SalespersonPurchaser.Code));
+            until SalespersonPurchaser.Next() = 0;
         exit(false);
     end;
 
@@ -116,6 +125,7 @@ codeunit 99316 "IKA WA Phone Mgt."
         Customer: Record Customer;
         Vendor: Record Vendor;
         Contact: Record Contact;
+        SalespersonPurchaser: Record "Salesperson/Purchaser";
         Phone: Text;
     begin
         case EntityType of
@@ -128,6 +138,9 @@ codeunit 99316 "IKA WA Phone Mgt."
             EntityType::Contact:
                 if Contact.Get(EntityNo) then
                     Phone := FirstNotBlank(Contact."Mobile Phone No.", Contact."Phone No.");
+            EntityType::SalespersonPurchaser:
+                if SalespersonPurchaser.Get(EntityNo) then
+                    Phone := SalespersonPurchaser."Phone No.";
         end;
         if Phone = '' then
             Error(NoPhoneErr, EntityType, EntityNo);
@@ -146,6 +159,7 @@ codeunit 99316 "IKA WA Phone Mgt."
         Customer: Record Customer;
         Vendor: Record Vendor;
         Contact: Record Contact;
+        SalespersonPurchaser: Record "Salesperson/Purchaser";
     begin
         case EntityType of
             EntityType::Customer:
@@ -157,7 +171,46 @@ codeunit 99316 "IKA WA Phone Mgt."
             EntityType::Contact:
                 if Contact.Get(EntityNo) then
                     exit(Contact.Name);
+            EntityType::SalespersonPurchaser:
+                if SalespersonPurchaser.Get(EntityNo) then
+                    exit(SalespersonPurchaser.Name);
         end;
+        exit('');
+    end;
+
+    /// <summary>
+    /// Comercial responsable de la entidad: vendedor del cliente o contacto, comprador del proveedor.
+    /// Para un vendedor/comprador no hay comercial asignado (la conversación es con él mismo).
+    /// </summary>
+    procedure GetEntitySalespersonCode(EntityType: Enum "IKA WA Entity Type"; EntityNo: Code[20]): Code[20]
+    var
+        Customer: Record Customer;
+        Vendor: Record Vendor;
+        Contact: Record Contact;
+    begin
+        case EntityType of
+            EntityType::Customer:
+                if Customer.Get(EntityNo) then
+                    exit(Customer."Salesperson Code");
+            EntityType::Vendor:
+                if Vendor.Get(EntityNo) then
+                    exit(Vendor."Purchaser Code");
+            EntityType::Contact:
+                if Contact.Get(EntityNo) then
+                    exit(Contact."Salesperson Code");
+        end;
+        exit('');
+    end;
+
+    /// <summary>
+    /// Vendedor/comprador del usuario actual (Configuración usuarios), para "Mis conversaciones".
+    /// </summary>
+    procedure GetUserSalespersonCode(): Code[20]
+    var
+        UserSetup: Record "User Setup";
+    begin
+        if UserSetup.Get(UserId()) then
+            exit(UserSetup."Salespers./Purch. Code");
         exit('');
     end;
 
@@ -166,6 +219,7 @@ codeunit 99316 "IKA WA Phone Mgt."
         Customer: Record Customer;
         Vendor: Record Vendor;
         Contact: Record Contact;
+        SalespersonPurchaser: Record "Salesperson/Purchaser";
     begin
         case EntityType of
             EntityType::Customer:
@@ -177,6 +231,9 @@ codeunit 99316 "IKA WA Phone Mgt."
             EntityType::Contact:
                 if Contact.Get(EntityNo) then
                     Page.Run(Page::"Contact Card", Contact);
+            EntityType::SalespersonPurchaser:
+                if SalespersonPurchaser.Get(EntityNo) then
+                    Page.Run(Page::"Salesperson/Purchaser Card", SalespersonPurchaser);
         end;
     end;
 
@@ -212,6 +269,8 @@ codeunit 99316 "IKA WA Phone Mgt."
                 RecRef.Open(Database::Vendor);
             EntityType::Contact:
                 RecRef.Open(Database::Contact);
+            EntityType::SalespersonPurchaser:
+                RecRef.Open(Database::"Salesperson/Purchaser");
             else
                 Error(EntityNotFoundErr, EntityType, EntityNo);
         end;
@@ -228,14 +287,14 @@ codeunit 99316 "IKA WA Phone Mgt."
     end;
 
     /// <summary>
-    /// "Document Attachment" no rellena el Nº para Contacto; se completa aquí.
+    /// "Document Attachment" no rellena el Nº para Contacto ni Vendedor/Comprador; se completa aquí.
     /// </summary>
     [EventSubscriber(ObjectType::Table, Database::"Document Attachment", 'OnAfterInitFieldsFromRecRef', '', false, false)]
     local procedure DocumentAttachmentOnAfterInitFieldsFromRecRef(var DocumentAttachment: Record "Document Attachment"; var RecRef: RecordRef)
     var
         FieldRef: FieldRef;
     begin
-        if (DocumentAttachment."No." <> '') or (RecRef.Number <> Database::Contact) then
+        if (DocumentAttachment."No." <> '') or not (RecRef.Number in [Database::Contact, Database::"Salesperson/Purchaser"]) then
             exit;
         FieldRef := RecRef.Field(1);
         DocumentAttachment."No." := FieldRef.Value;

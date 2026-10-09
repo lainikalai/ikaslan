@@ -1,10 +1,14 @@
 page 99331 "IKA WA Conversation"
 {
+    // Ficha de la conversación: datos de la entidad vinculada y el chat (control add-in).
+    // La página no es editable para no chocar con los cambios que hace el chat sobre la conversación
+    // (no leídos, último mensaje); la vinculación y el comercial se cambian con acciones.
     Caption = 'Conversación de WhatsApp';
     PageType = Document;
     SourceTable = "IKA WA Conversation";
     UsageCategory = None;
     InsertAllowed = false;
+    Editable = false;
     DataCaptionFields = "Entity Name", "Phone No.";
 
     layout
@@ -15,30 +19,16 @@ page 99331 "IKA WA Conversation"
             {
                 Caption = 'Conversación';
 
-                field("Phone No."; Rec."Phone No.")
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-                field("Profile Name"; Rec."Profile Name")
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-                field("Entity Type"; Rec."Entity Type")
-                {
-                    ApplicationArea = All;
-                }
-                field("Entity No."; Rec."Entity No.")
+                field("Entity Name"; Rec."Entity Name")
                 {
                     ApplicationArea = All;
 
-                    trigger OnValidate()
+                    trigger OnDrillDown()
                     begin
-                        Rec."Entity Name" := PhoneMgt.GetEntityName(Rec."Entity Type", Rec."Entity No.");
+                        PhoneMgt.OpenEntityCard(Rec."Entity Type", Rec."Entity No.");
                     end;
                 }
-                field("Entity Name"; Rec."Entity Name")
+                field("Phone No."; Rec."Phone No.")
                 {
                     ApplicationArea = All;
                 }
@@ -47,28 +37,46 @@ page 99331 "IKA WA Conversation"
                     ApplicationArea = All;
                     Caption = 'Ventana de 24 h';
                     StyleExpr = WindowStyle;
+                    ToolTip = 'Con la ventana cerrada WhatsApp solo permite enviar plantillas aprobadas.';
+                }
+                field("Salesperson Code"; Rec."Salesperson Code")
+                {
+                    ApplicationArea = All;
+                }
+                field("Profile Name"; Rec."Profile Name")
+                {
+                    ApplicationArea = All;
+                    Importance = Additional;
+                }
+                field("Entity Type"; Rec."Entity Type")
+                {
+                    ApplicationArea = All;
+                    Importance = Additional;
+                }
+                field("Entity No."; Rec."Entity No.")
+                {
+                    ApplicationArea = All;
+                    Importance = Additional;
                 }
                 field("Account Code"; Rec."Account Code")
                 {
                     ApplicationArea = All;
-                    Editable = false;
+                    Importance = Additional;
                 }
             }
-            group(Reply)
+            part(Chat; "IKA WA Chat Part")
             {
-                Caption = 'Responder';
-
-                field(NewMessageText; NewMessageText)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Mensaje';
-                    MultiLine = true;
-                    ToolTip = 'Texto libre: solo con la ventana de 24 h abierta. Si está cerrada, use "Enviar plantilla".';
-                }
+                ApplicationArea = All;
+                Caption = 'Chat';
+                SubPageLink = "Entry No." = field("Entry No.");
             }
             part(Messages; "IKA WA Messages Part")
             {
+                // Vista clásica en lista (estado, errores, documento de origen). Oculta por defecto:
+                // se puede mostrar personalizando la página.
                 ApplicationArea = All;
+                Caption = 'Detalle de mensajes';
+                Visible = false;
                 SubPageLink = "Conversation Entry No." = field("Entry No.");
             }
         }
@@ -78,48 +86,6 @@ page 99331 "IKA WA Conversation"
     {
         area(Processing)
         {
-            action(SendText)
-            {
-                ApplicationArea = All;
-                Caption = 'Enviar';
-                Image = SendTo;
-                ShortcutKey = 'Ctrl+Enter';
-                ToolTip = 'Envía el texto escrito.';
-
-                trigger OnAction()
-                var
-                    CloudApi: Codeunit "IKA WA Cloud API";
-                begin
-                    CurrPage.SaveRecord();
-                    CloudApi.SendText(Rec, NewMessageText);
-                    NewMessageText := '';
-                    CurrPage.Update(false);
-                end;
-            }
-            action(SendFile)
-            {
-                ApplicationArea = All;
-                Caption = 'Enviar fichero';
-                Image = Attach;
-                ToolTip = 'Envía un PDF o una imagen (ventana de 24 h abierta). El texto escrito va como pie.';
-
-                trigger OnAction()
-                var
-                    CloudApi: Codeunit "IKA WA Cloud API";
-                    TempBlob: Codeunit "Temp Blob";
-                    InStr: InStream;
-                    OutStr: OutStream;
-                    FileName: Text;
-                begin
-                    if not UploadIntoStream('', '', '', FileName, InStr) then
-                        exit;
-                    TempBlob.CreateOutStream(OutStr);
-                    CopyStream(OutStr, InStr);
-                    CloudApi.SendFile(Rec, TempBlob, GetFileNameOnly(FileName), NewMessageText, 0, '');
-                    NewMessageText := '';
-                    CurrPage.Update(false);
-                end;
-            }
             action(SendTemplate)
             {
                 ApplicationArea = All;
@@ -128,37 +94,22 @@ page 99331 "IKA WA Conversation"
                 ToolTip = 'Envía una plantilla aprobada (siempre permitido, también con la ventana cerrada).';
 
                 trigger OnAction()
-                var
-                    WASend: Page "IKA WA Send";
-                    TempBlob: Codeunit "Temp Blob";
-                    EmptyRecordId: RecordId;
                 begin
-                    WASend.SetContext(Rec."Entity Type", Rec."Entity No.", Rec."Phone No.", TempBlob, '', EmptyRecordId, '');
-                    WASend.RunModal();
+                    ChatMgt.SendTemplate(Rec."Entry No.");
                     CurrPage.Update(false);
                 end;
             }
-            action(LinkByPhone)
+            action(NotifySalesperson)
             {
                 ApplicationArea = All;
-                Caption = 'Buscar entidad por teléfono';
-                Image = Find;
-                ToolTip = 'Busca el cliente, proveedor o contacto con este teléfono.';
+                Caption = 'Avisar al comercial';
+                Image = SalesPerson;
+                Enabled = Rec."Salesperson Code" <> '';
+                ToolTip = 'Envía por WhatsApp al comercial asignado el último mensaje de esta conversación.';
 
                 trigger OnAction()
-                var
-                    EntityType: Enum "IKA WA Entity Type";
-                    EntityNo: Code[20];
-                    NotFoundMsg: Label 'No hay ningún cliente, proveedor ni contacto con el teléfono %1.', Comment = '%1 = phone';
                 begin
-                    if not PhoneMgt.FindEntityByPhone(Rec."Phone No.", EntityType, EntityNo) then begin
-                        Message(NotFoundMsg, Rec."Phone No.");
-                        exit;
-                    end;
-                    Rec."Entity Type" := EntityType;
-                    Rec."Entity No." := EntityNo;
-                    Rec."Entity Name" := PhoneMgt.GetEntityName(EntityType, EntityNo);
-                    Rec.Modify();
+                    ChatMgt.NotifySalesperson(Rec."Entry No.");
                 end;
             }
             action(Refresh)
@@ -174,9 +125,101 @@ page 99331 "IKA WA Conversation"
                     InboundProcessor: Codeunit "IKA WA Inbound Processor";
                 begin
                     InboundProcessor.ProcessPending();
-                    Rec.Get(Rec."Entry No.");
-                    MarkConversationRead();
                     CurrPage.Update(false);
+                end;
+            }
+            group(Link)
+            {
+                Caption = 'Vincular';
+                Image = Link;
+
+                action(LinkByPhone)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Buscar por teléfono';
+                    Image = Find;
+                    ToolTip = 'Busca el cliente, proveedor, contacto o vendedor/comprador con este teléfono.';
+
+                    trigger OnAction()
+                    begin
+                        ChatMgt.LinkByPhone(Rec."Entry No.");
+                        CurrPage.Update(false);
+                    end;
+                }
+                action(LinkCustomer)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Cliente...';
+                    Image = Customer;
+                    ToolTip = 'Vincula la conversación a un cliente.';
+
+                    trigger OnAction()
+                    begin
+                        LinkTo(Enum::"IKA WA Entity Type"::Customer);
+                    end;
+                }
+                action(LinkVendor)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Proveedor...';
+                    Image = Vendor;
+                    ToolTip = 'Vincula la conversación a un proveedor.';
+
+                    trigger OnAction()
+                    begin
+                        LinkTo(Enum::"IKA WA Entity Type"::Vendor);
+                    end;
+                }
+                action(LinkContact)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Contacto...';
+                    Image = ContactPerson;
+                    ToolTip = 'Vincula la conversación a un contacto.';
+
+                    trigger OnAction()
+                    begin
+                        LinkTo(Enum::"IKA WA Entity Type"::Contact);
+                    end;
+                }
+                action(LinkSalesperson)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Vendedor/comprador...';
+                    Image = SalesPerson;
+                    ToolTip = 'Vincula la conversación a un vendedor o comprador de la empresa.';
+
+                    trigger OnAction()
+                    begin
+                        LinkTo(Enum::"IKA WA Entity Type"::SalespersonPurchaser);
+                    end;
+                }
+                action(Unlink)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Desvincular';
+                    Image = Cancel;
+                    Enabled = Rec."Entity No." <> '';
+                    ToolTip = 'Quita la vinculación con el cliente, proveedor, contacto o vendedor/comprador.';
+
+                    trigger OnAction()
+                    begin
+                        ChatMgt.Unlink(Rec."Entry No.");
+                        CurrPage.Update(false);
+                    end;
+                }
+            }
+            action(AssignSalesperson)
+            {
+                ApplicationArea = All;
+                Caption = 'Asignar comercial';
+                Image = SalesPurchaseTeam;
+                ToolTip = 'Cambia el comercial responsable de la conversación (por defecto, el de la ficha del cliente, proveedor o contacto).';
+
+                trigger OnAction()
+                begin
+                    if ChatMgt.AssignSalesperson(Rec."Entry No.") then
+                        CurrPage.Update(false);
                 end;
             }
         }
@@ -188,7 +231,7 @@ page 99331 "IKA WA Conversation"
                 Caption = 'Abrir ficha';
                 Image = Card;
                 Enabled = Rec."Entity No." <> '';
-                ToolTip = 'Abre la ficha del cliente, proveedor o contacto.';
+                ToolTip = 'Abre la ficha del cliente, proveedor, contacto o vendedor/comprador.';
 
                 trigger OnAction()
                 begin
@@ -200,11 +243,11 @@ page 99331 "IKA WA Conversation"
                 ApplicationArea = All;
                 Caption = 'Abrir en mi WhatsApp';
                 Image = Web;
-                ToolTip = 'Abre este chat en WhatsApp web o de escritorio.';
+                ToolTip = 'Abre este chat en WhatsApp web o de escritorio (lo que se envíe desde allí no queda en BC).';
 
                 trigger OnAction()
                 begin
-                    PhoneMgt.OpenWaMe(Rec."Phone No.", NewMessageText);
+                    PhoneMgt.OpenWaMe(Rec."Phone No.", '');
                 end;
             }
         }
@@ -214,27 +257,35 @@ page 99331 "IKA WA Conversation"
             {
                 Caption = 'Proceso';
 
-                actionref(SendText_Promoted; SendText) { }
-                actionref(SendFile_Promoted; SendFile) { }
                 actionref(SendTemplate_Promoted; SendTemplate) { }
+                actionref(NotifySalesperson_Promoted; NotifySalesperson) { }
                 actionref(Refresh_Promoted; Refresh) { }
+            }
+            group(Category_Link)
+            {
+                Caption = 'Vincular';
+
+                actionref(LinkByPhone_Promoted; LinkByPhone) { }
+                actionref(LinkCustomer_Promoted; LinkCustomer) { }
+                actionref(LinkVendor_Promoted; LinkVendor) { }
+                actionref(LinkContact_Promoted; LinkContact) { }
+                actionref(LinkSalesperson_Promoted; LinkSalesperson) { }
+                actionref(AssignSalesperson_Promoted; AssignSalesperson) { }
             }
             group(Category_Navigate)
             {
                 Caption = 'Navegar';
 
                 actionref(OpenEntity_Promoted; OpenEntity) { }
-                actionref(LinkByPhone_Promoted; LinkByPhone) { }
                 actionref(OpenWaMe_Promoted; OpenWaMe) { }
             }
         }
     }
 
     var
+        ChatMgt: Codeunit "IKA WA Chat Mgt.";
         PhoneMgt: Codeunit "IKA WA Phone Mgt.";
-        NewMessageText: Text;
         WindowStyle: Text;
-        MarkedEntryNo: Integer;
 
     trigger OnAfterGetCurrRecord()
     begin
@@ -242,48 +293,11 @@ page 99331 "IKA WA Conversation"
             WindowStyle := 'Favorable'
         else
             WindowStyle := 'Attention';
-        if Rec."Entry No." <> MarkedEntryNo then begin
-            MarkedEntryNo := Rec."Entry No.";
-            MarkConversationRead();
-        end;
     end;
 
-    /// <summary>
-    /// Pone a cero los no leídos y, si está configurado, envía el "leído" a WhatsApp del último mensaje recibido.
-    /// </summary>
-    local procedure MarkConversationRead()
-    var
-        Setup: Record "IKA WA Setup";
-        WAMessage: Record "IKA WA Message";
-        CloudApi: Codeunit "IKA WA Cloud API";
+    local procedure LinkTo(EntityType: Enum "IKA WA Entity Type")
     begin
-        if Rec."No. of Unread" = 0 then
-            exit;
-        Setup.GetSetup();
-        if Setup."Send Read Receipts" then begin
-            WAMessage.SetCurrentKey("Conversation Entry No.", "Sent At");
-            WAMessage.SetRange("Conversation Entry No.", Rec."Entry No.");
-            WAMessage.SetRange(Direction, WAMessage.Direction::Inbound);
-            if WAMessage.FindLast() then
-                if not TryMarkAsRead(CloudApi, WAMessage) then; // no es crítico
-        end;
-        Rec."No. of Unread" := 0;
-        Rec.Modify();
-    end;
-
-    [TryFunction]
-    local procedure TryMarkAsRead(var CloudApi: Codeunit "IKA WA Cloud API"; WAMessage: Record "IKA WA Message")
-    begin
-        CloudApi.MarkAsRead(WAMessage."Account Code", WAMessage."WA Message ID");
-    end;
-
-    local procedure GetFileNameOnly(FullPath: Text): Text
-    var
-        Pos: Integer;
-    begin
-        Pos := StrLen(FullPath);
-        while (Pos > 0) and not (CopyStr(FullPath, Pos, 1) in ['\', '/']) do
-            Pos -= 1;
-        exit(CopyStr(FullPath, Pos + 1));
+        if ChatMgt.LinkToEntity(Rec."Entry No.", EntityType) then
+            CurrPage.Update(false);
     end;
 }

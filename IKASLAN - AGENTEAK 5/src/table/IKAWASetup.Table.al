@@ -53,6 +53,11 @@ table 99301 "IKA WA Setup"
             Caption = 'Vincular por teléfono automáticamente';
             InitValue = true;
         }
+        field(70; "Open My Conversations"; Boolean)
+        {
+            Caption = 'Abrir con "Mis conversaciones"';
+            ToolTip = 'La bandeja se abre filtrada por el vendedor/comprador del usuario (Configuración usuarios), si lo tiene.';
+        }
     }
 
     keys

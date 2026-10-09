@@ -34,7 +34,7 @@ table 99321 "IKA WA Conversation"
             trigger OnValidate()
             begin
                 if "Entity Type" <> xRec."Entity Type" then
-                    "Entity No." := '';
+                    SetEntity("Entity Type", '');
             end;
         }
         field(11; "Entity No."; Code[20])
@@ -44,12 +44,25 @@ table 99321 "IKA WA Conversation"
             else
             if ("Entity Type" = const(Vendor)) Vendor
             else
-            if ("Entity Type" = const(Contact)) Contact;
+            if ("Entity Type" = const(Contact)) Contact
+            else
+            if ("Entity Type" = const(SalespersonPurchaser)) "Salesperson/Purchaser";
+
+            trigger OnValidate()
+            begin
+                SetEntity("Entity Type", "Entity No.");
+            end;
         }
         field(12; "Entity Name"; Text[100])
         {
             Caption = 'Nombre entidad';
             Editable = false;
+        }
+        field(13; "Salesperson Code"; Code[20])
+        {
+            Caption = 'Comercial asignado';
+            TableRelation = "Salesperson/Purchaser";
+            ToolTip = 'Comercial responsable de la conversación: el vendedor del cliente o contacto, o el comprador del proveedor. Se rellena al vincular la entidad y se puede cambiar.';
         }
         field(20; "Last Message At"; DateTime)
         {
@@ -92,6 +105,9 @@ table 99321 "IKA WA Conversation"
         key(Entity; "Entity Type", "Entity No.")
         {
         }
+        key(Salesperson; "Salesperson Code", "Last Message At")
+        {
+        }
     }
 
     trigger OnDelete()
@@ -122,6 +138,50 @@ table 99321 "IKA WA Conversation"
             exit(ClosedLbl);
         Remaining := 24 * 60 * 60 * 1000 - (CurrentDateTime() - "Last Inbound At");
         exit(StrSubstNo(OpenLbl, Round(Remaining / 3600000, 1, '<')));
+    end;
+
+    /// <summary>
+    /// Vincula la conversación a un cliente, proveedor, contacto o vendedor/comprador: nombre y comercial asignado.
+    /// Con Nº en blanco la desvincula.
+    /// </summary>
+    procedure SetEntity(NewEntityType: Enum "IKA WA Entity Type"; NewEntityNo: Code[20])
+    var
+        PhoneMgt: Codeunit "IKA WA Phone Mgt.";
+    begin
+        "Entity Type" := NewEntityType;
+        "Entity No." := NewEntityNo;
+        "Entity Name" := PhoneMgt.GetEntityName(NewEntityType, NewEntityNo);
+        "Salesperson Code" := PhoneMgt.GetEntitySalespersonCode(NewEntityType, NewEntityNo);
+    end;
+
+    /// <summary>
+    /// Pone a cero los no leídos y, si está configurado, envía el "leído" a WhatsApp del último mensaje recibido.
+    /// </summary>
+    procedure MarkAsRead()
+    var
+        Setup: Record "IKA WA Setup";
+        WAMessage: Record "IKA WA Message";
+    begin
+        if "No. of Unread" = 0 then
+            exit;
+        Setup.GetSetup();
+        if Setup."Send Read Receipts" then begin
+            WAMessage.SetCurrentKey("Conversation Entry No.", "Sent At");
+            WAMessage.SetRange("Conversation Entry No.", "Entry No.");
+            WAMessage.SetRange(Direction, WAMessage.Direction::Inbound);
+            if WAMessage.FindLast() then
+                if not TrySendReadReceipt(WAMessage) then; // no es crítico
+        end;
+        "No. of Unread" := 0;
+        Modify();
+    end;
+
+    [TryFunction]
+    local procedure TrySendReadReceipt(WAMessage: Record "IKA WA Message")
+    var
+        CloudApi: Codeunit "IKA WA Cloud API";
+    begin
+        CloudApi.MarkAsRead(WAMessage."Account Code", WAMessage."WA Message ID");
     end;
 
     procedure FindOrCreate(AccountCode: Code[20]; PhoneNo: Text): Boolean

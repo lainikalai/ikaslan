@@ -11,6 +11,8 @@ permissionset 99301 "IKA WA User"
         tabledata "IKA WA Conversation" = RIMD,
         tabledata "IKA WA Message" = RIMD,
         tabledata "IKA WA Inbound Event" = RIMD,
+        tabledata "IKA WA Quick Reply" = RIMD,
+        tabledata "IKA WA Cue" = RIMD,
         tabledata "Document Attachment" = RIM,
         table "IKA WA Setup" = X,
         table "IKA WA Account" = X,
@@ -19,6 +21,8 @@ permissionset 99301 "IKA WA User"
         table "IKA WA Conversation" = X,
         table "IKA WA Message" = X,
         table "IKA WA Inbound Event" = X,
+        table "IKA WA Quick Reply" = X,
+        table "IKA WA Cue" = X,
         codeunit "IKA WA Cloud API" = X,
         codeunit "IKA WA Inbound Processor" = X,
         codeunit "IKA WA Media Downloader" = X,
@@ -26,6 +30,7 @@ permissionset 99301 "IKA WA User"
         codeunit "IKA WA Document Sender" = X,
         codeunit "IKA WA Json Helper" = X,
         codeunit "IKA WA Job" = X,
+        codeunit "IKA WA Chat Mgt." = X,
         page "IKA WA Setup" = X,
         page "IKA WA Accounts" = X,
         page "IKA WA Templates" = X,
@@ -36,5 +41,8 @@ permissionset 99301 "IKA WA User"
         page "IKA WA Messages Part" = X,
         page "IKA WA Send" = X,
         page "IKA WA Inbound Events" = X,
-        page "IKA WA Secret Input" = X;
+        page "IKA WA Secret Input" = X,
+        page "IKA WA Quick Replies" = X,
+        page "IKA WA Chat Part" = X,
+        page "IKA WA Activities" = X;
 }

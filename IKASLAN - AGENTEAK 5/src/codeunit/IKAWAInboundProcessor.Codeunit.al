@@ -90,11 +90,8 @@ codeunit 99306 "IKA WA Inbound Processor"
         if InboundEvent."Profile Name" <> '' then
             Conversation."Profile Name" := InboundEvent."Profile Name";
         if (Conversation."Entity No." = '') and Setup."Auto Link by Phone" then
-            if PhoneMgt.FindEntityByPhone(Phone, EntityType, EntityNo) then begin
-                Conversation."Entity Type" := EntityType;
-                Conversation."Entity No." := EntityNo;
-                Conversation."Entity Name" := PhoneMgt.GetEntityName(EntityType, EntityNo);
-            end;
+            if PhoneMgt.FindEntityByPhone(Phone, EntityType, EntityNo) then
+                Conversation.SetEntity(EntityType, EntityNo);
 
         WAMessage.Init();
         WAMessage."Entry No." := 0;

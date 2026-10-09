@@ -30,6 +30,10 @@ page 99301 "IKA WA Setup"
                     ApplicationArea = All;
                     ToolTip = 'Vincula las conversaciones nuevas al cliente, proveedor o contacto con ese teléfono.';
                 }
+                field("Open My Conversations"; Rec."Open My Conversations")
+                {
+                    ApplicationArea = All;
+                }
                 field("Send Read Receipts"; Rec."Send Read Receipts")
                 {
                     ApplicationArea = All;
@@ -79,6 +83,21 @@ page 99301 "IKA WA Setup"
                     Message(ProcessedMsg, InboundProcessor.ProcessPending());
                 end;
             }
+            action(FillSalespersons)
+            {
+                ApplicationArea = All;
+                Caption = 'Asignar comerciales a las conversaciones';
+                Image = SalesPurchaseTeam;
+                ToolTip = 'Rellena el comercial de las conversaciones vinculadas que no lo tienen, con el vendedor del cliente o contacto o el comprador del proveedor.';
+
+                trigger OnAction()
+                var
+                    ChatMgt: Codeunit "IKA WA Chat Mgt.";
+                    UpdatedMsg: Label '%1 conversación(es) actualizada(s).', Comment = '%1 = count';
+                begin
+                    Message(UpdatedMsg, ChatMgt.FillMissingSalespersons());
+                end;
+            }
             action(CreateJobQueue)
             {
                 ApplicationArea = All;
@@ -120,6 +139,14 @@ page 99301 "IKA WA Setup"
                 RunObject = page "IKA WA Conversations";
                 ToolTip = 'Bandeja de WhatsApp.';
             }
+            action(QuickReplies)
+            {
+                ApplicationArea = All;
+                Caption = 'Respuestas rápidas';
+                Image = Text;
+                RunObject = page "IKA WA Quick Replies";
+                ToolTip = 'Textos predefinidos que se insertan con un clic en el chat.';
+            }
             action(InboundEvents)
             {
                 ApplicationArea = All;
@@ -138,6 +165,7 @@ page 99301 "IKA WA Setup"
                 actionref(Accounts_Promoted; Accounts) { }
                 actionref(Templates_Promoted; Templates) { }
                 actionref(Conversations_Promoted; Conversations) { }
+                actionref(QuickReplies_Promoted; QuickReplies) { }
                 actionref(ProcessInbound_Promoted; ProcessInbound) { }
                 actionref(CreateJobQueue_Promoted; CreateJobQueue) { }
                 actionref(InboundEvents_Promoted; InboundEvents) { }

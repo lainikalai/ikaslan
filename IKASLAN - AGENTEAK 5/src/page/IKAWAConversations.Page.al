@@ -1,5 +1,7 @@
 page 99321 "IKA WA Conversations"
 {
+    // Bandeja de WhatsApp a dos paneles: conversaciones a la izquierda y el chat de la seleccionada
+    // en el panel de FactBox. "Mis conversaciones" filtra por el comercial del usuario (Configuración usuarios).
     Caption = 'WhatsApp';
     PageType = List;
     SourceTable = "IKA WA Conversation";
@@ -49,6 +51,10 @@ page 99321 "IKA WA Conversations"
                     ApplicationArea = All;
                     Caption = 'Ventana 24 h';
                 }
+                field("Salesperson Code"; Rec."Salesperson Code")
+                {
+                    ApplicationArea = All;
+                }
                 field("Entity Type"; Rec."Entity Type")
                 {
                     ApplicationArea = All;
@@ -62,6 +68,15 @@ page 99321 "IKA WA Conversations"
                     ApplicationArea = All;
                     Visible = false;
                 }
+            }
+        }
+        area(FactBoxes)
+        {
+            part(Chat; "IKA WA Chat Part")
+            {
+                ApplicationArea = All;
+                Caption = 'Chat';
+                SubPageLink = "Entry No." = field("Entry No.");
             }
         }
     }
@@ -86,9 +101,58 @@ page 99321 "IKA WA Conversations"
                     CurrPage.Update(false);
                 end;
             }
+            action(MyConversations)
+            {
+                ApplicationArea = All;
+                Caption = 'Mis conversaciones';
+                Image = FilterLines;
+                Visible = not OnlyMine;
+                ToolTip = 'Muestra solo las conversaciones asignadas a su vendedor/comprador (Configuración usuarios).';
+
+                trigger OnAction()
+                begin
+                    SetOnlyMine(true);
+                end;
+            }
+            action(AllConversations)
+            {
+                ApplicationArea = All;
+                Caption = 'Todas las conversaciones';
+                Image = ClearFilter;
+                Visible = OnlyMine;
+                ToolTip = 'Quita el filtro de comercial.';
+
+                trigger OnAction()
+                begin
+                    SetOnlyMine(false);
+                end;
+            }
+            action(NotifySalesperson)
+            {
+                ApplicationArea = All;
+                Caption = 'Avisar al comercial';
+                Image = SalesPerson;
+                Enabled = Rec."Salesperson Code" <> '';
+                ToolTip = 'Envía por WhatsApp al comercial asignado el último mensaje de la conversación.';
+
+                trigger OnAction()
+                var
+                    ChatMgt: Codeunit "IKA WA Chat Mgt.";
+                begin
+                    ChatMgt.NotifySalesperson(Rec."Entry No.");
+                end;
+            }
         }
         area(Navigation)
         {
+            action(QuickReplies)
+            {
+                ApplicationArea = All;
+                Caption = 'Respuestas rápidas';
+                Image = Text;
+                RunObject = page "IKA WA Quick Replies";
+                ToolTip = 'Textos predefinidos que se insertan con un clic en el chat.';
+            }
             action(Setup)
             {
                 ApplicationArea = All;
@@ -105,6 +169,10 @@ page 99321 "IKA WA Conversations"
                 Caption = 'Proceso';
 
                 actionref(Refresh_Promoted; Refresh) { }
+                actionref(MyConversations_Promoted; MyConversations) { }
+                actionref(AllConversations_Promoted; AllConversations) { }
+                actionref(NotifySalesperson_Promoted; NotifySalesperson) { }
+                actionref(QuickReplies_Promoted; QuickReplies) { }
                 actionref(Setup_Promoted; Setup) { }
             }
         }
@@ -125,11 +193,15 @@ page 99321 "IKA WA Conversations"
     }
 
     var
+        PhoneMgt: Codeunit "IKA WA Phone Mgt.";
         RowStyle: Text;
+        OnlyMine: Boolean;
+        NoSalespersonErr: Label 'Su usuario no tiene vendedor/comprador en Configuración usuarios.';
 
     trigger OnOpenPage()
     var
         Account: Record "IKA WA Account";
+        WASetup: Record "IKA WA Setup";
         InboundProcessor: Codeunit "IKA WA Inbound Processor";
         AllowedFilter: Text;
     begin
@@ -140,8 +212,31 @@ page 99321 "IKA WA Conversations"
         else
             Rec.SetFilter("Account Code", AllowedFilter);
         Rec.FilterGroup(0);
+        WASetup.GetSetup();
+        if WASetup."Open My Conversations" and (Rec.GetFilter("Salesperson Code") = '') and (PhoneMgt.GetUserSalespersonCode() <> '') then
+            ApplyOnlyMine(true);
         // Al abrir la bandeja se procesa lo que haya llegado (además de la cola de proyectos)
         InboundProcessor.ProcessPending();
+    end;
+
+    local procedure SetOnlyMine(NewOnlyMine: Boolean)
+    begin
+        ApplyOnlyMine(NewOnlyMine);
+        CurrPage.Update(false);
+    end;
+
+    local procedure ApplyOnlyMine(NewOnlyMine: Boolean)
+    var
+        SalespersonCode: Code[20];
+    begin
+        if NewOnlyMine then begin
+            SalespersonCode := PhoneMgt.GetUserSalespersonCode();
+            if SalespersonCode = '' then
+                Error(NoSalespersonErr);
+            Rec.SetRange("Salesperson Code", SalespersonCode);
+        end else
+            Rec.SetRange("Salesperson Code");
+        OnlyMine := NewOnlyMine;
     end;
 
     trigger OnAfterGetRecord()
