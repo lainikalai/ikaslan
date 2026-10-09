@@ -50,8 +50,33 @@
 
     function setIconLabel(b, icon, label) {
         b.innerHTML = '';
-        b.appendChild(el('span', 'mx-btn-icon', icon));
+        var iconNode = SVG_ICONS[icon] ? svgIcon(icon) : el('span', 'mx-btn-icon', icon);
+        b.appendChild(iconNode);
         b.appendChild(el('span', 'mx-btn-label', ' ' + label));
+    }
+
+    // Iconos dibujados (SVG): los emoji dependen de la fuente del navegador y en BC algunos salen casi invisibles
+    var SVG_ICONS = {
+        trash: 'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7'
+    };
+
+    function svgIcon(name) {
+        var ns = 'http://www.w3.org/2000/svg';
+        var svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('width', '14');
+        svg.setAttribute('height', '14');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('class', 'mx-svg');
+        var path = document.createElementNS(ns, 'path');
+        path.setAttribute('d', SVG_ICONS[name]);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'currentColor');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(path);
+        return svg;
     }
 
     function button(className, text, title, onClick) {
@@ -498,7 +523,7 @@
         container.appendChild(button('mx-action', 'Mover…', 'Mover a otra carpeta de Outlook', function () {
             invoke('MoveRequested', [id]);
         }));
-        container.appendChild(iconButton('mx-action mx-danger', '🗑', 'Eliminar', 'Mover a Elementos eliminados (Supr). En Elementos eliminados, borrar definitivamente.', function () {
+        container.appendChild(iconButton('mx-action mx-danger', 'trash', 'Eliminar', 'Mover a Elementos eliminados (Supr). En Elementos eliminados, borrar definitivamente.', function () {
             requestDelete(id);
         }));
         container.appendChild(button('mx-action', isRead ? 'Marcar no leído' : 'Marcar leído', '', function () {

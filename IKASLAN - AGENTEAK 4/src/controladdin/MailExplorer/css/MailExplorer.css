@@ -237,7 +237,9 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
     white-space: nowrap;
 }
 .mx-action:hover { background: var(--mx-accent-soft); border-color: var(--mx-accent); }
-.mx-action.mx-danger:hover { background: #ffebee; border-color: var(--mx-error); color: var(--mx-error); }
+.mx-action.mx-danger { color: var(--mx-error); border-color: #e9a8a8; }
+.mx-action.mx-danger:hover { background: #ffebee; border-color: var(--mx-error); }
+.mx-svg { vertical-align: -2px; }
 .mx-action.mx-primary { background: var(--mx-accent); border-color: var(--mx-accent); color: #ffffff; }
 .mx-more { display: inline-flex; gap: 4px; margin-left: auto; }
 .mx-attachments {
