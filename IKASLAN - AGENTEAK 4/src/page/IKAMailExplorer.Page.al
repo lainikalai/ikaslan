@@ -93,6 +93,28 @@ page 99251 "IKA Mail Explorer"
                     CurrPage.Explorer.ShowStatus(MovedMsg, false);
                 end;
 
+                trigger DeleteRequested(EntryNo: Integer; NextEntryNo: Integer)
+                var
+                    Permanent: Boolean;
+                begin
+                    if not ExplorerMgt.DeleteMessage(EntryNo, Permanent) then begin
+                        CurrPage.Explorer.SetBusy(false);
+                        exit;
+                    end;
+                    // Se selecciona el siguiente email, para poder eliminar varios seguidos
+                    SelectedEntryNo := NextEntryNo;
+                    RenderFolders();
+                    RenderMessages();
+                    if ReadingPaneVisible and (SelectedEntryNo <> 0) then
+                        ShowSelectedMessage()
+                    else
+                        CurrPage.Explorer.SetMessage('');
+                    if Permanent then
+                        CurrPage.Explorer.ShowStatus(DeletedForeverMsg, false)
+                    else
+                        CurrPage.Explorer.ShowStatus(MovedToDeletedMsg, false);
+                end;
+
                 trigger ToggleReadRequested(EntryNo: Integer)
                 var
                     MailMessage: Record "IKA Mail Message";
@@ -239,6 +261,8 @@ page 99251 "IKA Mail Explorer"
         NoAccountsMsg: Label 'Todavía no hay ninguna cuenta de Outlook 365 configurada a la que tenga acceso. Añada su cuenta en la página que se abre a continuación.';
         SyncedMsg: Label '%1 email(s) descargado(s).', Comment = '%1 = count';
         MovedMsg: Label 'Email movido.';
+        MovedToDeletedMsg: Label 'Email movido a Elementos eliminados.';
+        DeletedForeverMsg: Label 'Email eliminado definitivamente.';
 
     trigger OnOpenPage()
     var

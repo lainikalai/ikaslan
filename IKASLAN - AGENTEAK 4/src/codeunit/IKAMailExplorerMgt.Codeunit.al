@@ -8,6 +8,8 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         GraphClient: Codeunit "IKA Mail Graph Client";
         AttachMgt: Codeunit "IKA Mail Attach Mgt.";
         NoWebLinkErr: Label 'Este email no tiene enlace a Outlook Web. Sincronice la carpeta e inténtelo de nuevo.';
+        DeleteForeverQst: Label 'El email "%1" está en Elementos eliminados. ¿Eliminarlo definitivamente de Outlook?', Comment = '%1 = subject';
+        DeleteLinkedForeverQst: Label 'El email "%1" está en Elementos eliminados y tiene %2 fichero(s) adjuntado(s) a entidades de BC. Esos ficheros se conservan en BC. ¿Eliminar el email definitivamente de Outlook?', Comment = '%1 = subject, %2 = links';
         ReferenceAttachmentErr: Label 'El adjunto "%1" es un enlace a OneDrive/SharePoint, no un fichero. Ábralo desde Outlook.', Comment = '%1 = name';
 
     // =====================================================================
@@ -345,6 +347,7 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         MailMessage: Record "IKA Mail Message";
         MailFolder: Record "IKA Mail Folder";
         DestinationFolder: Record "IKA Mail Folder";
+        SourceFolderId: Text;
     begin
         MailMessage.Get(EntryNo);
         CheckAccess(MailMessage);
@@ -353,7 +356,43 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         MailMessage.Get(EntryNo);
         if MailMessage."Folder Id" = DestinationFolder."Folder Id" then
             exit(false);
+        SourceFolderId := MailMessage."Folder Id";
         GraphClient.MoveMessage(MailMessage, DestinationFolder."Folder Id");
+        GraphClient.UpdateFolderCounts(MailMessage."Mailbox Code", SourceFolderId);
+        GraphClient.UpdateFolderCounts(MailMessage."Mailbox Code", DestinationFolder."Folder Id");
+        exit(true);
+    end;
+
+    /// <summary>
+    /// Elimina el email como Outlook: lo mueve a "Elementos eliminados" o, si ya está allí, lo borra
+    /// definitivamente tras pedir confirmación. Devuelve false si el usuario cancela; Permanent indica
+    /// si se ha borrado definitivamente.
+    /// </summary>
+    procedure DeleteMessage(EntryNo: Integer; var Permanent: Boolean): Boolean
+    var
+        MailMessage: Record "IKA Mail Message";
+        SourceFolderId: Text;
+        DeletedItemsFolderId: Text;
+    begin
+        MailMessage.Get(EntryNo);
+        CheckAccess(MailMessage);
+        SourceFolderId := MailMessage."Folder Id";
+        DeletedItemsFolderId := GraphClient.GetDeletedItemsFolderId(MailMessage."Mailbox Code");
+        Permanent := (DeletedItemsFolderId <> '') and (SourceFolderId = DeletedItemsFolderId);
+        if Permanent then begin
+            MailMessage.CalcFields("No. of Links");
+            if MailMessage."No. of Links" > 0 then begin
+                if not Confirm(DeleteLinkedForeverQst, false, MailMessage.Subject, MailMessage."No. of Links") then
+                    exit(false);
+            end else
+                if not Confirm(DeleteForeverQst, false, MailMessage.Subject) then
+                    exit(false);
+        end;
+        Permanent := GraphClient.DeleteMessage(MailMessage);
+        // Contadores de no leídos de la carpeta de origen y de "Elementos eliminados"
+        GraphClient.UpdateFolderCounts(MailMessage."Mailbox Code", SourceFolderId);
+        if not Permanent then
+            GraphClient.UpdateFolderCounts(MailMessage."Mailbox Code", MailMessage."Folder Id");
         exit(true);
     end;
 

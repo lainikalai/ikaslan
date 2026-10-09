@@ -431,7 +431,23 @@
         } else if (e.key === 'Enter' && index >= 0) {
             e.preventDefault();
             invoke('MessageOpened', [list[index].id]);
+        } else if (e.key === 'Delete' && index >= 0) {
+            e.preventDefault();
+            requestDelete(list[index].id);
         }
+    }
+
+    // El email que queda seleccionado después de eliminar: el siguiente de la lista o, si era el último, el anterior
+    function requestDelete(id) {
+        var list = visibleMessages();
+        var next = 0;
+        list.forEach(function (m, i) {
+            if (m.id === id) {
+                if (i + 1 < list.length) { next = list[i + 1].id; } else if (i > 0) { next = list[i - 1].id; }
+            }
+        });
+        setBusy(true);
+        invoke('DeleteRequested', [id, next]);
     }
 
     function selectedMessage() {
@@ -465,6 +481,9 @@
         }));
         container.appendChild(button('mx-action', 'Mover…', 'Mover a otra carpeta de Outlook', function () {
             invoke('MoveRequested', [id]);
+        }));
+        container.appendChild(iconButton('mx-action mx-danger', '🗑', 'Eliminar', 'Mover a Elementos eliminados (Supr). En Elementos eliminados, borrar definitivamente.', function () {
+            requestDelete(id);
         }));
         container.appendChild(button('mx-action', isRead ? 'Marcar no leído' : 'Marcar leído', '', function () {
             invoke('ToggleReadRequested', [id]);

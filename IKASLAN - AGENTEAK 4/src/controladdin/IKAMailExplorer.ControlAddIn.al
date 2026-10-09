@@ -35,6 +35,8 @@ controladdin "IKA Mail Explorer"
     /// <summary>Responder ("reply"), responder a todos ("replyAll") o reenviar ("forward").</summary>
     event ComposeRequested(EntryNo: Integer; Mode: Text);
     event MoveRequested(EntryNo: Integer);
+    /// <summary>Eliminar (botón o Supr). NextEntryNo es el email que se selecciona después (0 si no hay).</summary>
+    event DeleteRequested(EntryNo: Integer; NextEntryNo: Integer);
     event ToggleReadRequested(EntryNo: Integer);
     event OpenInOutlookRequested(EntryNo: Integer);
     event DownloadAttachmentRequested(EntryNo: Integer; LineNo: Integer);

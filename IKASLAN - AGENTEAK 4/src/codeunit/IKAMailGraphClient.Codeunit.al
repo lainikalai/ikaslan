@@ -314,7 +314,7 @@ codeunit 99201 "IKA Mail Graph Client"
     /// <summary>
     /// Actualiza los contadores (emails, no leídos) de la carpeta, si ya se ha descargado el árbol de carpetas.
     /// </summary>
-    local procedure UpdateFolderCounts(MailboxCode: Code[20]; FolderId: Text)
+    procedure UpdateFolderCounts(MailboxCode: Code[20]; FolderId: Text)
     var
         MailFolder: Record "IKA Mail Folder";
         ResponseJson: JsonObject;
@@ -329,7 +329,47 @@ codeunit 99201 "IKA Mail Graph Client"
     end;
 
     /// <summary>
-    /// Mueve el email a otra carpeta de Outlook (POST /messages/{id}/move).
+    /// Id de la carpeta "Elementos eliminados" de la cuenta ('' si no se puede obtener).
+    /// </summary>
+    procedure GetDeletedItemsFolderId(MailboxCode: Code[20]): Text
+    var
+        MailFolder: Record "IKA Mail Folder";
+        FolderId: Text;
+    begin
+        MailFolder.SetRange("Mailbox Code", MailboxCode);
+        MailFolder.SetRange("Well-known Name", 'deleteditems');
+        if MailFolder.FindFirst() then
+            exit(MailFolder."Folder Id");
+        SetMailboxByCode(MailboxCode);
+        if TryGetFolderIdByAlias('deleteditems', FolderId) then
+            exit(FolderId);
+        exit('');
+    end;
+
+    /// <summary>
+    /// Como en Outlook: fuera de "Elementos eliminados" el email se mueve a esa carpeta (se puede recuperar);
+    /// dentro, se borra (DELETE /messages/{id}) y se quita de BC. Los vínculos con entidades se conservan:
+    /// guardan asunto, remitente y fecha, y los ficheros siguen en los documentos adjuntos de la entidad.
+    /// Devuelve true si se ha borrado definitivamente.
+    /// </summary>
+    procedure DeleteMessage(var MailMessage: Record "IKA Mail Message"): Boolean
+    var
+        DeletedItemsFolderId: Text;
+    begin
+        SetMailboxByCode(MailMessage."Mailbox Code");
+        DeletedItemsFolderId := GetDeletedItemsFolderId(MailMessage."Mailbox Code");
+        if (DeletedItemsFolderId = '') or (MailMessage."Folder Id" <> DeletedItemsFolderId) then begin
+            MoveMessage(MailMessage, 'deleteditems');
+            exit(false);
+        end;
+        SendGraphRequest('DELETE', GetMessageUrl(MailMessage), '');
+        MailMessage.Delete(true);
+        exit(true);
+    end;
+
+    /// <summary>
+    /// Mueve el email a otra carpeta de Outlook (POST /messages/{id}/move). DestinationFolderId puede ser
+    /// un Id o un nombre estándar de Graph (p.ej. deleteditems).
     /// </summary>
     procedure MoveMessage(var MailMessage: Record "IKA Mail Message"; DestinationFolderId: Text)
     var
