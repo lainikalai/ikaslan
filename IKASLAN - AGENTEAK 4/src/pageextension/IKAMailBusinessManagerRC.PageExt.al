@@ -2,23 +2,20 @@ pageextension 99246 "IKA Mail Business Manager RC" extends "Business Manager Rol
 {
     actions
     {
-        addlast(Embedding)
-        {
-            action("IKA Mail Messages Embedded")
-            {
-                ApplicationArea = All;
-                Caption = 'Correo Outlook 365';
-                RunObject = page "IKA Mail Messages";
-                ToolTip = 'Bandeja de correo de Outlook 365 en Business Central.';
-            }
-        }
         addlast(Sections)
         {
             group("IKA Mail Workspace")
             {
                 Caption = 'Correo Outlook 365';
-                ToolTip = 'Bandeja de correo de Outlook 365, emails vinculados a entidades, cuentas y configuración.';
+                ToolTip = 'Configuración, cuentas y bandeja de correo de Outlook 365, y emails vinculados a entidades.';
 
+                action("IKA Mail Setup")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Configuración';
+                    RunObject = page "IKA Mail Setup";
+                    ToolTip = 'Credenciales de Microsoft Graph (registro de aplicación), cuenta por defecto y opciones del visor de correo.';
+                }
                 action("IKA Mail Messages")
                 {
                     ApplicationArea = All;
@@ -55,13 +52,6 @@ pageextension 99246 "IKA Mail Business Manager RC" extends "Business Manager Rol
                     Caption = 'Cuentas de Outlook 365';
                     RunObject = page "IKA Mail Mailboxes";
                     ToolTip = 'Cuentas y buzones compartidos que se muestran en BC.';
-                }
-                action("IKA Mail Setup")
-                {
-                    ApplicationArea = All;
-                    Caption = 'Configuración';
-                    RunObject = page "IKA Mail Setup";
-                    ToolTip = 'Configuración de Microsoft Graph (registro de aplicación) y del visor de correo.';
                 }
             }
         }

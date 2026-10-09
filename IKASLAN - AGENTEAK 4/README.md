@@ -108,7 +108,7 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
 | Page | 99241 | IKA Mail Folders (selector de carpetas en árbol) |
-| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas, configuración) y acceso a la bandeja |
+| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (configuración, bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas), junto a la de *Agentes (Claude)* de AGENTEAK |
 | PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
 | PermissionSet | 99201 | IKA Mail Workspace |
 
