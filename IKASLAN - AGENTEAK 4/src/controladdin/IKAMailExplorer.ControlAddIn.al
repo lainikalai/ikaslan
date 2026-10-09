@@ -5,7 +5,8 @@ controladdin "IKA Mail Explorer"
     // se muestra en un iframe aislado sin scripts, igual que en "IKA Mail Workspace".
     RequestedHeight = 700;
     MinimumHeight = 420;
-    RequestedWidth = 1100;
+    // Ancho pequeño + HorizontalStretch: ocupa el ancho disponible de la página sin salirse de ella
+    RequestedWidth = 320;
     MinimumWidth = 320;
     VerticalStretch = true;
     VerticalShrink = true;

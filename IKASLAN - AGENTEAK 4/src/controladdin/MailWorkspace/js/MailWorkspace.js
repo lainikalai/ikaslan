@@ -39,6 +39,17 @@
 
     // ------------------------------------------------------------------ layout
 
+    // Sin allow-scripts ni allow-same-origin: el HTML del email no puede ejecutar código.
+    function createBodyFrame(html) {
+        var frame = document.createElement('iframe');
+        frame.className = 'ika-body';
+        frame.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+        frame.setAttribute('referrerpolicy', 'no-referrer');
+        frame.title = 'Cuerpo del email';
+        frame.srcdoc = html || '';
+        return frame;
+    }
+
     function buildLayout() {
         root = document.getElementById('controlAddIn');
         root.innerHTML = '';
@@ -47,12 +58,7 @@
         var main = el('div', 'ika-main');
 
         var left = el('section', 'ika-left');
-        bodyFrame = document.createElement('iframe');
-        bodyFrame.className = 'ika-body';
-        // Sin allow-scripts ni allow-same-origin: el HTML del email no puede ejecutar código.
-        bodyFrame.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
-        bodyFrame.setAttribute('referrerpolicy', 'no-referrer');
-        bodyFrame.title = 'Cuerpo del email';
+        bodyFrame = createBodyFrame('');
         left.appendChild(bodyFrame);
         left.appendChild(el('div', 'ika-section-title', 'Email y adjuntos — arrastre a un destino'));
         itemsList = el('div', 'ika-items');
@@ -238,7 +244,11 @@
     window.IkaMail = { init: buildLayout };
 
     window.SetBody = function (html) {
-        bodyFrame.srcdoc = html || '';
+        // Un iframe nuevo en lugar de cambiar srcdoc: así no se añaden entradas al historial del navegador
+        // y la flecha "Atrás" de BC cierra la página.
+        var frame = createBodyFrame(html);
+        bodyFrame.parentNode.replaceChild(frame, bodyFrame);
+        bodyFrame = frame;
     };
 
     window.SetItems = function (itemsJson) {

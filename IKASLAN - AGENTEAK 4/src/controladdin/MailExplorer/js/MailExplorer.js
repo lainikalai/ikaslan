@@ -231,15 +231,31 @@
         ui.readerAttachments = el('div', 'mx-attachments');
         ui.reader.appendChild(ui.readerAttachments);
 
-        ui.bodyFrame = document.createElement('iframe');
-        ui.bodyFrame.className = 'mx-body';
-        // Sin allow-scripts ni allow-same-origin: el HTML del email no puede ejecutar código.
-        ui.bodyFrame.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
-        ui.bodyFrame.setAttribute('referrerpolicy', 'no-referrer');
-        ui.bodyFrame.title = 'Cuerpo del email';
+        ui.bodyFrame = createBodyFrame('');
         ui.reader.appendChild(ui.bodyFrame);
         ui.readingPane.appendChild(ui.reader);
         return ui.readingPane;
+    }
+
+    // Iframe aislado para el cuerpo del email. Sin allow-scripts ni allow-same-origin: el HTML del email
+    // no puede ejecutar código.
+    function createBodyFrame(html) {
+        var frame = document.createElement('iframe');
+        frame.className = 'mx-body';
+        frame.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+        frame.setAttribute('referrerpolicy', 'no-referrer');
+        frame.title = 'Cuerpo del email';
+        frame.srcdoc = html || '';
+        return frame;
+    }
+
+    // Cambiar srcdoc de un iframe ya insertado añade una entrada al historial del navegador, y la flecha
+    // "Atrás" de BC iría recorriendo los emails en lugar de cerrar la página. Un iframe nuevo, con el
+    // contenido puesto antes de insertarlo, no añade entradas.
+    function setBody(html) {
+        var frame = createBodyFrame(html);
+        ui.bodyFrame.parentNode.replaceChild(frame, ui.bodyFrame);
+        ui.bodyFrame = frame;
     }
 
     function updateLayout() {
@@ -517,7 +533,7 @@
         if (!d) {
             ui.readerEmpty.style.display = '';
             ui.reader.style.display = 'none';
-            ui.bodyFrame.srcdoc = '';
+            setBody('');
             return;
         }
         ui.readerEmpty.style.display = 'none';
@@ -624,13 +640,13 @@
 
     window.SetMessage = function (detailJson) {
         state.detail = detailJson ? parseJson(detailJson, null) : null;
-        if (!state.detail) { ui.bodyFrame.srcdoc = ''; }
+        if (!state.detail) { setBody(''); }
         renderReadingPane();
         setBusy(false);
     };
 
     window.SetBody = function (html) {
-        ui.bodyFrame.srcdoc = html || '';
+        setBody(html);
     };
 
     window.SetReadingPane = function (visible) {
