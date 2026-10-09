@@ -108,6 +108,7 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
 | Page | 99241 | IKA Mail Folders (selector de carpetas en árbol) |
+| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas, configuración) y acceso a la bandeja |
 | PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
 | PermissionSet | 99201 | IKA Mail Workspace |
 
@@ -128,7 +129,8 @@ suscriptor `DocumentAttachmentOnAfterInitFieldsFromRecRef` de `IKA Mail Attach M
    administrador da de alta los buzones compartidos. Para una cuenta de otro tenant: *Credenciales propias* +
    Tenant Id, Client Id y *Establecer secreto propio*. *Probar conexión* y *Sincronizar*.
 5. Asignar el conjunto de permisos **IKA Mail Workspace** a los usuarios.
-6. Abrir *Correo Outlook 365* (búsqueda "Correo") → abrir un email → arrastrar.
+6. Abrir *Correo Outlook 365* desde el menú **Correo Outlook 365** del Área de trabajo *Gerente de empresa*
+   (o con la búsqueda "Correo") → abrir un email → arrastrar.
 
 ## Consideraciones
 
