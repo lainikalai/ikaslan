@@ -110,17 +110,16 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         if not CurrentMessage.Get(EntryNo) then
             exit(0);
         MailMessage.SetCurrentKey("Mailbox Code", "Received At");
-        MailMessage.Ascending(false);
         SetFolderFilter(MailMessage, MailboxCode, FolderId, DefaultFolderId);
-        MailMessage := CurrentMessage;
-        if not MailMessage.Find('=') then
-            exit(0);
-        if MailMessage.Next(1) <> 0 then
+        MailMessage.SetFilter("Entry No.", '<>%1', EntryNo);
+        // Siguiente en la lista: el más reciente de los anteriores
+        MailMessage.SetFilter("Received At", '<=%1', CurrentMessage."Received At");
+        if MailMessage.FindLast() then
             exit(MailMessage."Entry No.");
-        MailMessage := CurrentMessage;
-        if MailMessage.Find('=') then
-            if MailMessage.Next(-1) <> 0 then
-                exit(MailMessage."Entry No.");
+        // Era el último: el más antiguo de los posteriores
+        MailMessage.SetFilter("Received At", '>%1', CurrentMessage."Received At");
+        if MailMessage.FindFirst() then
+            exit(MailMessage."Entry No.");
         exit(0);
     end;
 
