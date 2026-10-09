@@ -6,12 +6,33 @@ Extensión AL para Business Central 28 que trae el correo de **Outlook 365** a B
   otro tenant con credenciales propias. Cada usuario ve las cuentas compartidas y las suyas.
 - **Bandeja de correo**: listado de emails (no leídos en negrita), sincronización, *Cargar anteriores*,
   vistas *No leídos*, *Con adjuntos* y *Con adjuntos sin vincular*.
+- **Carpetas de Outlook**: selector con el árbol completo de carpetas (subcarpetas a cualquier nivel, con sus
+  no leídos) y *Mover a carpeta* desde la bandeja o la ficha del email.
 - **Ficha del email**: cabecera, cuerpo HTML (con imágenes incrustadas), adjuntos, descarga del email en
   `.eml`, *Abrir en Outlook* y **Responder / Responder a todos / Reenviar** (con ficheros añadidos).
 - **Adjuntar a entidades de BC** (cliente, proveedor, contacto, banco, recurso, producto, empleado, activo
   fijo, proyecto) **arrastrando** el email completo o sus adjuntos sobre una zona de destino.
 
-> ⚠️ Código generado sin compilar. `AL: Download Symbols` + `Ctrl+Shift+B` y corregir lo que indique el compilador.
+> ⚠️ Compilado con el compilador AL 18 (CodeCop, UICop y PerTenantExtensionCop) contra versiones **simuladas**
+> de los objetos estándar, no con los símbolos reales de BC 28: hacer `AL: Download Symbols` + `Ctrl+Shift+B` y
+> corregir lo que indique el compilador.
+
+## Carpetas
+
+- En *Correo Outlook 365*, **Carpeta...** (`Ctrl+Mayús+F`) muestra el árbol de carpetas de la cuenta, en el orden
+  de Outlook (bandeja de entrada, borradores, enviados, eliminados, no deseado, archivo y después el resto por
+  nombre) y con sus no leídos. Al elegir una, la bandeja muestra sus emails; la primera vez se descargan solos.
+  *Sincronizar* y *Cargar anteriores* trabajan sobre la carpeta que se está viendo.
+- **Carpeta por defecto** vuelve a la carpeta con la que se abre la bandeja: el campo *Carpeta* de la cuenta, que
+  ahora también se puede elegir del árbol (asistente de búsqueda en *Cuentas de Outlook 365*).
+- El árbol se descarga la primera vez que se abre el selector; *Actualizar carpetas* (F5 en el selector) lo vuelve
+  a leer si se crean, renombran o borran carpetas en Outlook.
+- **Mover a carpeta...** mueve en Outlook los emails seleccionados (o el email abierto en la ficha).
+- Se piden a Graph **Id inmutables**, que no cambian al mover un email: un email movido en Outlook se actualiza
+  (cambia de carpeta) en lugar de duplicarse. Los emails ya guardados antes de esta versión no tienen carpeta: se
+  tratan como de la carpeta por defecto y se actualizan solos al sincronizar.
+- *Todas mis cuentas* muestra los emails de todas las carpetas; la columna *Carpeta* (oculta por defecto) indica
+  de cuál es cada uno.
 
 ## Cómo funciona el drag & drop
 
@@ -72,8 +93,9 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Table | 99221 | IKA Mail Link (email/adjunto → entidad) |
 | Table | 99226 | IKA Mail Pinned Target (destinos fijados por usuario) |
 | Table | 99231 / 99236 | IKA Mail Drop Target / Compose File (temporales) |
+| Table | 99241 | IKA Mail Folder (árbol de carpetas de Outlook de cada cuenta) |
 | Enum | 99201–99216 | Entity Type, Compose Mode, Target Kind, Account Type |
-| Codeunit | 99201 | IKA Mail Graph Client (sincronizar, detalle, adjuntos, .eml, leído, responder/reenviar) |
+| Codeunit | 99201 | IKA Mail Graph Client (sincronizar, carpetas, mover, detalle, adjuntos, .eml, leído, responder/reenviar) |
 | Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
 | Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
 | Codeunit | 99216 | IKA Mail Json Helper |
@@ -85,6 +107,7 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Page | 99221 | IKA Mail Compose (responder / reenviar) |
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
+| Page | 99241 | IKA Mail Folders (selector de carpetas en árbol) |
 | PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
 | PermissionSet | 99201 | IKA Mail Workspace |
 

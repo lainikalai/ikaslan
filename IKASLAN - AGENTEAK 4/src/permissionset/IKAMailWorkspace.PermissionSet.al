@@ -12,6 +12,7 @@ permissionset 99201 "IKA Mail Workspace"
         tabledata "IKA Mail Pinned Target" = RIMD,
         tabledata "IKA Mail Drop Target" = RIMD,
         tabledata "IKA Mail Compose File" = RIMD,
+        tabledata "IKA Mail Folder" = RIMD,
         tabledata "Document Attachment" = RIM,
         table "IKA Mail Setup" = X,
         table "IKA Mail Mailbox" = X,
@@ -21,6 +22,7 @@ permissionset 99201 "IKA Mail Workspace"
         table "IKA Mail Pinned Target" = X,
         table "IKA Mail Drop Target" = X,
         table "IKA Mail Compose File" = X,
+        table "IKA Mail Folder" = X,
         codeunit "IKA Mail Graph Client" = X,
         codeunit "IKA Mail Entity Mgt." = X,
         codeunit "IKA Mail Attach Mgt." = X,
@@ -32,5 +34,6 @@ permissionset 99201 "IKA Mail Workspace"
         page "IKA Mail Compose" = X,
         page "IKA Mail Links" = X,
         page "IKA Mail Linked Emails" = X,
-        page "IKA Mail Secret Input" = X;
+        page "IKA Mail Secret Input" = X,
+        page "IKA Mail Folders" = X;
 }

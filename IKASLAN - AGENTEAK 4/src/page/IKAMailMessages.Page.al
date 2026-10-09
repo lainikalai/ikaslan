@@ -1,5 +1,7 @@
 page 99211 "IKA Mail Messages"
 {
+    // Bandeja: emails de una cuenta y una carpeta (Carpeta... muestra el árbol de carpetas de Outlook).
+    // Al abrir se muestra la carpeta por defecto de la cuenta (campo Carpeta de la cuenta).
     Caption = 'Correo Outlook 365';
     PageType = List;
     SourceTable = "IKA Mail Message";
@@ -64,6 +66,12 @@ page 99211 "IKA Mail Messages"
                     ApplicationArea = All;
                     Visible = false;
                 }
+                field("Folder Name"; Rec."Folder Name")
+                {
+                    ApplicationArea = All;
+                    Visible = false;
+                    ToolTip = 'Carpeta de Outlook en la que está el email.';
+                }
                 field("Mailbox Code"; Rec."Mailbox Code")
                 {
                     ApplicationArea = All;
@@ -82,7 +90,7 @@ page 99211 "IKA Mail Messages"
                 Caption = 'Sincronizar';
                 Image = Refresh;
                 ShortcutKey = 'F5';
-                ToolTip = 'Descarga los últimos emails de la cuenta actual.';
+                ToolTip = 'Descarga los últimos emails de la carpeta actual.';
 
                 trigger OnAction()
                 begin
@@ -99,6 +107,55 @@ page 99211 "IKA Mail Messages"
                 trigger OnAction()
                 begin
                     SyncCurrent(true);
+                end;
+            }
+            action(ChooseFolder)
+            {
+                ApplicationArea = All;
+                Caption = 'Carpeta...';
+                Image = ViewDocumentLine;
+                ShortcutKey = 'Ctrl+Shift+F';
+                ToolTip = 'Elige otra carpeta de Outlook de esta cuenta (bandeja de entrada, enviados, subcarpetas...).';
+
+                trigger OnAction()
+                var
+                    MailFolder: Record "IKA Mail Folder";
+                    SelectedFolder: Record "IKA Mail Folder";
+                begin
+                    if CurrentMailboxCode = '' then
+                        Error(SelectAccountFirstErr);
+                    if not MailFolder.SelectFolder(CurrentMailboxCode, GetShownFolderId(), SelectedFolder) then
+                        exit;
+                    SetCurrentFolder(CurrentMailboxCode, SelectedFolder."Folder Id");
+                    // Primera vez en esta carpeta: se descargan sus emails
+                    if not HasLocalMessages() then
+                        SyncCurrent(false);
+                end;
+            }
+            action(DefaultFolder)
+            {
+                ApplicationArea = All;
+                Caption = 'Carpeta por defecto';
+                Image = Home;
+                ToolTip = 'Vuelve a la carpeta por defecto de la cuenta (normalmente, la bandeja de entrada).';
+
+                trigger OnAction()
+                begin
+                    if CurrentMailboxCode = '' then
+                        Error(SelectAccountFirstErr);
+                    SetCurrentFolder(CurrentMailboxCode, '');
+                end;
+            }
+            action(MoveToFolder)
+            {
+                ApplicationArea = All;
+                Caption = 'Mover a carpeta...';
+                Image = MoveToNextPeriod;
+                ToolTip = 'Mueve los emails seleccionados a otra carpeta de Outlook.';
+
+                trigger OnAction()
+                begin
+                    MoveSelected();
                 end;
             }
             action(ChangeAccount)
@@ -189,6 +246,9 @@ page 99211 "IKA Mail Messages"
                 Caption = 'Proceso';
 
                 actionref(Sync_Promoted; Sync) { }
+                actionref(ChooseFolder_Promoted; ChooseFolder) { }
+                actionref(DefaultFolder_Promoted; DefaultFolder) { }
+                actionref(MoveToFolder_Promoted; MoveToFolder) { }
                 actionref(LoadOlder_Promoted; LoadOlder) { }
                 actionref(ChangeAccount_Promoted; ChangeAccount) { }
                 actionref(AllAccounts_Promoted; AllAccounts) { }
@@ -227,10 +287,14 @@ page 99211 "IKA Mail Messages"
 
     var
         CurrentMailboxCode: Code[20];
+        CurrentFolderId: Text;
         RowStyle: Text;
         NoAccountsMsg: Label 'Todavía no hay ninguna cuenta de Outlook 365 configurada a la que tenga acceso. Añada su cuenta en la página que se abre a continuación.';
         SyncedMsg: Label '%1 emails sincronizados de %2.', Comment = '%1 = count, %2 = mailbox';
         SelectAccountErr: Label 'Elija una cuenta con "Cambiar cuenta" para sincronizar.';
+        SelectAccountFirstErr: Label 'Elija primero una cuenta con "Cambiar cuenta".';
+        MovedMsg: Label '%1 email(s) movido(s) a %2.', Comment = '%1 = count, %2 = folder';
+        PageCaptionLbl: Label 'Correo Outlook 365', Locked = true;
 
     trigger OnOpenPage()
     var
@@ -254,10 +318,12 @@ page 99211 "IKA Mail Messages"
         Setup.GetSetup();
         Mailbox.SetFilter(Code, AllowedFilter);
         if (Setup."Default Mailbox Code" <> '') and Mailbox.Get(Setup."Default Mailbox Code") and Mailbox.HasAccess() then
-            SetCurrentMailbox(Mailbox.Code)
+            CurrentMailboxCode := Mailbox.Code
         else
             if Mailbox.FindFirst() then
-                SetCurrentMailbox(Mailbox.Code);
+                CurrentMailboxCode := Mailbox.Code;
+        CurrentFolderId := '';
+        ApplyFilters();
     end;
 
     trigger OnAfterGetRecord()
@@ -269,20 +335,79 @@ page 99211 "IKA Mail Messages"
     end;
 
     local procedure SetCurrentMailbox(MailboxCode: Code[20])
+    begin
+        SetCurrentFolder(MailboxCode, '');
+    end;
+
+    /// <summary>
+    /// Cuenta y carpeta que se muestran. Con FolderId vacío, la carpeta por defecto de la cuenta.
+    /// </summary>
+    local procedure SetCurrentFolder(MailboxCode: Code[20]; FolderId: Text)
+    begin
+        CurrentMailboxCode := MailboxCode;
+        CurrentFolderId := FolderId;
+        ApplyFilters();
+        CurrPage.Update(false);
+    end;
+
+    local procedure ApplyFilters()
+    var
+        Mailbox: Record "IKA Mail Mailbox";
+        FolderId: Text;
+    begin
+        if CurrentMailboxCode = '' then begin
+            Rec.SetRange("Mailbox Code");
+            Rec.SetRange("Folder Id");
+            CurrPage.Caption := PageCaptionLbl;
+            exit;
+        end;
+        Mailbox.Get(CurrentMailboxCode);
+        Mailbox.CheckAccess();
+        Rec.SetRange("Mailbox Code", CurrentMailboxCode);
+        FolderId := GetShownFolderId();
+        case FolderId of
+            '':
+                // Carpeta por defecto todavía sin resolver (antes de la primera sincronización)
+                Rec.SetRange("Folder Id");
+            Mailbox."Folder Id":
+                // Los emails guardados antes de existir el selector de carpetas no tienen carpeta: son de la carpeta por defecto
+                Rec.SetFilter("Folder Id", '%1|%2', FolderId, '');
+            else
+                Rec.SetRange("Folder Id", FolderId);
+        end;
+        CurrPage.Caption := PageCaptionLbl + ' - ' + Mailbox.Address + ' - ' + GetFolderCaption(Mailbox, FolderId);
+    end;
+
+    /// <summary>
+    /// Id de la carpeta que se está mostrando ('' si es la carpeta por defecto y aún no se conoce su Id).
+    /// </summary>
+    local procedure GetShownFolderId(): Text
     var
         Mailbox: Record "IKA Mail Mailbox";
     begin
-        CurrentMailboxCode := MailboxCode;
-        if MailboxCode = '' then begin
-            Rec.SetRange("Mailbox Code");
-            CurrPage.Caption := 'Correo Outlook 365';
-        end else begin
-            Mailbox.Get(MailboxCode);
-            Mailbox.CheckAccess();
-            Rec.SetRange("Mailbox Code", MailboxCode);
-            CurrPage.Caption := 'Correo Outlook 365 - ' + Mailbox.Address;
-        end;
-        CurrPage.Update(false);
+        if CurrentFolderId <> '' then
+            exit(CurrentFolderId);
+        if (CurrentMailboxCode <> '') and Mailbox.Get(CurrentMailboxCode) then
+            exit(Mailbox."Folder Id");
+        exit('');
+    end;
+
+    local procedure GetFolderCaption(Mailbox: Record "IKA Mail Mailbox"; FolderId: Text): Text
+    var
+        MailFolder: Record "IKA Mail Folder";
+    begin
+        if FolderId <> '' then
+            if MailFolder.Get(Mailbox.Code, CopyStr(FolderId, 1, MaxStrLen(MailFolder."Folder Id"))) then
+                exit(MailFolder.Path);
+        exit(Mailbox.Folder);
+    end;
+
+    local procedure HasLocalMessages(): Boolean
+    var
+        MailMessage: Record "IKA Mail Message";
+    begin
+        MailMessage.CopyFilters(Rec);
+        exit(not MailMessage.IsEmpty());
     end;
 
     local procedure SyncCurrent(LoadOlderMessages: Boolean)
@@ -294,10 +419,38 @@ page 99211 "IKA Mail Messages"
         if CurrentMailboxCode = '' then
             Error(SelectAccountErr);
         Mailbox.Get(CurrentMailboxCode);
-        SyncedCount := GraphClient.SyncMessages(Mailbox, LoadOlderMessages);
+        SyncedCount := GraphClient.SyncFolderMessages(Mailbox, CurrentFolderId, LoadOlderMessages);
+        ApplyFilters(); // la primera sincronización resuelve el Id de la carpeta por defecto
         CurrPage.Update(false);
         if LoadOlderMessages then
             Message(SyncedMsg, SyncedCount, Mailbox.Address);
+    end;
+
+    local procedure MoveSelected()
+    var
+        MailMessage: Record "IKA Mail Message";
+        MailFolder: Record "IKA Mail Folder";
+        DestinationFolder: Record "IKA Mail Folder";
+        GraphClient: Codeunit "IKA Mail Graph Client";
+        MovedCount: Integer;
+    begin
+        if CurrentMailboxCode = '' then
+            Error(SelectAccountFirstErr);
+        CurrPage.SetSelectionFilter(MailMessage);
+        MailMessage.SetRange("Mailbox Code", CurrentMailboxCode);
+        if MailMessage.IsEmpty() then
+            exit;
+        if not MailFolder.SelectFolder(CurrentMailboxCode, '', DestinationFolder) then
+            exit;
+        if MailMessage.FindSet() then
+            repeat
+                if MailMessage."Folder Id" <> DestinationFolder."Folder Id" then begin
+                    GraphClient.MoveMessage(MailMessage, DestinationFolder."Folder Id");
+                    MovedCount += 1;
+                end;
+            until MailMessage.Next() = 0;
+        CurrPage.Update(false);
+        Message(MovedMsg, MovedCount, DestinationFolder.Path);
     end;
 
     local procedure SetReadSelected(IsRead: Boolean)

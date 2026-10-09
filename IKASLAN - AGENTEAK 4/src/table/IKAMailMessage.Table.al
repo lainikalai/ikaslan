@@ -19,6 +19,10 @@ table 99211 "IKA Mail Message"
             Caption = 'Buzón';
             TableRelation = "IKA Mail Mailbox";
         }
+        field(3; "Folder Id"; Text[250])
+        {
+            Caption = 'Id carpeta (Graph)';
+        }
         field(10; "Graph Id"; Text[250])
         {
             Caption = 'Id (Graph)';
@@ -99,6 +103,13 @@ table 99211 "IKA Mail Message"
             CalcFormula = count("IKA Mail Attachment" where("Message Entry No." = field("Entry No."), "Is Inline" = const(false)));
             Editable = false;
         }
+        field(52; "Folder Name"; Text[250])
+        {
+            Caption = 'Carpeta';
+            FieldClass = FlowField;
+            CalcFormula = lookup("IKA Mail Folder"."Display Name" where("Mailbox Code" = field("Mailbox Code"), "Folder Id" = field("Folder Id")));
+            Editable = false;
+        }
     }
 
     keys
@@ -111,6 +122,9 @@ table 99211 "IKA Mail Message"
         {
         }
         key(Received; "Mailbox Code", "Received At")
+        {
+        }
+        key(FolderReceived; "Mailbox Code", "Folder Id", "Received At")
         {
         }
         key(FromAddress; "From Address")

@@ -36,6 +36,12 @@ page 99216 "IKA Mail Message"
                 {
                     ApplicationArea = All;
                 }
+                field("Folder Name"; Rec."Folder Name")
+                {
+                    ApplicationArea = All;
+                    Importance = Additional;
+                    ToolTip = 'Carpeta de Outlook en la que está el email.';
+                }
                 field("To Recipients"; Rec."To Recipients")
                 {
                     ApplicationArea = All;
@@ -287,6 +293,27 @@ page 99216 "IKA Mail Message"
                     GraphClient.SetReadFlag(Rec, false);
                 end;
             }
+            action(MoveToFolder)
+            {
+                ApplicationArea = All;
+                Caption = 'Mover a carpeta...';
+                Image = MoveToNextPeriod;
+                ToolTip = 'Mueve el email a otra carpeta de Outlook.';
+
+                trigger OnAction()
+                var
+                    MailFolder: Record "IKA Mail Folder";
+                    DestinationFolder: Record "IKA Mail Folder";
+                    MovedMsg: Label 'Email movido a %1.', Comment = '%1 = folder';
+                begin
+                    if not MailFolder.SelectFolder(Rec."Mailbox Code", '', DestinationFolder) then
+                        exit;
+                    Rec.Get(Rec."Entry No.");
+                    GraphClient.MoveMessage(Rec, DestinationFolder."Folder Id");
+                    CurrPage.Update(false);
+                    Message(MovedMsg, DestinationFolder.Path);
+                end;
+            }
             action(Reload)
             {
                 ApplicationArea = All;
@@ -338,6 +365,7 @@ page 99216 "IKA Mail Message"
                 actionref(Forward_Promoted; Forward) { }
                 actionref(OpenInOutlook_Promoted; OpenInOutlook) { }
                 actionref(DownloadEml_Promoted; DownloadEml) { }
+                actionref(MoveToFolder_Promoted; MoveToFolder) { }
             }
             group(Category_Attach)
             {

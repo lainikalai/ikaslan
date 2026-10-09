@@ -4,6 +4,8 @@ codeunit 99201 "IKA Mail Graph Client"
     // (client credentials). Permisos de aplicación necesarios: Mail.ReadWrite y Mail.Send.
     // Recomendado: limitar la aplicación a los buzones dados de alta con RBAC for Applications
     // de Exchange Online (sin ello, el permiso de aplicación da acceso a todos los buzones del tenant).
+    // Se piden Id inmutables (Prefer: IdType="ImmutableId"): el Id de un email no cambia al moverlo de
+    // carpeta, así que un email movido en Outlook se actualiza en lugar de duplicarse.
 
     var
         Setup: Record "IKA Mail Setup";
@@ -13,7 +15,7 @@ codeunit 99201 "IKA Mail Graph Client"
         TokenCache: Dictionary of [Text, Text];
         GraphRootTok: Label 'https://graph.microsoft.com/v1.0', Locked = true;
         TokenUrlTok: Label 'https://login.microsoftonline.com/%1/oauth2/v2.0/token', Locked = true;
-        MessageSelectTok: Label 'id,internetMessageId,conversationId,subject,from,toRecipients,ccRecipients,receivedDateTime,bodyPreview,isRead,hasAttachments,importance,webLink', Locked = true;
+        MessageSelectTok: Label 'id,parentFolderId,internetMessageId,conversationId,subject,from,toRecipients,ccRecipients,receivedDateTime,bodyPreview,isRead,hasAttachments,importance,webLink', Locked = true;
         TokenErr: Label 'No se pudo obtener el token de Microsoft Graph: %1', Comment = '%1 = error';
         GraphErr: Label 'Error de Microsoft Graph (%1): HTTP %2 %3', Comment = '%1 = method, %2 = status, %3 = body';
         FolderNotFoundErr: Label 'No se encuentra la carpeta "%1" en el buzón %2.', Comment = '%1 = folder, %2 = mailbox';
@@ -22,6 +24,7 @@ codeunit 99201 "IKA Mail Graph Client"
         ReferenceAttachmentErr: Label 'El adjunto "%1" es un enlace a OneDrive/SharePoint, no un fichero. Ábralo desde Outlook.', Comment = '%1 = name';
         AttachmentTooBigErr: Label 'El fichero %1 supera 3 MB, el máximo para adjuntar al responder desde BC.', Comment = '%1 = file name';
         NoRecipientsErr: Label 'Indique al menos un destinatario.';
+        FolderSelectTok: Label 'id,displayName,parentFolderId,childFolderCount,totalItemCount,unreadItemCount', Locked = true;
         ConnectionOkLbl: Label 'Conexión correcta con %1: carpeta "%2", %3 emails (%4 sin leer).', Comment = '%1 = address, %2 = folder, %3 = total, %4 = unread';
 
     procedure SetMailbox(Mailbox: Record "IKA Mail Mailbox")
@@ -35,27 +38,44 @@ codeunit 99201 "IKA Mail Graph Client"
     // =====================================================================
 
     /// <summary>
-    /// Descarga los últimos emails de la carpeta de la cuenta (o, con LoadOlder, los anteriores al
-    /// más antiguo que ya hay) y los guarda/actualiza en la tabla local.
+    /// Descarga los últimos emails de la carpeta por defecto de la cuenta (o, con LoadOlder, los anteriores
+    /// al más antiguo que ya hay) y los guarda/actualiza en la tabla local.
     /// </summary>
     procedure SyncMessages(var Mailbox: Record "IKA Mail Mailbox"; LoadOlder: Boolean): Integer
+    begin
+        exit(SyncFolderMessages(Mailbox, '', LoadOlder));
+    end;
+
+    /// <summary>
+    /// Como SyncMessages, pero de la carpeta indicada (Id de Graph). Con FolderId vacío, la carpeta por defecto.
+    /// </summary>
+    procedure SyncFolderMessages(var Mailbox: Record "IKA Mail Mailbox"; FolderId: Text; LoadOlder: Boolean): Integer
     var
         MailMessage: Record "IKA Mail Message";
         ResponseJson: JsonObject;
         MessageArray: JsonArray;
         MessageToken: JsonToken;
+        DefaultFolderId: Text;
         Url: Text;
         SyncedCount: Integer;
     begin
         SetMailbox(Mailbox);
         Setup.GetSetup();
-        Url := GetMailboxUrl() + '/mailFolders/' + GetFolderId(Mailbox.Folder) + '/messages' +
+        DefaultFolderId := GetDefaultFolderId(Mailbox);
+        if FolderId = '' then
+            FolderId := DefaultFolderId;
+        Url := GetMailboxUrl() + '/mailFolders/' + FolderId + '/messages' +
             '?$top=' + Format(Setup."Messages per Sync") +
             '&$select=' + MessageSelectTok +
             '&$orderby=receivedDateTime%20desc';
         if LoadOlder then begin
-            MailMessage.SetCurrentKey("Mailbox Code", "Received At");
+            MailMessage.SetCurrentKey("Mailbox Code", "Folder Id", "Received At");
             MailMessage.SetRange("Mailbox Code", Mailbox.Code);
+            // Los emails guardados antes de existir el selector de carpetas no tienen carpeta: son de la carpeta por defecto
+            if FolderId = DefaultFolderId then
+                MailMessage.SetFilter("Folder Id", '%1|%2', FolderId, '')
+            else
+                MailMessage.SetRange("Folder Id", FolderId);
             if MailMessage.FindFirst() then
                 Url += '&$filter=' + UriHelper.EscapeDataString('receivedDateTime lt ' + Format(MailMessage."Received At", 0, 9));
         end;
@@ -63,32 +83,67 @@ codeunit 99201 "IKA Mail Graph Client"
         ResponseJson := SendGraphRequest('GET', Url, '');
         if JsonHelper.GetArray(ResponseJson, 'value', MessageArray) then
             foreach MessageToken in MessageArray do begin
-                UpsertMessage(Mailbox.Code, MessageToken.AsObject());
+                UpsertMessage(Mailbox.Code, FolderId, MessageToken.AsObject());
                 SyncedCount += 1;
             end;
 
+        UpdateFolderCounts(Mailbox.Code, FolderId);
         Mailbox."Last Sync At" := CurrentDateTime();
         Mailbox.Modify();
         exit(SyncedCount);
     end;
 
-    local procedure UpsertMessage(MailboxCode: Code[20]; MessageJson: JsonObject)
+    /// <summary>
+    /// Id de Graph de la carpeta por defecto de la cuenta (campo Carpeta). Se guarda en la cuenta la primera vez.
+    /// </summary>
+    procedure GetDefaultFolderId(var Mailbox: Record "IKA Mail Mailbox"): Text
+    var
+        ResponseJson: JsonObject;
+    begin
+        if Mailbox."Folder Id" <> '' then
+            exit(Mailbox."Folder Id");
+        SetMailbox(Mailbox);
+        // Los nombres estándar (inbox, sentitems...) son alias: se pide el Id real para poder filtrar por carpeta
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + GetFolderId(Mailbox.Folder) + '?$select=id', '');
+        Mailbox."Folder Id" := CopyStr(JsonHelper.GetText(ResponseJson, 'id'), 1, MaxStrLen(Mailbox."Folder Id"));
+        Mailbox.Modify();
+        exit(Mailbox."Folder Id");
+    end;
+
+    local procedure UpsertMessage(MailboxCode: Code[20]; SyncedFolderId: Text; MessageJson: JsonObject)
     var
         MailMessage: Record "IKA Mail Message";
         GraphId: Text;
+        FolderId: Text;
+        InternetMessageId: Text;
         ReceivedAt: DateTime;
         IsNew: Boolean;
     begin
         GraphId := JsonHelper.GetText(MessageJson, 'id');
+        FolderId := JsonHelper.GetText(MessageJson, 'parentFolderId');
+        if FolderId = '' then
+            FolderId := SyncedFolderId;
         MailMessage.SetCurrentKey("Mailbox Code", "Graph Id");
         MailMessage.SetRange("Mailbox Code", MailboxCode);
         MailMessage.SetRange("Graph Id", CopyStr(GraphId, 1, MaxStrLen(MailMessage."Graph Id")));
         IsNew := not MailMessage.FindFirst();
         if IsNew then begin
+            // Emails guardados con el Id antiguo (no inmutable): se reconocen por el Internet Message-ID en la misma carpeta
+            InternetMessageId := JsonHelper.GetText(MessageJson, 'internetMessageId');
+            if InternetMessageId <> '' then begin
+                MailMessage.Reset();
+                MailMessage.SetRange("Mailbox Code", MailboxCode);
+                MailMessage.SetRange("Internet Message Id", CopyStr(InternetMessageId, 1, MaxStrLen(MailMessage."Internet Message Id")));
+                MailMessage.SetFilter("Folder Id", '%1|%2', CopyStr(FolderId, 1, MaxStrLen(MailMessage."Folder Id")), '');
+                IsNew := not MailMessage.FindFirst();
+            end;
+        end;
+        if IsNew then begin
             MailMessage.Init();
             MailMessage."Mailbox Code" := MailboxCode;
-            MailMessage."Graph Id" := CopyStr(GraphId, 1, MaxStrLen(MailMessage."Graph Id"));
         end;
+        MailMessage."Graph Id" := CopyStr(GraphId, 1, MaxStrLen(MailMessage."Graph Id"));
+        MailMessage."Folder Id" := CopyStr(FolderId, 1, MaxStrLen(MailMessage."Folder Id"));
 
         MailMessage."Internet Message Id" := CopyStr(JsonHelper.GetText(MessageJson, 'internetMessageId'), 1, MaxStrLen(MailMessage."Internet Message Id"));
         MailMessage."Conversation Id" := CopyStr(JsonHelper.GetText(MessageJson, 'conversationId'), 1, MaxStrLen(MailMessage."Conversation Id"));
@@ -131,6 +186,173 @@ codeunit 99201 "IKA Mail Graph Client"
                 Result += Address;
         end;
         exit(Result);
+    end;
+
+    // =====================================================================
+    // Carpetas
+    // =====================================================================
+
+    /// <summary>
+    /// Descarga el árbol completo de carpetas de la cuenta (subcarpetas a cualquier nivel) con sus contadores.
+    /// </summary>
+    procedure SyncFolders(var Mailbox: Record "IKA Mail Mailbox"): Integer
+    var
+        MailFolder: Record "IKA Mail Folder";
+        WellKnownIds: Dictionary of [Text, Text];
+        SortingOrder: Integer;
+    begin
+        SetMailbox(Mailbox);
+        LoadWellKnownFolderIds(WellKnownIds);
+        MailFolder.SetRange("Mailbox Code", Mailbox.Code);
+        MailFolder.DeleteAll();
+        AddFolderLevel(Mailbox.Code, GetMailboxUrl() + '/mailFolders', '', 0, WellKnownIds, SortingOrder);
+        exit(SortingOrder);
+    end;
+
+    /// <summary>
+    /// Lee una carpeta y sus hermanas (todas las páginas), las ordena como Outlook y baja recursivamente a las subcarpetas.
+    /// </summary>
+    local procedure AddFolderLevel(MailboxCode: Code[20]; Url: Text; ParentPath: Text; Level: Integer; WellKnownIds: Dictionary of [Text, Text]; var SortingOrder: Integer)
+    var
+        MailFolder: Record "IKA Mail Folder";
+        TempSiblingFolder: Record "IKA Mail Folder" temporary;
+        ResponseJson: JsonObject;
+        FolderArray: JsonArray;
+        FolderToken: JsonToken;
+        FolderJson: JsonObject;
+        NextUrl: Text;
+        WellKnownName: Text;
+        MaxFolders: Integer;
+    begin
+        MaxFolders := 1000;
+        NextUrl := Url + '?$top=100&$select=' + FolderSelectTok;
+        while NextUrl <> '' do begin
+            ResponseJson := SendGraphRequest('GET', NextUrl, '');
+            if JsonHelper.GetArray(ResponseJson, 'value', FolderArray) then
+                foreach FolderToken in FolderArray do begin
+                    FolderJson := FolderToken.AsObject();
+                    TempSiblingFolder.Init();
+                    TempSiblingFolder."Mailbox Code" := MailboxCode;
+                    TempSiblingFolder."Folder Id" := CopyStr(JsonHelper.GetText(FolderJson, 'id'), 1, MaxStrLen(TempSiblingFolder."Folder Id"));
+                    TempSiblingFolder."Display Name" := CopyStr(JsonHelper.GetText(FolderJson, 'displayName'), 1, MaxStrLen(TempSiblingFolder."Display Name"));
+                    TempSiblingFolder."Parent Folder Id" := CopyStr(JsonHelper.GetText(FolderJson, 'parentFolderId'), 1, MaxStrLen(TempSiblingFolder."Parent Folder Id"));
+                    TempSiblingFolder."Child Folder Count" := JsonHelper.GetInteger(FolderJson, 'childFolderCount');
+                    TempSiblingFolder."Total Items" := JsonHelper.GetInteger(FolderJson, 'totalItemCount');
+                    TempSiblingFolder."Unread Items" := JsonHelper.GetInteger(FolderJson, 'unreadItemCount');
+                    if WellKnownIds.Get(TempSiblingFolder."Folder Id", WellKnownName) then
+                        TempSiblingFolder."Well-known Name" := CopyStr(WellKnownName, 1, MaxStrLen(TempSiblingFolder."Well-known Name"));
+                    TempSiblingFolder."Sort Key" := CopyStr(GetFolderSortPrefix(TempSiblingFolder."Well-known Name") + LowerCase(TempSiblingFolder."Display Name"), 1, MaxStrLen(TempSiblingFolder."Sort Key"));
+                    if TempSiblingFolder.Insert() then;
+                end;
+            NextUrl := JsonHelper.GetText(ResponseJson, '@odata.nextLink');
+        end;
+
+        TempSiblingFolder.SetCurrentKey("Mailbox Code", "Sort Key");
+        if TempSiblingFolder.FindSet() then
+            repeat
+                if SortingOrder >= MaxFolders then
+                    exit;
+                SortingOrder += 1;
+                MailFolder := TempSiblingFolder;
+                MailFolder.Level := Level;
+                MailFolder."Sorting Order" := SortingOrder;
+                if ParentPath = '' then
+                    MailFolder.Path := TempSiblingFolder."Display Name"
+                else
+                    MailFolder.Path := CopyStr(ParentPath + ' / ' + TempSiblingFolder."Display Name", 1, MaxStrLen(MailFolder.Path));
+                MailFolder."Last Refreshed At" := CurrentDateTime();
+                MailFolder.Insert();
+                if (MailFolder."Child Folder Count" > 0) and (Level < 15) then
+                    AddFolderLevel(MailboxCode, GetMailboxUrl() + '/mailFolders/' + MailFolder."Folder Id" + '/childFolders',
+                        MailFolder.Path, Level + 1, WellKnownIds, SortingOrder);
+            until TempSiblingFolder.Next() = 0;
+    end;
+
+    /// <summary>
+    /// Orden de Outlook: bandeja de entrada, borradores, enviados, eliminados, no deseado, archivo; después, por nombre.
+    /// </summary>
+    local procedure GetFolderSortPrefix(WellKnownName: Text): Text
+    begin
+        case WellKnownName of
+            'inbox':
+                exit('0');
+            'drafts':
+                exit('1');
+            'sentitems':
+                exit('2');
+            'deleteditems':
+                exit('3');
+            'junkemail':
+                exit('4');
+            'archive':
+                exit('5');
+        end;
+        exit('9');
+    end;
+
+    local procedure LoadWellKnownFolderIds(var WellKnownIds: Dictionary of [Text, Text])
+    var
+        WellKnownName: Text;
+        FolderId: Text;
+    begin
+        foreach WellKnownName in 'inbox,drafts,sentitems,deleteditems,junkemail,archive'.Split(',') do
+            // archive no existe en todos los buzones: se ignora el error
+            if TryGetFolderIdByAlias(WellKnownName, FolderId) then
+                if (FolderId <> '') and not WellKnownIds.ContainsKey(FolderId) then
+                    WellKnownIds.Add(FolderId, WellKnownName);
+    end;
+
+    [TryFunction]
+    local procedure TryGetFolderIdByAlias(Alias: Text; var FolderId: Text)
+    var
+        ResponseJson: JsonObject;
+    begin
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + Alias + '?$select=id', '');
+        FolderId := JsonHelper.GetText(ResponseJson, 'id');
+    end;
+
+    /// <summary>
+    /// Actualiza los contadores (emails, no leídos) de la carpeta, si ya se ha descargado el árbol de carpetas.
+    /// </summary>
+    local procedure UpdateFolderCounts(MailboxCode: Code[20]; FolderId: Text)
+    var
+        MailFolder: Record "IKA Mail Folder";
+        ResponseJson: JsonObject;
+    begin
+        if not MailFolder.Get(MailboxCode, CopyStr(FolderId, 1, MaxStrLen(MailFolder."Folder Id"))) then
+            exit;
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + FolderId + '?$select=totalItemCount,unreadItemCount', '');
+        MailFolder."Total Items" := JsonHelper.GetInteger(ResponseJson, 'totalItemCount');
+        MailFolder."Unread Items" := JsonHelper.GetInteger(ResponseJson, 'unreadItemCount');
+        MailFolder."Last Refreshed At" := CurrentDateTime();
+        MailFolder.Modify();
+    end;
+
+    /// <summary>
+    /// Mueve el email a otra carpeta de Outlook (POST /messages/{id}/move).
+    /// </summary>
+    procedure MoveMessage(var MailMessage: Record "IKA Mail Message"; DestinationFolderId: Text)
+    var
+        Body: JsonObject;
+        ResponseJson: JsonObject;
+        BodyText: Text;
+        NewId: Text;
+        NewFolderId: Text;
+    begin
+        SetMailboxByCode(MailMessage."Mailbox Code");
+        Body.Add('destinationId', DestinationFolderId);
+        Body.WriteTo(BodyText);
+        ResponseJson := SendGraphRequest('POST', GetMessageUrl(MailMessage) + '/move', BodyText);
+        NewId := JsonHelper.GetText(ResponseJson, 'id');
+        if NewId <> '' then
+            MailMessage."Graph Id" := CopyStr(NewId, 1, MaxStrLen(MailMessage."Graph Id"));
+        NewFolderId := JsonHelper.GetText(ResponseJson, 'parentFolderId');
+        if NewFolderId = '' then
+            NewFolderId := DestinationFolderId;
+        MailMessage."Folder Id" := CopyStr(NewFolderId, 1, MaxStrLen(MailMessage."Folder Id"));
+        if JsonHelper.GetText(ResponseJson, 'webLink') <> '' then
+            MailMessage."Web Link" := CopyStr(JsonHelper.GetText(ResponseJson, 'webLink'), 1, MaxStrLen(MailMessage."Web Link"));
+        MailMessage.Modify();
     end;
 
     // =====================================================================
@@ -382,9 +604,13 @@ codeunit 99201 "IKA Mail Graph Client"
     procedure TestConnection(Mailbox: Record "IKA Mail Mailbox"): Text
     var
         ResponseJson: JsonObject;
+        FolderRef: Text;
     begin
         SetMailbox(Mailbox);
-        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + GetFolderId(Mailbox.Folder) + '?$select=displayName,totalItemCount,unreadItemCount', '');
+        FolderRef := Mailbox."Folder Id";
+        if FolderRef = '' then
+            FolderRef := GetFolderId(Mailbox.Folder);
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + '/mailFolders/' + FolderRef + '?$select=displayName,totalItemCount,unreadItemCount', '');
         exit(StrSubstNo(ConnectionOkLbl, Mailbox.Address,
             JsonHelper.GetText(ResponseJson, 'displayName'),
             JsonHelper.GetText(ResponseJson, 'totalItemCount'),
@@ -467,7 +693,7 @@ codeunit 99201 "IKA Mail Graph Client"
         Request.SetRequestUri(Url);
         Request.GetHeaders(RequestHeaders);
         AddBearerHeader(RequestHeaders);
-        RequestHeaders.Add('Prefer', 'outlook.body-content-type="html"');
+        RequestHeaders.Add('Prefer', 'outlook.body-content-type="html", IdType="ImmutableId"');
 
         // POST sin cuerpo (p.ej. /send) también necesita Content-Type
         if (BodyText <> '') or (Method = 'POST') then begin
