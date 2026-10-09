@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TEST_Ikaslan",
+            "request": "launch",
+            "type": "al",
+            "environmentType": "Sandbox",
+            "environmentName": "TEST_Ikaslan",
+            "breakOnError": true,
+            "startupObjectType": "Page",
+            "startupObjectId": 99011,
+            "launchBrowser": true,
+            "enableLongRunningSqlStatements": true,
+            "enableSqlInformationDebugger": true,
+            "schemaUpdateMode":  "ForceSync",   // "ForceSync",  // "Synchronize",
+            "tenant": "50dc272f-06d9-46ee-aa19-bbeddd5311e9"
+        }
+    ]
+}
