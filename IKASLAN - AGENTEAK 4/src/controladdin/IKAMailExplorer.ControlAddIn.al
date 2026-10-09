@@ -27,6 +27,8 @@ controladdin "IKA Mail Explorer"
     event MessageSelected(EntryNo: Integer);
     /// <summary>El usuario abre un email (doble clic o Intro): se abre su ficha.</summary>
     event MessageOpened(EntryNo: Integer);
+    /// <summary>Redactar un email nuevo desde la cuenta actual.</summary>
+    event NewMessageRequested();
     /// <summary>Descargar los últimos emails de la carpeta.</summary>
     event SyncRequested();
     /// <summary>Descargar emails más antiguos de la carpeta.</summary>

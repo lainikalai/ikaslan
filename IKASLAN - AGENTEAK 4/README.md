@@ -11,6 +11,8 @@ Extensión AL para Business Central 28 que trae el correo de **Outlook 365** a B
   no leídos) y *Mover a carpeta* desde la bandeja o la ficha del email.
 - **Ficha del email**: cabecera, cuerpo HTML (con imágenes incrustadas), adjuntos, descarga del email en
   `.eml`, *Abrir en Outlook* y **Responder / Responder a todos / Reenviar** (con ficheros añadidos).
+- **Nuevo email** desde la cuenta (vista Outlook y bandeja): Para, CC, Asunto, Texto y ficheros; queda en
+  *Elementos enviados*.
 - **Adjuntar a entidades de BC** (cliente, proveedor, contacto, banco, recurso, producto, empleado, activo
   fijo, proyecto) **arrastrando** el email completo o sus adjuntos sobre una zona de destino.
 
@@ -32,6 +34,7 @@ y en la bandeja en lista. Es un control add-in (`src/controladdin/MailExplorer`)
   seleccionado aparecen encima de la lista y el email se abre con doble clic o Intro.
 - **Navegación**: clic o flechas ↑↓ para seleccionar; doble clic o Intro abre la ficha del email (la del arrastre
   de adjuntos a clientes, proveedores...). *Adjuntar a BC…* también abre esa ficha.
+- **Nuevo email**: botón de la barra del panel o acción *Nuevo email*; se envía desde la cuenta que se está viendo.
 - **Acciones**: *Responder*, *A todos*, *Reenviar*, *Mover…*, *Eliminar*, *Marcar leído/no leído*, *Outlook* (Outlook Web) y *.eml*.
 - **Eliminar**, como en Outlook: acción *Eliminar* de la barra de BC, papelera de cada email de la lista (al pasar
   el ratón o en el seleccionado), botón *Eliminar* del panel de lectura o tecla **Supr** en la lista:

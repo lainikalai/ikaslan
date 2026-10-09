@@ -68,6 +68,8 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 }
 .mx-tool:hover { background: var(--mx-accent-soft); }
 .mx-tool.mx-active { border-color: var(--mx-accent); color: var(--mx-accent); }
+.mx-tool.mx-new { background: var(--mx-accent); border-color: var(--mx-accent); color: #ffffff; }
+.mx-tool.mx-new:hover { background: #006f79; }
 .mx-menu { display: none; }
 .mx-mailbox {
     flex: 0 1 240px;

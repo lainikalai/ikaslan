@@ -90,6 +90,15 @@ codeunit 99221 "IKA Mail Explorer Mgt."
         exit(GraphClient.SyncFolderMessages(Mailbox, FolderId, LoadOlder));
     end;
 
+    procedure IsSentItemsFolder(MailboxCode: Code[20]; FolderId: Text): Boolean
+    var
+        MailFolder: Record "IKA Mail Folder";
+    begin
+        if not MailFolder.Get(MailboxCode, CopyStr(FolderId, 1, MaxStrLen(MailFolder."Folder Id"))) then
+            exit(false);
+        exit(MailFolder."Well-known Name" = 'sentitems');
+    end;
+
     procedure HasLocalMessages(MailboxCode: Code[20]; FolderId: Text; DefaultFolderId: Text): Boolean
     var
         MailMessage: Record "IKA Mail Message";
@@ -441,6 +450,17 @@ codeunit 99221 "IKA Mail Explorer Mgt."
                 Mode := Mode::Reply;
         end;
         MailCompose.SetMessage(MailMessage, Mode);
+        MailCompose.RunModal();
+    end;
+
+    /// <summary>
+    /// Email nuevo desde la cuenta indicada.
+    /// </summary>
+    procedure ComposeNew(MailboxCode: Code[20])
+    var
+        MailCompose: Page "IKA Mail Compose";
+    begin
+        MailCompose.SetNewMail(MailboxCode, '', '');
         MailCompose.RunModal();
     end;
 

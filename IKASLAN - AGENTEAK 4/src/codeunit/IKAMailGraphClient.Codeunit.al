@@ -526,6 +526,44 @@ codeunit 99201 "IKA Mail Graph Client"
     // =====================================================================
 
     /// <summary>
+    /// Email nuevo desde la cuenta: crea el borrador en Outlook (POST /messages), le añade los ficheros y lo
+    /// envía. Queda en "Elementos enviados", igual que las respuestas.
+    /// </summary>
+    procedure SendNewMail(MailboxCode: Code[20]; ToText: Text; CcText: Text; SubjectText: Text; BodyText: Text; var TempComposeFile: Record "IKA Mail Compose File" temporary)
+    var
+        Draft: JsonObject;
+        BodyJson: JsonObject;
+        DraftJson: JsonObject;
+        ToArray: JsonArray;
+        CcArray: JsonArray;
+        RequestText: Text;
+        DraftUrl: Text;
+    begin
+        SetMailboxByCode(MailboxCode);
+        ToArray := TextToRecipients(ToText);
+        CcArray := TextToRecipients(CcText);
+        if ToArray.Count() = 0 then
+            Error(NoRecipientsErr);
+
+        Draft.Add('subject', SubjectText);
+        BodyJson.Add('contentType', 'HTML');
+        BodyJson.Add('content', TextToHtml(BodyText));
+        Draft.Add('body', BodyJson);
+        Draft.Add('toRecipients', ToArray);
+        Draft.Add('ccRecipients', CcArray);
+        Draft.WriteTo(RequestText);
+        DraftJson := SendGraphRequest('POST', GetMailboxUrl() + '/messages', RequestText);
+        DraftUrl := GetMailboxUrl() + '/messages/' + JsonHelper.GetText(DraftJson, 'id');
+
+        if TempComposeFile.FindSet() then
+            repeat
+                AddFileToDraft(DraftUrl, TempComposeFile);
+            until TempComposeFile.Next() = 0;
+
+        SendGraphRequest('POST', DraftUrl + '/send', '');
+    end;
+
+    /// <summary>
     /// Crea el borrador de respuesta/reenvío en Outlook (que incluye el email original citado),
     /// fija destinatarios, añade los ficheros y lo envía. El email enviado queda en "Elementos enviados".
     /// </summary>

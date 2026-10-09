@@ -63,6 +63,11 @@ page 99251 "IKA Mail Explorer"
                     ExplorerMgt.OpenCard(EntryNo);
                 end;
 
+                trigger NewMessageRequested()
+                begin
+                    NewMail();
+                end;
+
                 trigger SyncRequested()
                 begin
                     SyncCurrentFolder(false);
@@ -136,6 +141,18 @@ page 99251 "IKA Mail Explorer"
     {
         area(Processing)
         {
+            action(NewMailAction)
+            {
+                ApplicationArea = All;
+                Caption = 'Nuevo email';
+                Image = NewDocument;
+                ToolTip = 'Redacta un email nuevo desde la cuenta que se está viendo. Quedará en Elementos enviados.';
+
+                trigger OnAction()
+                begin
+                    NewMail();
+                end;
+            }
             action(Sync)
             {
                 ApplicationArea = All;
@@ -234,6 +251,7 @@ page 99251 "IKA Mail Explorer"
             {
                 Caption = 'Proceso';
 
+                actionref(NewMail_Promoted; NewMailAction) { }
                 actionref(Sync_Promoted; Sync) { }
                 actionref(LoadOlder_Promoted; LoadOlder) { }
                 actionref(RefreshFolders_Promoted; RefreshFoldersAction) { }
@@ -306,6 +324,16 @@ page 99251 "IKA Mail Explorer"
             CurrPage.Explorer.ShowStatus(DeletedForeverMsg, false)
         else
             CurrPage.Explorer.ShowStatus(MovedToDeletedMsg, false);
+    end;
+
+    local procedure NewMail()
+    begin
+        if CurrentMailboxCode = '' then
+            exit;
+        ExplorerMgt.ComposeNew(CurrentMailboxCode);
+        // Si se envía desde la carpeta de enviados, que aparezca al momento
+        if ExplorerMgt.IsSentItemsFolder(CurrentMailboxCode, CurrentFolderId) then
+            SyncCurrentFolder(false);
     end;
 
     local procedure OpenMailbox(MailboxCode: Code[20]; WantedFolderId: Text)

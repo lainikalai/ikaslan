@@ -57,7 +57,8 @@
 
     // Iconos dibujados (SVG): los emoji dependen de la fuente del navegador y en BC algunos salen casi invisibles
     var SVG_ICONS = {
-        trash: 'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7'
+        trash: 'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7',
+        mail: 'M3 6h18v12H3zM3 7l9 6 9-6'
     };
 
     function svgIcon(name) {
@@ -167,6 +168,10 @@
             updateLayout();
         });
         bar.appendChild(ui.menuButton);
+
+        bar.appendChild(iconButton('mx-tool mx-new', 'mail', 'Nuevo email', 'Redactar un email nuevo desde esta cuenta', function () {
+            invoke('NewMessageRequested');
+        }));
 
         ui.mailboxSelect = el('select', 'mx-mailbox');
         ui.mailboxSelect.title = 'Cuenta de Outlook 365';

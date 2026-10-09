@@ -84,6 +84,23 @@ page 99211 "IKA Mail Messages"
     {
         area(Processing)
         {
+            action(NewMail)
+            {
+                ApplicationArea = All;
+                Caption = 'Nuevo email';
+                Image = NewDocument;
+                ToolTip = 'Redacta un email nuevo desde la cuenta actual. Quedará en Elementos enviados.';
+
+                trigger OnAction()
+                var
+                    MailCompose: Page "IKA Mail Compose";
+                begin
+                    if CurrentMailboxCode = '' then
+                        Error(SelectAccountFirstErr);
+                    MailCompose.SetNewMail(CurrentMailboxCode, '', '');
+                    MailCompose.RunModal();
+                end;
+            }
             action(Sync)
             {
                 ApplicationArea = All;
@@ -253,6 +270,7 @@ page 99211 "IKA Mail Messages"
             {
                 Caption = 'Proceso';
 
+                actionref(NewMail_Promoted; NewMail) { }
                 actionref(Sync_Promoted; Sync) { }
                 actionref(ChooseFolder_Promoted; ChooseFolder) { }
                 actionref(DefaultFolder_Promoted; DefaultFolder) { }

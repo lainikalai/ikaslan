@@ -15,4 +15,8 @@ enum 99206 "IKA Mail Compose Mode"
     {
         Caption = 'Reenviar';
     }
+    value(30; New)
+    {
+        Caption = 'Nuevo email';
+    }
 }
