@@ -261,32 +261,34 @@ codeunit 99221 "IKA Mail Address Search"
     end;
 
     /// <summary>
-    /// Las consultas $filter no filtran por asunto: se quitan aquí los emails cuyo asunto no tiene todas las palabras.
+    /// Las consultas $filter no filtran por asunto: se quitan aquí los emails cuyo asunto no cumple el filtro.
+    /// Filtro: alternativas separadas por | y, en cada una, palabras que deben estar todas.
+    ///   "pedido 2026|PV-1001" = (contiene "pedido" y "2026") o contiene "PV-1001".
     /// </summary>
     local procedure ApplySubjectFilter()
     var
-        Words: List of [Text];
-        Word: Text;
+        Alternatives: List of [Text];
+        Alternative: Text;
         LowerSubject: Text;
         RemovedCount: Integer;
         Keep: Boolean;
     begin
-        foreach Word in SubjectFilter.Split(' ') do begin
-            Word := LowerCase(DelChr(CleanTerm(Word), '=', '*'));
-            if Word <> '' then
-                Words.Add(Word);
+        foreach Alternative in SubjectFilter.Split('|') do begin
+            Alternative := LowerCase(DelChr(CleanTerm(Alternative.Replace('*', '')), '<>', ' '));
+            if Alternative <> '' then
+                Alternatives.Add(Alternative);
         end;
-        if Words.Count() = 0 then
+        if Alternatives.Count() = 0 then
             exit;
 
         TempResult.Reset();
         if TempResult.FindSet() then
             repeat
                 LowerSubject := LowerCase(TempResult.Subject);
-                Keep := true;
-                foreach Word in Words do
-                    if StrPos(LowerSubject, Word) = 0 then
-                        Keep := false;
+                Keep := false;
+                foreach Alternative in Alternatives do
+                    if not Keep then
+                        Keep := ContainsAllWords(LowerSubject, Alternative);
                 if not Keep then begin
                     TempResult.Delete();
                     RemovedCount += 1;
@@ -294,6 +296,16 @@ codeunit 99221 "IKA Mail Address Search"
             until TempResult.Next() = 0;
         if RemovedCount > 0 then
             AddLog(StrSubstNo(LogSubjectLbl, RemovedCount));
+    end;
+
+    local procedure ContainsAllWords(LowerSubject: Text; Alternative: Text): Boolean
+    var
+        Word: Text;
+    begin
+        foreach Word in Alternative.Split(' ') do
+            if (Word <> '') and (StrPos(LowerSubject, Word) = 0) then
+                exit(false);
+        exit(true);
     end;
 
     local procedure KeepNewest(MaxResults: Integer)
@@ -351,24 +363,50 @@ codeunit 99221 "IKA Mail Address Search"
         if AddressCount > 1 then
             AddressPart := '(' + AddressPart + ')';
 
-        foreach Term in SubjectText.Split(' ') do begin
-            Term := CleanTerm(Term);
-            if Term <> '' then begin
-                if SubjectPart <> '' then
-                    SubjectPart += ' AND ';
-                SubjectPart += 'subject:' + Term;
-            end;
-        end;
+        SubjectPart := BuildSubjectQuery(SubjectText);
 
         if (AddressPart <> '') and (SubjectPart <> '') then
             exit(AddressPart + ' AND ' + SubjectPart);
         exit(AddressPart + SubjectPart);
     end;
 
+    local procedure BuildSubjectQuery(SubjectText: Text): Text
+    var
+        Alternative: Text;
+        Word: Text;
+        GroupPart: Text;
+        Result: Text;
+        GroupCount: Integer;
+    begin
+        // "pedido 2026|PV-1001" -> ((subject:pedido AND subject:2026) OR (subject:PV AND subject:1001))
+        // Los separadores de los nº de documento (PV-1001) se pasan como palabras sueltas, que es como
+        // Outlook indexa el asunto; el filtro local (ApplySubjectFilter) sí exige "pv-1001" entero.
+        foreach Alternative in SubjectText.Split('|') do begin
+            GroupPart := '';
+            foreach Word in ConvertStr(CleanTerm(Alternative), '-/_.,;#+', '        ').Split(' ') do
+                if Word <> '' then begin
+                    if GroupPart <> '' then
+                        GroupPart += ' AND ';
+                    GroupPart += 'subject:' + Word;
+                end;
+            if GroupPart <> '' then begin
+                if StrPos(GroupPart, ' AND ') > 0 then
+                    GroupPart := '(' + GroupPart + ')';
+                if Result <> '' then
+                    Result += ' OR ';
+                Result += GroupPart;
+                GroupCount += 1;
+            end;
+        end;
+        if GroupCount > 1 then
+            Result := '(' + Result + ')';
+        exit(Result);
+    end;
+
     local procedure CleanTerm(Term: Text): Text
     begin
         // Fuera lo que rompería las consultas ($search va entre comillas dobles, $filter entre simples)
-        Term := DelChr(Term, '=', '"''()\:<>');
+        Term := DelChr(Term, '=', '"''()\:<>|');
         exit(DelChr(Term, '<>', ' '));
     end;
 
@@ -384,6 +422,71 @@ codeunit 99221 "IKA Mail Address Search"
         if Address2 = '' then
             exit(Address1);
         exit(Address1 + '; ' + Address2);
+    end;
+
+    /// <summary>
+    /// Email del cliente y del contacto del documento ("a@x.com; b@x.com").
+    /// </summary>
+    procedure GetCustomerAddresses(CustomerNo: Code[20]; ContactNo: Code[20]): Text
+    var
+        Customer: Record Customer;
+    begin
+        if CustomerNo <> '' then
+            if Customer.Get(CustomerNo) then;
+        exit(JoinAddresses(Customer."E-Mail", GetContactAddress(ContactNo)));
+    end;
+
+    /// <summary>
+    /// Email del proveedor y del contacto del documento.
+    /// </summary>
+    procedure GetVendorAddresses(VendorNo: Code[20]; ContactNo: Code[20]): Text
+    var
+        Vendor: Record Vendor;
+    begin
+        if VendorNo <> '' then
+            if Vendor.Get(VendorNo) then;
+        exit(JoinAddresses(Vendor."E-Mail", GetContactAddress(ContactNo)));
+    end;
+
+    local procedure GetContactAddress(ContactNo: Code[20]): Text
+    var
+        Contact: Record Contact;
+    begin
+        if ContactNo = '' then
+            exit('');
+        if not Contact.Get(ContactNo) then
+            exit('');
+        exit(Contact."E-Mail");
+    end;
+
+    /// <summary>
+    /// Filtro de asunto de un documento: sus números como alternativas ("PV-1001|PED-555"), sin vacíos ni
+    /// repetidos. '' si en la configuración se ha desactivado el filtro por nº de documento.
+    /// </summary>
+    procedure GetDocumentSubjectFilter(DocumentNo1: Text; DocumentNo2: Text; DocumentNo3: Text): Text
+    var
+        Setup: Record "IKA Mail Setup";
+        Result: Text;
+    begin
+        if Setup.Get() then
+            if not Setup."Doc. Emails by Doc. No." then
+                exit('');
+        AddSubjectAlternative(Result, DocumentNo1);
+        AddSubjectAlternative(Result, DocumentNo2);
+        AddSubjectAlternative(Result, DocumentNo3);
+        exit(Result);
+    end;
+
+    local procedure AddSubjectAlternative(var SubjectFilterText: Text; DocumentNo: Text)
+    begin
+        DocumentNo := DelChr(CleanTerm(DocumentNo), '<>', ' ');
+        if DocumentNo = '' then
+            exit;
+        if ('|' + UpperCase(SubjectFilterText) + '|').Contains('|' + UpperCase(DocumentNo) + '|') then
+            exit;
+        if SubjectFilterText <> '' then
+            SubjectFilterText += '|';
+        SubjectFilterText += DocumentNo;
     end;
 
     procedure IsAutoLoadEnabled(): Boolean

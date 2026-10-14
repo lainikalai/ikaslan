@@ -19,7 +19,7 @@ page 99251 "IKA Mail Address Filter"
             {
                 ApplicationArea = All;
                 Caption = 'Asunto';
-                ToolTip = 'Palabras que debe contener el asunto (todas). Admite * al final de una palabra, p.ej. pedi*.';
+                ToolTip = 'Palabras que debe contener el asunto (todas). Separe con | varias alternativas: PV-1001|PED-555 = contiene PV-1001 o PED-555.';
             }
         }
     }

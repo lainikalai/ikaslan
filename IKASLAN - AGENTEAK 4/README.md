@@ -82,7 +82,25 @@ una con su `Caption` y `SetContext(..., Direction)`; sin dirección muestra los 
   se busca al pulsar *Actualizar*) y número máximo de emails (25 por defecto).
 - Si Graph falla (sin configurar, sin permiso...), el FactBox muestra el motivo en *Resultado* y la ficha se abre igual.
 
-Para añadirlo a otra página (pedidos, albaranes, facturas):
+### En pedidos, albaranes y facturas
+
+Los mismos dos FactBoxes están en **pedido de venta**, **factura de venta**, **histórico de albaranes de venta**,
+**histórico de facturas de venta**, **pedido de compra**, **factura de compra**, **histórico de albaranes de compra**
+e **histórico de facturas de compra**:
+
+| Documento | Email | Asunto (alternativas separadas por `|`) |
+|---|---|---|
+| Pedido / factura de venta | Cliente (*Venta a*) + contacto del documento | Nº · Nº documento externo |
+| Hist. albarán / factura de venta | Cliente (*Venta a*) + contacto | Nº · Nº pedido · Nº documento externo |
+| Pedido de compra | Proveedor (*Compra a*) + contacto | Nº · Nº pedido proveedor |
+| Factura de compra | Proveedor + contacto | Nº · Nº factura proveedor · Nº pedido proveedor |
+| Hist. albarán / factura de compra | Proveedor + contacto | Nº · Nº pedido · Nº albarán / factura proveedor |
+
+El filtro de asunto admite alternativas: `PV-1001|PED-555` = el asunto contiene *PV-1001* **o** *PED-555*.
+Si el filtro por nº no interesa, se desactiva en la configuración (*Filtrar emails de documentos por nº*) y los
+FactBoxes muestran todos los emails del cliente o proveedor; también se puede borrar el asunto en el FactBox.
+
+Para añadirlo a otra página:
 
 ```al
 part("IKA Mail Address Emails"; "IKA Mail Address Emails") { ApplicationArea = All; }
@@ -130,6 +148,7 @@ end;
 | Page | 99241 | IKA Mail Address Emails (FactBox *Emails enviados y recibidos*) |
 | Page | 99246 | IKA Mail Address Email List (lista completa) |
 | Page | 99251 | IKA Mail Address Filter (diálogo de filtros) |
+| PageExt | 99246–99281 | FactBoxes *Emails recibidos* / *Emails enviados* en pedidos, albaranes y facturas de venta y compra |
 | PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto); *Emails enviados y recibidos* en cliente, proveedor y contacto |
 | PermissionSet | 99201 | IKA Mail Workspace |
 

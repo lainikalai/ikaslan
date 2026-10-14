@@ -75,13 +75,17 @@ page 99201 "IKA Mail Setup"
             }
             group(AddressEmails)
             {
-                Caption = 'Emails en fichas (cliente, proveedor, contacto)';
+                Caption = 'Emails en fichas y documentos';
 
                 field("Address Emails Auto Load"; Rec."Address Emails Auto Load")
                 {
                     ApplicationArea = All;
                 }
                 field("Address Emails to Show"; Rec."Address Emails to Show")
+                {
+                    ApplicationArea = All;
+                }
+                field("Doc. Emails by Doc. No."; Rec."Doc. Emails by Doc. No.")
                 {
                     ApplicationArea = All;
                 }

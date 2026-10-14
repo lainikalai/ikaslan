@@ -69,6 +69,12 @@ table 99201 "IKA Mail Setup"
             MaxValue = 250;
             ToolTip = 'Máximo de emails que se muestran en el FactBox y en la lista "Emails enviados y recibidos".';
         }
+        field(92; "Doc. Emails by Doc. No."; Boolean)
+        {
+            Caption = 'Filtrar emails de documentos por nº';
+            InitValue = true;
+            ToolTip = 'En pedidos, albaranes y facturas, los FactBox de emails muestran solo los emails con el nº del documento (o el nº de pedido, o la referencia del cliente/proveedor) en el asunto. Desactivado, muestran todos los emails del cliente o proveedor.';
+        }
     }
 
     keys
