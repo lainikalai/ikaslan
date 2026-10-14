@@ -6,12 +6,70 @@ Extensión AL para Business Central 28 que trae el correo de **Outlook 365** a B
   otro tenant con credenciales propias. Cada usuario ve las cuentas compartidas y las suyas.
 - **Bandeja de correo**: listado de emails (no leídos en negrita), sincronización, *Cargar anteriores*,
   vistas *No leídos*, *Con adjuntos* y *Con adjuntos sin vincular*.
+- **Vista Outlook**: carpetas, emails y panel de lectura (que se puede ocultar) en una sola página.
+- **Carpetas de Outlook**: selector con el árbol completo de carpetas (subcarpetas a cualquier nivel, con sus
+  no leídos) y *Mover a carpeta* desde la bandeja o la ficha del email.
 - **Ficha del email**: cabecera, cuerpo HTML (con imágenes incrustadas), adjuntos, descarga del email en
   `.eml`, *Abrir en Outlook* y **Responder / Responder a todos / Reenviar** (con ficheros añadidos).
+- **Nuevo email** desde la cuenta (vista Outlook y bandeja): Para, CC, Asunto, Texto y ficheros; queda en
+  *Elementos enviados*.
 - **Adjuntar a entidades de BC** (cliente, proveedor, contacto, banco, recurso, producto, empleado, activo
   fijo, proyecto) **arrastrando** el email completo o sus adjuntos sobre una zona de destino.
 
-> ⚠️ Código generado sin compilar. `AL: Download Symbols` + `Ctrl+Shift+B` y corregir lo que indique el compilador.
+> ⚠️ Compilado con el compilador AL 18 (CodeCop, UICop y PerTenantExtensionCop) contra versiones **simuladas**
+> de los objetos estándar, no con los símbolos reales de BC 28: hacer `AL: Download Symbols` + `Ctrl+Shift+B` y
+> corregir lo que indique el compilador.
+
+## Vista Outlook
+
+Página **Correo Outlook 365 (vista Outlook)** (`IKA Mail Explorer`), en el menú *Correo Outlook 365 > Vista Outlook*
+y en la bandeja en lista. Es un control add-in (`src/controladdin/MailExplorer`) con tres paneles:
+
+| Carpetas | Emails de la carpeta | Panel de lectura |
+|---|---|---|
+| Árbol de Outlook con subcarpetas plegables y no leídos | Remitente, asunto, vista previa, fecha, 📎, ❗, 🔗 (adjuntado a BC); no leídos en negrita | Cabecera, adjuntos (clic = descargar), cuerpo en iframe aislado y acciones |
+
+- **Panel de lectura**: se muestra u oculta con el botón *Ocultar/Mostrar lectura* de la barra o con la acción
+  *Panel de lectura* (`Ctrl+Mayús+R`). Se recuerda por usuario. Con el panel oculto, las acciones del email
+  seleccionado aparecen encima de la lista y el email se abre con doble clic o Intro.
+- **Navegación**: clic o flechas ↑↓ para seleccionar; doble clic o Intro abre la ficha del email (la del arrastre
+  de adjuntos a clientes, proveedores...). *Adjuntar a BC…* también abre esa ficha.
+- **Nuevo email**: botón de la barra del panel o acción *Nuevo email*; se envía desde la cuenta que se está viendo.
+- **Acciones**: *Responder*, *A todos*, *Reenviar*, *Mover…*, *Eliminar*, *Marcar leído/no leído*, *Outlook* (Outlook Web) y *.eml*.
+- **Eliminar**, como en Outlook: acción *Eliminar* de la barra de BC, papelera de cada email de la lista (al pasar
+  el ratón o en el seleccionado), botón *Eliminar* del panel de lectura o tecla **Supr** en la lista:
+  - Fuera de *Elementos eliminados*, mueve el email a esa carpeta (se puede recuperar).
+  - En *Elementos eliminados*, lo borra de Outlook y de BC, previa confirmación. Lo que se adjuntó a entidades de BC
+    se conserva: los ficheros siguen en los documentos adjuntos y el vínculo guarda asunto, remitente y fecha.
+  - Después se selecciona el email siguiente, para poder eliminar varios seguidos.
+- **Sincronizar** descarga los últimos emails de la carpeta; *Cargar anteriores* (al final de la lista) los más antiguos.
+  La primera vez que se abre una carpeta se descargan solos.
+- **Buscar** filtra al momento los emails ya descargados de la carpeta (remitente, asunto y vista previa, sin
+  distinguir mayúsculas ni acentos).
+- Si hay varias cuentas, se elige en el desplegable de la barra. Se recuerdan la cuenta y la carpeta de cada usuario
+  (tabla `IKA Mail User Setting`).
+- Al abrir un email en el panel de lectura se marca como leído si así está en la configuración (*Marcar como leído al
+  abrir*), igual que en la ficha.
+- En pantallas estrechas (tablet, móvil) las carpetas se despliegan con ☰ y el email se lee a pantalla completa con
+  *← Volver a la lista*.
+- Se muestran los 500 emails más recientes de la carpeta.
+
+## Carpetas
+
+- En *Correo Outlook 365*, **Carpeta...** (`Ctrl+Mayús+F`) muestra el árbol de carpetas de la cuenta, en el orden
+  de Outlook (bandeja de entrada, borradores, enviados, eliminados, no deseado, archivo y después el resto por
+  nombre) y con sus no leídos. Al elegir una, la bandeja muestra sus emails; la primera vez se descargan solos.
+  *Sincronizar* y *Cargar anteriores* trabajan sobre la carpeta que se está viendo.
+- **Carpeta por defecto** vuelve a la carpeta con la que se abre la bandeja: el campo *Carpeta* de la cuenta, que
+  ahora también se puede elegir del árbol (asistente de búsqueda en *Cuentas de Outlook 365*).
+- El árbol se descarga la primera vez que se abre el selector; *Actualizar carpetas* (F5 en el selector) lo vuelve
+  a leer si se crean, renombran o borran carpetas en Outlook.
+- **Mover a carpeta...** mueve en Outlook los emails seleccionados (o el email abierto en la ficha).
+- Se piden a Graph **Id inmutables**, que no cambian al mover un email: un email movido en Outlook se actualiza
+  (cambia de carpeta) en lugar de duplicarse. Los emails ya guardados antes de esta versión no tienen carpeta: se
+  tratan como de la carpeta por defecto y se actualizan solos al sincronizar.
+- *Todas mis cuentas* muestra los emails de todas las carpetas; la columna *Carpeta* (oculta por defecto) indica
+  de cuál es cada uno.
 
 ## Cómo funciona el drag & drop
 
@@ -130,14 +188,18 @@ end;
 | Table | 99221 | IKA Mail Link (email/adjunto → entidad) |
 | Table | 99226 | IKA Mail Pinned Target (destinos fijados por usuario) |
 | Table | 99231 / 99236 | IKA Mail Drop Target / Compose File (temporales) |
+| Table | 99241 | IKA Mail Folder (árbol de carpetas de Outlook de cada cuenta) |
+| Table | 99251 | IKA Mail User Setting (panel de lectura, última cuenta y carpeta de cada usuario) |
 | Enum | 99201–99216 | Entity Type, Compose Mode, Target Kind, Account Type |
-| Codeunit | 99201 | IKA Mail Graph Client (sincronizar, detalle, adjuntos, .eml, leído, responder/reenviar) |
+| Codeunit | 99201 | IKA Mail Graph Client (sincronizar, carpetas, mover, detalle, adjuntos, .eml, leído, responder/reenviar) |
 | Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
 | Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
 | Codeunit | 99216 | IKA Mail Json Helper |
 | Enum | 99221 | IKA Mail Address Direction (Todos / Recibidos / Enviados) |
-| Codeunit | 99221 | IKA Mail Address Search (búsqueda por dirección/asunto en Outlook) |
+| Codeunit | 99221 | IKA Mail Explorer Mgt. (datos y acciones de la vista Outlook) |
+| Codeunit | 99226 | IKA Mail Address Search (búsqueda por dirección/asunto en Outlook) |
 | ControlAddIn | — | IKA Mail Workspace (`src/controladdin/MailWorkspace`) |
+| ControlAddIn | — | IKA Mail Explorer (`src/controladdin/MailExplorer`) |
 | Page | 99201 | IKA Mail Setup |
 | Page | 99206 | IKA Mail Mailboxes (*Cuentas de Outlook 365*) |
 | Page | 99211 | IKA Mail Messages (*Correo Outlook 365*) |
@@ -145,11 +207,14 @@ end;
 | Page | 99221 | IKA Mail Compose (responder / reenviar) |
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
-| Page | 99241 | IKA Mail Address Emails (FactBox *Emails enviados y recibidos*) |
-| Page | 99246 | IKA Mail Address Email List (lista completa) |
-| Page | 99251 | IKA Mail Address Filter (diálogo de filtros) |
-| PageExt | 99246–99281 | FactBoxes *Emails recibidos* / *Emails enviados* en pedidos, albaranes y facturas de venta y compra |
-| PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto); *Emails enviados y recibidos* en cliente, proveedor y contacto |
+| Page | 99241 | IKA Mail Folders (selector de carpetas en árbol) |
+| Page | 99246 | IKA Mail Address Email List (lista completa de emails enviados y recibidos) |
+| Page | 99251 | IKA Mail Explorer (*Correo Outlook 365 (vista Outlook)*) |
+| Page | 99256 | IKA Mail Address Emails (FactBoxes *Emails recibidos* / *Emails enviados*) |
+| Page | 99261 | IKA Mail Address Filter (diálogo de filtros) |
+| PageExt | 99246 | Área de trabajo *Gerente de empresa*: sección **Correo Outlook 365** en el menú (configuración, vista Outlook, bandeja, no leídos, con adjuntos sin vincular, vínculos, cuentas), junto a la de *Agentes (Claude)* de AGENTEAK |
+| PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto); *Emails recibidos* / *Emails enviados* en cliente, proveedor y contacto |
+| PageExt | 99251–99286 | FactBoxes *Emails recibidos* / *Emails enviados* en pedidos, albaranes y facturas de venta y compra |
 | PermissionSet | 99201 | IKA Mail Workspace |
 
 Para añadir otro tipo de entidad: un valor en el enum `IKA Mail Entity Type` y un caso en cada procedimiento de
@@ -169,7 +234,8 @@ suscriptor `DocumentAttachmentOnAfterInitFieldsFromRecRef` de `IKA Mail Attach M
    administrador da de alta los buzones compartidos. Para una cuenta de otro tenant: *Credenciales propias* +
    Tenant Id, Client Id y *Establecer secreto propio*. *Probar conexión* y *Sincronizar*.
 5. Asignar el conjunto de permisos **IKA Mail Workspace** a los usuarios.
-6. Abrir *Correo Outlook 365* (búsqueda "Correo") → abrir un email → arrastrar.
+6. Abrir *Correo Outlook 365* desde el menú **Correo Outlook 365** del Área de trabajo *Gerente de empresa*
+   (o con la búsqueda "Correo") → abrir un email → arrastrar.
 
 ## Consideraciones
 

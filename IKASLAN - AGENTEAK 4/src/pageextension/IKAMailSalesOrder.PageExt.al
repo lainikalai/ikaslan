@@ -1,4 +1,4 @@
-pageextension 99246 "IKA Mail Sales Order" extends "Sales Order"
+pageextension 99286 "IKA Mail Sales Order" extends "Sales Order"
 {
     // FactBoxes "Emails recibidos" y "Emails enviados": emails con el cliente (y el contacto del documento)
     // cuyo asunto contiene el nº del pedido o la referencia del cliente.

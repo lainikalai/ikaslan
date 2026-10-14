@@ -36,6 +36,22 @@ page 99206 "IKA Mail Mailboxes"
                 field(Folder; Rec.Folder)
                 {
                     ApplicationArea = All;
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        MailFolder: Record "IKA Mail Folder";
+                        SelectedFolder: Record "IKA Mail Folder";
+                    begin
+                        CurrPage.SaveRecord();
+                        if not MailFolder.SelectFolder(Rec.Code, Rec."Folder Id", SelectedFolder) then
+                            exit(false);
+                        // Se asigna aquí el Id: la ruta puede no caber entera en el campo Carpeta
+                        Rec.Validate(Folder, CopyStr(SelectedFolder.Path, 1, MaxStrLen(Rec.Folder)));
+                        Rec.SetFolderId(SelectedFolder."Folder Id");
+                        Rec.Modify(true);
+                        CurrPage.Update(false);
+                        exit(false);
+                    end;
                 }
                 field("Restricted to User ID"; Rec."Restricted to User ID")
                 {

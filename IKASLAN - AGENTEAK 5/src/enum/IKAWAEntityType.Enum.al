@@ -19,4 +19,8 @@ enum 99316 "IKA WA Entity Type"
     {
         Caption = 'Contacto';
     }
+    value(40; SalespersonPurchaser)
+    {
+        Caption = 'Vendedor/Comprador';
+    }
 }

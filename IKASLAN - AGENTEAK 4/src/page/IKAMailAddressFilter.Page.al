@@ -1,4 +1,4 @@
-page 99251 "IKA Mail Address Filter"
+page 99261 "IKA Mail Address Filter"
 {
     // Diálogo para cambiar los filtros del FactBox "Emails enviados y recibidos".
     Caption = 'Filtrar emails';

@@ -1,4 +1,4 @@
-page 99241 "IKA Mail Address Emails"
+page 99256 "IKA Mail Address Emails"
 {
     // FactBox con los emails enviados y recibidos con una dirección, buscados en Outlook 365 (todas las
     // carpetas de las cuentas a las que tiene acceso el usuario). La página que lo contiene le pasa la

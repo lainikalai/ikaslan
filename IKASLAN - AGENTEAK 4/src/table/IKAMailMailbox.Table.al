@@ -43,7 +43,18 @@ table 99206 "IKA Mail Mailbox"
         {
             Caption = 'Carpeta';
             InitValue = 'inbox';
-            ToolTip = 'inbox, sentitems, archive... o el nombre de una subcarpeta de la bandeja de entrada.';
+            ToolTip = 'Carpeta que se muestra al abrir la bandeja: elíjala de la lista de carpetas de Outlook, o escriba inbox, sentitems, archive... o el nombre de una subcarpeta de la bandeja de entrada.';
+
+            trigger OnValidate()
+            begin
+                SetFolderId(FindFolderIdByName(Folder));
+            end;
+        }
+        field(31; "Folder Id"; Text[250])
+        {
+            Caption = 'Id carpeta (Graph)';
+            Editable = false;
+            ToolTip = 'Id de Outlook de la carpeta por defecto. Se obtiene al elegir la carpeta o en la primera sincronización.';
         }
         field(40; "Restricted to User ID"; Code[50])
         {
@@ -98,10 +109,54 @@ table 99206 "IKA Mail Mailbox"
     trigger OnDelete()
     var
         MailMessage: Record "IKA Mail Message";
+        MailFolder: Record "IKA Mail Folder";
     begin
         MailMessage.SetRange("Mailbox Code", Code);
         MailMessage.DeleteAll(true);
+        MailFolder.SetRange("Mailbox Code", Code);
+        MailFolder.DeleteAll();
         SetClientSecret('');
+    end;
+
+    /// <summary>
+    /// Cambia la carpeta por defecto. Los emails guardados sin carpeta (anteriores al selector de carpetas)
+    /// eran de la carpeta por defecto anterior: se les asigna antes del cambio.
+    /// </summary>
+    procedure SetFolderId(NewFolderId: Text)
+    var
+        MailMessage: Record "IKA Mail Message";
+    begin
+        if NewFolderId = "Folder Id" then
+            exit;
+        if "Folder Id" <> '' then begin
+            MailMessage.SetRange("Mailbox Code", Code);
+            MailMessage.SetRange("Folder Id", '');
+            MailMessage.ModifyAll("Folder Id", "Folder Id");
+        end;
+        "Folder Id" := CopyStr(NewFolderId, 1, MaxStrLen("Folder Id"));
+    end;
+
+    /// <summary>
+    /// Id de la carpeta ya descargada con esa ruta o, si el nombre es único, con ese nombre. '' si no se sabe:
+    /// se resolverá con Graph en la próxima sincronización.
+    /// </summary>
+    local procedure FindFolderIdByName(FolderName: Text): Text[250]
+    var
+        MailFolder: Record "IKA Mail Folder";
+    begin
+        if FolderName = '' then
+            exit('');
+        MailFolder.SetRange("Mailbox Code", Code);
+        MailFolder.SetRange(Path, CopyStr(FolderName, 1, MaxStrLen(MailFolder.Path)));
+        if MailFolder.FindFirst() then
+            exit(MailFolder."Folder Id");
+        MailFolder.SetRange(Path);
+        MailFolder.SetRange("Display Name", CopyStr(FolderName, 1, MaxStrLen(MailFolder."Display Name")));
+        if MailFolder.Count() = 1 then begin
+            MailFolder.FindFirst();
+            exit(MailFolder."Folder Id");
+        end;
+        exit('');
     end;
 
     var

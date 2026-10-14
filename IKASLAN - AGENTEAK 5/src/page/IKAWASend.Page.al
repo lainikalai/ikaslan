@@ -318,6 +318,14 @@ page 99341 "IKA WA Send"
         UpdateConversationInfo();
     end;
 
+    /// <summary>
+    /// Texto libre propuesto (se puede editar). Con la ventana cerrada sirve para "Abrir en mi WhatsApp".
+    /// </summary>
+    procedure SetFreeText(NewFreeText: Text)
+    begin
+        FreeText := NewFreeText;
+    end;
+
     local procedure UpdateConversationInfo()
     var
         Conversation: Record "IKA WA Conversation";
@@ -384,9 +392,7 @@ page 99341 "IKA WA Send"
         PhoneNo := CopyStr(PhoneMgt.NormalizePhone(PhoneNo), 1, MaxStrLen(PhoneNo));
         if Conversation.FindOrCreate(AccountCode, PhoneNo) or (Conversation."Entity No." = '') then
             if EntityNo <> '' then begin
-                Conversation."Entity Type" := EntityType;
-                Conversation."Entity No." := EntityNo;
-                Conversation."Entity Name" := RecipientName;
+                Conversation.SetEntity(EntityType, EntityNo);
                 Conversation.Modify();
             end;
 

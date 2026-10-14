@@ -1,8 +1,8 @@
 page 99221 "IKA Mail Compose"
 {
-    // Responder / responder a todos / reenviar. Outlook genera el borrador con el email original
-    // citado (y, al reenviar, con sus adjuntos); aquí solo se escribe el texto, se ajustan los
-    // destinatarios y se añaden ficheros.
+    // Nuevo email, responder, responder a todos y reenviar. Al responder o reenviar, Outlook genera el
+    // borrador con el email original citado (y, al reenviar, con sus adjuntos); aquí solo se escribe el
+    // texto, se ajustan los destinatarios y se añaden ficheros.
     Caption = 'Redactar';
     PageType = Card;
     UsageCategory = None;
@@ -20,6 +20,14 @@ page 99221 "IKA Mail Compose"
                     ApplicationArea = All;
                     Caption = 'Acción';
                     Editable = false;
+                    ToolTip = 'Nuevo email, responder, responder a todos o reenviar.';
+                }
+                field(FromText; FromText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'De';
+                    Editable = false;
+                    ToolTip = 'Cuenta de Outlook 365 desde la que se envía.';
                 }
                 field(ToText; ToText)
                 {
@@ -36,15 +44,15 @@ page 99221 "IKA Mail Compose"
                 {
                     ApplicationArea = All;
                     Caption = 'Asunto';
-                    Editable = false;
-                    ToolTip = 'Outlook pone el asunto automáticamente (RE: / RV:).';
+                    Editable = IsNewMail;
+                    ToolTip = 'En un email nuevo, escriba el asunto. Al responder o reenviar, Outlook lo pone automáticamente (RE: / RV:).';
                 }
                 field(CommentText; CommentText)
                 {
                     ApplicationArea = All;
                     Caption = 'Texto';
                     MultiLine = true;
-                    ToolTip = 'Se añade encima del email original citado.';
+                    ToolTip = 'Texto del email. Al responder o reenviar, se añade encima del email original citado.';
                 }
                 field(FilesText; FilesText)
                 {
@@ -66,14 +74,21 @@ page 99221 "IKA Mail Compose"
                 ApplicationArea = All;
                 Caption = 'Enviar';
                 Image = SendMail;
-                ToolTip = 'Envía la respuesta desde la cuenta de Outlook. Quedará en Elementos enviados.';
+                ToolTip = 'Envía el email desde la cuenta de Outlook. Quedará en Elementos enviados.';
 
                 trigger OnAction()
                 var
                     GraphClient: Codeunit "IKA Mail Graph Client";
                     SentMsg: Label 'Email enviado.';
+                    NoSubjectQst: Label 'El email no tiene asunto. ¿Enviarlo igualmente?';
                 begin
-                    GraphClient.SendCompose(MailMessage, Mode, ToText, CcText, CommentText, TempComposeFile);
+                    if IsNewMail then begin
+                        if DelChr(SubjectText, '<>', ' ') = '' then
+                            if not Confirm(NoSubjectQst, false) then
+                                exit;
+                        GraphClient.SendNewMail(MailboxCode, ToText, CcText, SubjectText, CommentText, TempComposeFile);
+                    end else
+                        GraphClient.SendCompose(MailMessage, Mode, ToText, CcText, CommentText, TempComposeFile);
                     Message(SentMsg);
                     CurrPage.Close();
                 end;
@@ -141,6 +156,9 @@ page 99221 "IKA Mail Compose"
         MailMessage: Record "IKA Mail Message";
         TempComposeFile: Record "IKA Mail Compose File" temporary;
         Mode: Enum "IKA Mail Compose Mode";
+        MailboxCode: Code[20];
+        IsNewMail: Boolean;
+        FromText: Text;
         ToText: Text;
         CcText: Text;
         SubjectText: Text;
@@ -154,6 +172,8 @@ page 99221 "IKA Mail Compose"
         MailMessage := NewMailMessage;
         Mode := NewMode;
         Mailbox.Get(MailMessage."Mailbox Code");
+        MailboxCode := Mailbox.Code;
+        FromText := Mailbox.Address;
         case Mode of
             Mode::Reply:
                 begin
@@ -170,6 +190,23 @@ page 99221 "IKA Mail Compose"
             Mode::Forward:
                 SubjectText := 'RV: ' + MailMessage.Subject;
         end;
+    end;
+
+    /// <summary>
+    /// Email nuevo desde la cuenta indicada (opcionalmente con destinatario y asunto propuestos).
+    /// </summary>
+    procedure SetNewMail(NewMailboxCode: Code[20]; NewToText: Text; NewSubjectText: Text)
+    var
+        Mailbox: Record "IKA Mail Mailbox";
+    begin
+        Mailbox.Get(NewMailboxCode);
+        Mailbox.CheckAccess();
+        Mode := Mode::New;
+        IsNewMail := true;
+        MailboxCode := Mailbox.Code;
+        FromText := Mailbox.Address;
+        ToText := NewToText;
+        SubjectText := NewSubjectText;
     end;
 
     local procedure FormatAddress(Name: Text; Address: Text): Text

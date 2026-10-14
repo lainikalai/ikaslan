@@ -1,0 +1,34 @@
+{
+  "id": "626ece17-8210-4fcd-8a9b-2750c398baaf",
+  "name": "Ikaslan Agents (Claude)",
+  "publisher": "PUBLISHER",
+  "version": "2.0.0.0",
+  "brief": "Agentes con Claude: pedidos de venta desde emails de clientes y recepción de albaranes de proveedores.",
+  "description": "Lee emails de buzones de Outlook (Microsoft Graph) y ficheros de SharePoint/OneDrive. Pedidos de clientes: extrae cliente, productos y cantidades con Claude y crea pedidos de venta. Albaranes de proveedores: extrae proveedor, nº de albarán, pedidos y líneas, los concilia con los pedidos de compra abiertos y prepara o registra la recepción. Configuración, cuentas de correo y filtros comunes.",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "28.0.0.0",
+  "application": "28.0.0.0",
+  "idRanges": [
+    {
+      "from": 99001,
+      "to": 99200
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": false,
+    "includeSourceInSymbolFile": false
+  },
+  "features": [
+    "NoImplicitWith",
+    "TranslationFile"
+  ],
+  "runtime": "15.0",
+  "target": "Cloud"
+}

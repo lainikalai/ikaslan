@@ -1,4 +1,4 @@
-codeunit 99221 "IKA Mail Address Search"
+codeunit 99226 "IKA Mail Address Search"
 {
     // Emails enviados y recibidos con una o varias direcciones (y, opcionalmente, un texto en el asunto),
     // buscados en Outlook 365 en todas las cuentas a las que tiene acceso el usuario.
