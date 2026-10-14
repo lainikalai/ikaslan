@@ -147,29 +147,26 @@ codeunit 99201 "IKA Mail Graph Client"
     // =====================================================================
 
     /// <summary>
-    /// Busca en todas las carpetas de la cuenta (recibidos, enviados, archivados...) con una consulta KQL
-    /// de Graph ($search), p.ej. participants:ana@cliente.com AND subject:pedido, y añade los resultados
-    /// a la tabla temporal. No toca la caché local. Los borradores se descartan y, si el mismo email
-    /// ya está en el resultado (otra cuenta), no se repite.
+    /// GET {cuenta}{RelativePath}?{QueryText}&amp;$select=... y añade los emails a la tabla temporal.
+    /// RelativePath: '/messages' (todas las carpetas) o '/mailFolders/sentitems/messages'.
+    /// QueryText: $search, $filter, $orderby y $top ya codificados. No toca la caché local.
+    /// Los borradores se descartan y, si el mismo email ya está en el resultado (por otra consulta
+    /// u otra cuenta), no se repite. Devuelve cuántos emails nuevos se han añadido.
     /// </summary>
-    procedure SearchMessages(var Mailbox: Record "IKA Mail Mailbox"; KqlQuery: Text; MaxResults: Integer; var TempMailMessage: Record "IKA Mail Message" temporary): Integer
+    procedure ListMessages(var Mailbox: Record "IKA Mail Mailbox"; RelativePath: Text; QueryText: Text; var TempMailMessage: Record "IKA Mail Message" temporary): Integer
     var
         ResponseJson: JsonObject;
         MessageArray: JsonArray;
         MessageToken: JsonToken;
         MessageJson: JsonObject;
         InternetMessageId: Text;
-        Url: Text;
+        GraphId: Text;
+        IsNew: Boolean;
         NextEntryNo: Integer;
         FoundCount: Integer;
     begin
         SetMailbox(Mailbox);
-        // $search ordena por fecha (más recientes primero) y no admite $orderby ni $filter
-        Url := GetMailboxUrl() + '/messages' +
-            '?$search=' + UriHelper.EscapeDataString('"' + KqlQuery + '"') +
-            '&$top=' + Format(MaxResults) +
-            '&$select=' + MessageSelectTok + ',isDraft';
-        ResponseJson := SendGraphRequest('GET', Url, '');
+        ResponseJson := SendGraphRequest('GET', GetMailboxUrl() + RelativePath + '?' + QueryText + '&$select=' + MessageSelectTok + ',isDraft', '');
         if not JsonHelper.GetArray(ResponseJson, 'value', MessageArray) then
             exit(0);
 
@@ -180,18 +177,23 @@ codeunit 99201 "IKA Mail Graph Client"
             MessageJson := MessageToken.AsObject();
             if not JsonHelper.GetBoolean(MessageJson, 'isDraft') then begin
                 InternetMessageId := JsonHelper.GetText(MessageJson, 'internetMessageId');
-                TempMailMessage.SetRange("Internet Message Id", CopyStr(InternetMessageId, 1, MaxStrLen(TempMailMessage."Internet Message Id")));
-                if (InternetMessageId = '') or TempMailMessage.IsEmpty() then begin
+                GraphId := JsonHelper.GetText(MessageJson, 'id');
+                if InternetMessageId <> '' then
+                    TempMailMessage.SetRange("Internet Message Id", CopyStr(InternetMessageId, 1, MaxStrLen(TempMailMessage."Internet Message Id")))
+                else
+                    TempMailMessage.SetRange("Graph Id", CopyStr(GraphId, 1, MaxStrLen(TempMailMessage."Graph Id")));
+                IsNew := TempMailMessage.IsEmpty();
+                TempMailMessage.Reset();
+                if IsNew then begin
                     NextEntryNo += 1;
                     TempMailMessage.Init();
                     TempMailMessage."Entry No." := NextEntryNo;
                     TempMailMessage."Mailbox Code" := Mailbox.Code;
-                    TempMailMessage."Graph Id" := CopyStr(JsonHelper.GetText(MessageJson, 'id'), 1, MaxStrLen(TempMailMessage."Graph Id"));
+                    TempMailMessage."Graph Id" := CopyStr(GraphId, 1, MaxStrLen(TempMailMessage."Graph Id"));
                     TransferMessageFields(TempMailMessage, MessageJson);
                     TempMailMessage.Insert();
                     FoundCount += 1;
                 end;
-                TempMailMessage.SetRange("Internet Message Id");
             end;
         end;
         exit(FoundCount);

@@ -60,9 +60,14 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 En las fichas de **cliente**, **proveedor** y **contacto** hay un FactBox con los emails enviados y recibidos
 con el email de la ficha (en el contacto, *Correo electrónico* y *Correo electrónico 2*):
 
-- Se busca **en Outlook 365**, en todas las carpetas (bandeja de entrada, enviados, archivo, subcarpetas...) de
-  todas las cuentas a las que tiene acceso el usuario, no solo en los emails sincronizados en BC.
-  Se usa `$search` de Graph con `participants:` (De, Para, CC y CCO).
+- Se busca **en Outlook 365**, no solo en los emails sincronizados en BC, en todas las cuentas a las que
+  tiene acceso el usuario. En cada cuenta se juntan tres consultas de Graph (sin repetir emails):
+  1. **Recibidos**: `$filter` remitente = la dirección, en todas las carpetas.
+  2. **Enviados**: `$filter` destinatario (Para) = la dirección, en *Elementos enviados*.
+  3. **Búsqueda**: `$search participants:` (De, Para, CC, CCO; todas las carpetas). Cubre los dominios y las copias,
+     pero depende del índice de Outlook, que puede tardar unos minutos en incluir un email nuevo.
+  Si una consulta falla, las demás siguen. *Detalle de la búsqueda* muestra cada consulta, cuántos emails ha
+  devuelto y los errores.
 - Filtros editables en el propio FactBox (y con *Cambiar filtros*): **Email** (una o varias direcciones separadas
   por `;`; `@cliente.com` para todo el dominio) y **Asunto** (palabras que debe contener; `pedi*` para prefijos).
   *Restablecer filtros* vuelve a los de la ficha.

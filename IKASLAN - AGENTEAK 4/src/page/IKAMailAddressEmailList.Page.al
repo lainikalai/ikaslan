@@ -160,6 +160,18 @@ page 99246 "IKA Mail Address Email List"
                     AddressSearch.OpenInOutlook(Rec);
                 end;
             }
+            action(SearchDetails)
+            {
+                ApplicationArea = All;
+                Caption = 'Detalle de la búsqueda';
+                Image = ViewDetails;
+                ToolTip = 'Muestra qué consultas se han hecho en cada cuenta de Outlook, cuántos emails ha devuelto cada una y los errores. Útil si no aparece un email que debería.';
+
+                trigger OnAction()
+                begin
+                    Message(AddressSearch.GetSearchLog());
+                end;
+            }
         }
         area(Promoted)
         {
