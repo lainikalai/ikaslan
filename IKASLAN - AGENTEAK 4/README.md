@@ -88,7 +88,7 @@ Los mismos dos FactBoxes están en **pedido de venta**, **factura de venta**, **
 **histórico de facturas de venta**, **pedido de compra**, **factura de compra**, **histórico de albaranes de compra**
 e **histórico de facturas de compra**:
 
-| Documento | Email | Asunto (alternativas separadas por `|`) |
+| Documento | Email | Asunto (alternativas) |
 |---|---|---|
 | Pedido / factura de venta | Cliente (*Venta a*) + contacto del documento | Nº · Nº documento externo |
 | Hist. albarán / factura de venta | Cliente (*Venta a*) + contacto | Nº · Nº pedido · Nº documento externo |
