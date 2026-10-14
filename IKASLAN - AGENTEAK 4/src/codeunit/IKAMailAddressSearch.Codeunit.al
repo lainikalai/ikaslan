@@ -24,6 +24,7 @@ codeunit 99221 "IKA Mail Address Search"
         UriHelper: Codeunit Uri;
         AddressFilter: Text;
         SubjectFilter: Text;
+        Direction: Enum "IKA Mail Address Direction";
         SearchLog: Text;
         FirstError: Text;
         MailboxCount: Integer;
@@ -34,11 +35,13 @@ codeunit 99221 "IKA Mail Address Search"
         NotConfiguredLbl: Label 'Falta la configuración de correo Outlook 365.';
         SearchErrLbl: Label 'No se pudo buscar en Outlook: %1', Comment = '%1 = error';
         ResultLbl: Label 'Recibidos: %1 · Enviados: %2 (%3 cuentas)', Comment = '%1 = received, %2 = sent, %3 = mailboxes';
+        ResultOneLbl: Label '%1 emails', Comment = '%1 = count';
+        ResultOneMaxLbl: Label 'Últimos %1 emails', Comment = '%1 = count';
         ResultMaxLbl: Label 'Últimos %1 emails. Recibidos: %2 · Enviados: %3 (%4 cuentas)', Comment = '%1 = total, %2 = received, %3 = sent, %4 = mailboxes';
         QueryErrorsLbl: Label ' · %1 consultas con error (ver "Detalle de la búsqueda")', Comment = '%1 = count';
         NoAccessErr: Label 'No tiene acceso a la cuenta %1.', Comment = '%1 = mailbox';
         NoSearchYetLbl: Label 'Todavía no se ha buscado.';
-        LogHeaderLbl: Label 'Email: %1 · Asunto: %2', Comment = '%1 = address filter, %2 = subject filter';
+        LogHeaderLbl: Label 'Email: %1 · Asunto: %2 · %3', Comment = '%1 = address filter, %2 = subject filter, %3 = Todos/Recibidos/Enviados';
         LogQueryOkLbl: Label '%1 (%2) - %3: %4 emails nuevos', Comment = '%1 = mailbox, %2 = address, %3 = query, %4 = count';
         LogQueryErrLbl: Label '%1 (%2) - %3: ERROR %4', Comment = '%1 = mailbox, %2 = address, %3 = query, %4 = error';
         LogSubjectLbl: Label 'Descartados por el asunto: %1', Comment = '%1 = count';
@@ -47,9 +50,18 @@ codeunit 99221 "IKA Mail Address Search"
         QuerySearchLbl: Label 'búsqueda';
 
     /// <summary>
-    /// Busca y deja los resultados en TempMailMessage (borra lo que tuviera). Devuelve el texto de estado.
+    /// Busca enviados y recibidos y deja los resultados en TempMailMessage (borra lo que tuviera).
+    /// Devuelve el texto de estado.
     /// </summary>
     procedure RunSearch(NewAddressFilter: Text; NewSubjectFilter: Text; var TempMailMessage: Record "IKA Mail Message" temporary): Text
+    begin
+        exit(RunSearch(NewAddressFilter, NewSubjectFilter, Direction::All, TempMailMessage));
+    end;
+
+    /// <summary>
+    /// Igual, pero solo los recibidos o solo los enviados (NewDirection); así no se lanza la consulta que no hace falta.
+    /// </summary>
+    procedure RunSearch(NewAddressFilter: Text; NewSubjectFilter: Text; NewDirection: Enum "IKA Mail Address Direction"; var TempMailMessage: Record "IKA Mail Message" temporary): Text
     var
         Setup: Record "IKA Mail Setup";
     begin
@@ -57,6 +69,7 @@ codeunit 99221 "IKA Mail Address Search"
         TempMailMessage.DeleteAll();
         AddressFilter := NewAddressFilter;
         SubjectFilter := NewSubjectFilter;
+        Direction := NewDirection;
         SearchLog := '';
         if BuildQuery(AddressFilter, SubjectFilter) = '' then
             exit(NoFilterLbl);
@@ -100,10 +113,16 @@ codeunit 99221 "IKA Mail Address Search"
         TempResult.SetRange("Is Sent", true);
         SentCount := TempResult.Count();
         TempResult.Reset();
-        if TotalCount >= GetMaxResults() then
-            StatusText := StrSubstNo(ResultMaxLbl, TotalCount, TotalCount - SentCount, SentCount, MailboxCount)
-        else
-            StatusText := StrSubstNo(ResultLbl, TotalCount - SentCount, SentCount, MailboxCount);
+        if Direction <> Direction::All then begin
+            if TotalCount >= GetMaxResults() then
+                StatusText := StrSubstNo(ResultOneMaxLbl, TotalCount)
+            else
+                StatusText := StrSubstNo(ResultOneLbl, TotalCount);
+        end else
+            if TotalCount >= GetMaxResults() then
+                StatusText := StrSubstNo(ResultMaxLbl, TotalCount, TotalCount - SentCount, SentCount, MailboxCount)
+            else
+                StatusText := StrSubstNo(ResultLbl, TotalCount - SentCount, SentCount, MailboxCount);
         if QueryErrorCount > 0 then
             StatusText += StrSubstNo(QueryErrorsLbl, QueryErrorCount);
         exit(StatusText);
@@ -140,7 +159,7 @@ codeunit 99221 "IKA Mail Address Search"
         if AllowedFilter = '' then
             Error(NoMailboxErr);
 
-        AddLog(StrSubstNo(LogHeaderLbl, AddressFilter, SubjectFilter));
+        AddLog(StrSubstNo(LogHeaderLbl, AddressFilter, SubjectFilter, Format(Direction)));
         MaxResults := GetMaxResults();
         TopText := '&$top=' + Format(MaxResults);
         ExactAddresses := GetExactAddresses(AddressFilter);
@@ -150,14 +169,14 @@ codeunit 99221 "IKA Mail Address Search"
         if Mailbox.FindSet() then
             repeat
                 MailboxCount += 1;
-                if FromFilter <> '' then begin
-                    // $orderby solo se admite si su campo va primero en el $filter
+                // $orderby solo se admite si su campo va primero en el $filter
+                if (FromFilter <> '') and (Direction <> Direction::Sent) then
                     RunQuery(GraphClient, Mailbox, QueryReceivedLbl, '/messages',
                         '$filter=' + UriHelper.EscapeDataString('receivedDateTime ge 1900-01-01T00:00:00Z and (' + FromFilter + ')') +
                         '&$orderby=receivedDateTime%20desc' + TopText);
+                if (ToFilter <> '') and (Direction <> Direction::Received) then
                     RunQuery(GraphClient, Mailbox, QuerySentLbl, '/mailFolders/sentitems/messages',
                         '$filter=' + UriHelper.EscapeDataString(ToFilter) + TopText);
-                end;
                 RunQuery(GraphClient, Mailbox, QuerySearchLbl, '/messages',
                     '$search=' + UriHelper.EscapeDataString('"' + KqlQuery + '"') + TopText);
             until Mailbox.Next() = 0;
@@ -165,8 +184,20 @@ codeunit 99221 "IKA Mail Address Search"
         // Si no ha funcionado ninguna consulta, el error se muestra en el estado
         if (QueryOkCount = 0) and (FirstError <> '') then
             Error(FirstError);
+        ApplyDirectionFilter();
         ApplySubjectFilter();
         KeepNewest(MaxResults);
+    end;
+
+    local procedure ApplyDirectionFilter()
+    begin
+        // $search devuelve enviados y recibidos: se quitan los que no tocan
+        if Direction = Direction::All then
+            exit;
+        TempResult.Reset();
+        TempResult.SetRange("Is Sent", Direction = Direction::Received);
+        TempResult.DeleteAll();
+        TempResult.Reset();
     end;
 
     local procedure RunQuery(var GraphClient: Codeunit "IKA Mail Graph Client"; var Mailbox: Record "IKA Mail Mailbox"; QueryName: Text; RelativePath: Text; QueryText: Text)

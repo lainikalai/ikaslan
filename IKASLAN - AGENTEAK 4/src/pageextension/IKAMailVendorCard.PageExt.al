@@ -4,9 +4,15 @@ pageextension 99206 "IKA Mail Vendor Card" extends "Vendor Card"
     {
         addfirst(factboxes)
         {
-            part("IKA Mail Address Emails"; "IKA Mail Address Emails")
+            part("IKA Mail Received Emails"; "IKA Mail Address Emails")
             {
                 ApplicationArea = All;
+                Caption = 'Emails recibidos';
+            }
+            part("IKA Mail Sent Emails"; "IKA Mail Address Emails")
+            {
+                ApplicationArea = All;
+                Caption = 'Emails enviados';
             }
             part("IKA Mail Linked Emails"; "IKA Mail Linked Emails")
             {
@@ -18,7 +24,8 @@ pageextension 99206 "IKA Mail Vendor Card" extends "Vendor Card"
 
     trigger OnAfterGetCurrRecord()
     begin
-        // Emails enviados y recibidos con el email de la ficha (vacío = el usuario escribe uno en el FactBox)
-        CurrPage."IKA Mail Address Emails".Page.SetContext(Rec."E-Mail", '');
+        // Emails recibidos y enviados (dos FactBoxes) con el email de la ficha (vacío = el usuario escribe uno en el FactBox)
+        CurrPage."IKA Mail Received Emails".Page.SetContext(Rec."E-Mail", '', Enum::"IKA Mail Address Direction"::Received);
+        CurrPage."IKA Mail Sent Emails".Page.SetContext(Rec."E-Mail", '', Enum::"IKA Mail Address Direction"::Sent);
     end;
 }

@@ -55,10 +55,12 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 - **Al revés**: en las fichas de cliente, proveedor, contacto, banco, recurso, producto, empleado, activo y proyecto
   se añade el FactBox **Emails vinculados**, desde el que se abre el email de origen.
 
-## FactBox "Emails enviados y recibidos"
+## FactBoxes "Emails recibidos" y "Emails enviados"
 
-En las fichas de **cliente**, **proveedor** y **contacto** hay un FactBox con los emails enviados y recibidos
-con el email de la ficha (en el contacto, *Correo electrónico* y *Correo electrónico 2*):
+En las fichas de **cliente**, **proveedor** y **contacto** hay dos FactBoxes, como dos carpetas: **Emails recibidos**
+(de la dirección) y **Emails enviados** (a la dirección), con el email de la ficha (en el contacto, *Correo
+electrónico* y *Correo electrónico 2*). Es la misma página (`IKA Mail Address Emails`) puesta dos veces, cada
+una con su `Caption` y `SetContext(..., Direction)`; sin dirección muestra los dos tipos con una columna *Tipo*:
 
 - Se busca **en Outlook 365**, no solo en los emails sincronizados en BC, en todas las cuentas a las que
   tiene acceso el usuario. En cada cuenta se juntan tres consultas de Graph (sin repetir emails):
@@ -89,6 +91,7 @@ trigger OnAfterGetCurrRecord()
 begin
     // email del cliente + nº de documento en el asunto
     CurrPage."IKA Mail Address Emails".Page.SetContext(Rec."Sell-to E-Mail", Rec."No.");
+    // o dos partes: SetContext(..., Enum::"IKA Mail Address Direction"::Received) / ::Sent
 end;
 ```
 
@@ -114,6 +117,7 @@ end;
 | Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
 | Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
 | Codeunit | 99216 | IKA Mail Json Helper |
+| Enum | 99221 | IKA Mail Address Direction (Todos / Recibidos / Enviados) |
 | Codeunit | 99221 | IKA Mail Address Search (búsqueda por dirección/asunto en Outlook) |
 | ControlAddIn | — | IKA Mail Workspace (`src/controladdin/MailWorkspace`) |
 | Page | 99201 | IKA Mail Setup |

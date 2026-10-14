@@ -6,6 +6,9 @@ page 99241 "IKA Mail Address Emails"
     //     CurrPage."IKA Mail Address Emails".Page.SetContext(Rec."E-Mail", '');
     // Para un documento (pedido, albarán, factura) se puede pasar el email del cliente/proveedor y el nº
     // del documento como asunto. El usuario puede cambiar los dos filtros en el propio FactBox.
+    // Con un tercer parámetro solo muestra los recibidos o los enviados; así se pone dos veces en la
+    // ficha, como dos "carpetas", dando a cada parte su propio Caption:
+    //     CurrPage."IKA Mail Received Emails".Page.SetContext(Rec."E-Mail", '', Enum::"IKA Mail Address Direction"::Received);
     Caption = 'Emails enviados y recibidos';
     PageType = ListPart;
     SourceTable = "IKA Mail Message";
@@ -69,6 +72,7 @@ page 99241 "IKA Mail Address Emails"
                 {
                     ApplicationArea = All;
                     Caption = 'Tipo';
+                    Visible = ShowDirectionColumn;
                     StyleExpr = DirectionStyle;
                     ToolTip = 'Enviado desde una cuenta de la empresa o recibido en ella.';
                 }
@@ -201,7 +205,7 @@ page 99241 "IKA Mail Address Emails"
                 var
                     AddressEmailList: Page "IKA Mail Address Email List";
                 begin
-                    AddressEmailList.SetFilters(AddressFilterText, SubjectFilterText);
+                    AddressEmailList.SetFilters(AddressFilterText, SubjectFilterText, Direction);
                     AddressEmailList.Run();
                 end;
             }
@@ -210,6 +214,7 @@ page 99241 "IKA Mail Address Emails"
 
     var
         AddressSearch: Codeunit "IKA Mail Address Search";
+        Direction: Enum "IKA Mail Address Direction";
         AddressFilterText: Text;
         SubjectFilterText: Text;
         ContextAddresses: Text;
@@ -220,9 +225,15 @@ page 99241 "IKA Mail Address Emails"
         CounterpartText: Text;
         RowStyle: Text;
         ContextSet: Boolean;
+        ShowDirectionColumn: Boolean;
         SentLbl: Label 'Enviado';
         ReceivedLbl: Label 'Recibido';
         PressRefreshLbl: Label 'Pulse "Actualizar" para buscar en Outlook.';
+
+    trigger OnInit()
+    begin
+        ShowDirectionColumn := true;
+    end;
 
     trigger OnAfterGetRecord()
     begin
@@ -246,6 +257,17 @@ page 99241 "IKA Mail Address Emails"
     /// </summary>
     procedure SetContext(NewAddresses: Text; NewSubject: Text)
     begin
+        SetContext(NewAddresses, NewSubject, Direction::All);
+    end;
+
+    /// <summary>
+    /// Igual, pero solo con los emails recibidos o solo con los enviados.
+    /// </summary>
+    procedure SetContext(NewAddresses: Text; NewSubject: Text; NewDirection: Enum "IKA Mail Address Direction")
+    begin
+        // La columna Tipo sobra cuando el FactBox es solo de recibidos o solo de enviados
+        Direction := NewDirection;
+        ShowDirectionColumn := Direction = Direction::All;
         if ContextSet and (NewAddresses = ContextAddresses) and (NewSubject = ContextSubject) then
             exit;
         ContextSet := true;
@@ -265,7 +287,7 @@ page 99241 "IKA Mail Address Emails"
 
     local procedure LoadEmails()
     begin
-        StatusText := AddressSearch.RunSearch(AddressFilterText, SubjectFilterText, Rec);
+        StatusText := AddressSearch.RunSearch(AddressFilterText, SubjectFilterText, Direction, Rec);
         Rec.Reset();
         Rec.SetCurrentKey("Received At");
         Rec.Ascending(false);

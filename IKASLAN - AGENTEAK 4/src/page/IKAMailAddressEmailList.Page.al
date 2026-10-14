@@ -43,6 +43,17 @@ page 99246 "IKA Mail Address Email List"
                         LoadEmails();
                     end;
                 }
+                field(DirectionFilter; Direction)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Mostrar';
+                    ToolTip = 'Todos, solo los recibidos o solo los enviados.';
+
+                    trigger OnValidate()
+                    begin
+                        LoadEmails();
+                    end;
+                }
                 field(StatusText; StatusText)
                 {
                     ApplicationArea = All;
@@ -188,6 +199,7 @@ page 99246 "IKA Mail Address Email List"
 
     var
         AddressSearch: Codeunit "IKA Mail Address Search";
+        Direction: Enum "IKA Mail Address Direction";
         AddressFilterText: Text;
         SubjectFilterText: Text;
         StatusText: Text;
@@ -217,6 +229,12 @@ page 99246 "IKA Mail Address Email List"
             RowStyle := 'Strong';
     end;
 
+    procedure SetFilters(NewAddressFilter: Text; NewSubjectFilter: Text; NewDirection: Enum "IKA Mail Address Direction")
+    begin
+        Direction := NewDirection;
+        SetFilters(NewAddressFilter, NewSubjectFilter);
+    end;
+
     procedure SetFilters(NewAddressFilter: Text; NewSubjectFilter: Text)
     begin
         AddressFilterText := NewAddressFilter;
@@ -231,7 +249,7 @@ page 99246 "IKA Mail Address Email List"
 
     local procedure SearchEmails()
     begin
-        StatusText := AddressSearch.RunSearch(AddressFilterText, SubjectFilterText, Rec);
+        StatusText := AddressSearch.RunSearch(AddressFilterText, SubjectFilterText, Direction, Rec);
         Rec.Reset();
         Rec.SetCurrentKey("Received At");
         Rec.Ascending(false);
