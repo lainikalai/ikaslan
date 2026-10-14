@@ -77,6 +77,16 @@ table 99211 "IKA Mail Message"
             Caption = 'Enlace Outlook Web';
             ExtendedDatatype = URL;
         }
+        field(31; "Is Sent"; Boolean)
+        {
+            Caption = 'Enviado';
+            ToolTip = 'El remitente es la propia cuenta de Outlook 365 (email enviado, no recibido).';
+        }
+        field(32; "Search Only"; Boolean)
+        {
+            Caption = 'Solo de búsqueda';
+            ToolTip = 'Email abierto desde una búsqueda por dirección (p.ej. el FactBox de la ficha de cliente). No se muestra en la bandeja hasta que llegue por la sincronización.';
+        }
         field(40; "Body Html"; Blob)
         {
             Caption = 'Cuerpo (HTML)';
@@ -114,6 +124,9 @@ table 99211 "IKA Mail Message"
         {
         }
         key(FromAddress; "From Address")
+        {
+        }
+        key(ReceivedAt; "Received At")
         {
         }
     }

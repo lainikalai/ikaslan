@@ -3,7 +3,7 @@ page 99211 "IKA Mail Messages"
     Caption = 'Correo Outlook 365';
     PageType = List;
     SourceTable = "IKA Mail Message";
-    SourceTableView = sorting("Mailbox Code", "Received At") order(descending);
+    SourceTableView = sorting("Mailbox Code", "Received At") order(descending) where("Search Only" = const(false));
     CardPageId = "IKA Mail Message";
     UsageCategory = Lists;
     ApplicationArea = All;

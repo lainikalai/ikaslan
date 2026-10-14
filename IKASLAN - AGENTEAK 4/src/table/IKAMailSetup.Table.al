@@ -55,6 +55,20 @@ table 99201 "IKA Mail Setup"
             Caption = 'Tamaño máx. para adjuntar a entidad (MB)';
             InitValue = 25;
         }
+        field(90; "Address Emails Auto Load"; Boolean)
+        {
+            Caption = 'Cargar emails en las fichas automáticamente';
+            InitValue = true;
+            ToolTip = 'El FactBox "Emails enviados y recibidos" de las fichas de cliente, proveedor y contacto busca en Outlook al abrir la ficha. Desactívelo si ralentiza la navegación: entonces se busca al pulsar "Actualizar".';
+        }
+        field(91; "Address Emails to Show"; Integer)
+        {
+            Caption = 'Emails a mostrar por dirección';
+            InitValue = 25;
+            MinValue = 1;
+            MaxValue = 250;
+            ToolTip = 'Máximo de emails que se muestran en el FactBox y en la lista "Emails enviados y recibidos".';
+        }
     }
 
     keys

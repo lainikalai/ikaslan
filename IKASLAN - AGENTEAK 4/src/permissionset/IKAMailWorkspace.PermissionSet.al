@@ -25,6 +25,7 @@ permissionset 99201 "IKA Mail Workspace"
         codeunit "IKA Mail Entity Mgt." = X,
         codeunit "IKA Mail Attach Mgt." = X,
         codeunit "IKA Mail Json Helper" = X,
+        codeunit "IKA Mail Address Search" = X,
         page "IKA Mail Setup" = X,
         page "IKA Mail Mailboxes" = X,
         page "IKA Mail Messages" = X,
@@ -32,5 +33,8 @@ permissionset 99201 "IKA Mail Workspace"
         page "IKA Mail Compose" = X,
         page "IKA Mail Links" = X,
         page "IKA Mail Linked Emails" = X,
-        page "IKA Mail Secret Input" = X;
+        page "IKA Mail Secret Input" = X,
+        page "IKA Mail Address Emails" = X,
+        page "IKA Mail Address Email List" = X,
+        page "IKA Mail Address Filter" = X;
 }

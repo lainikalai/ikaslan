@@ -55,6 +55,38 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 - **Al revés**: en las fichas de cliente, proveedor, contacto, banco, recurso, producto, empleado, activo y proyecto
   se añade el FactBox **Emails vinculados**, desde el que se abre el email de origen.
 
+## FactBox "Emails enviados y recibidos"
+
+En las fichas de **cliente**, **proveedor** y **contacto** hay un FactBox con los emails enviados y recibidos
+con el email de la ficha (en el contacto, *Correo electrónico* y *Correo electrónico 2*):
+
+- Se busca **en Outlook 365**, en todas las carpetas (bandeja de entrada, enviados, archivo, subcarpetas...) de
+  todas las cuentas a las que tiene acceso el usuario, no solo en los emails sincronizados en BC.
+  Se usa `$search` de Graph con `participants:` (De, Para, CC y CCO).
+- Filtros editables en el propio FactBox (y con *Cambiar filtros*): **Email** (una o varias direcciones separadas
+  por `;`; `@cliente.com` para todo el dominio) y **Asunto** (palabras que debe contener; `pedi*` para prefijos).
+  *Restablecer filtros* vuelve a los de la ficha.
+- Columnas: fecha, *Enviado/Recibido*, asunto (clic para abrir el email en BC) y remitente o destinatarios.
+  *Ver en lista* abre la lista completa con más columnas; también se abre desde la búsqueda de BC
+  ("Emails enviados y recibidos") para buscar cualquier dirección.
+- Al abrir un email que no estaba en la bandeja se guarda en la caché marcado como *Solo de búsqueda*
+  y no aparece en la bandeja de correo.
+- *Configuración correo Outlook 365* → *Emails en fichas*: buscar al abrir la ficha (si se desactiva,
+  se busca al pulsar *Actualizar*) y número máximo de emails (25 por defecto).
+- Si Graph falla (sin configurar, sin permiso...), el FactBox muestra el motivo en *Resultado* y la ficha se abre igual.
+
+Para añadirlo a otra página (pedidos, albaranes, facturas):
+
+```al
+part("IKA Mail Address Emails"; "IKA Mail Address Emails") { ApplicationArea = All; }
+...
+trigger OnAfterGetCurrRecord()
+begin
+    // email del cliente + nº de documento en el asunto
+    CurrPage."IKA Mail Address Emails".Page.SetContext(Rec."Sell-to E-Mail", Rec."No.");
+end;
+```
+
 ### Seguridad del visor
 - El HTML del email se muestra en un `iframe` con `sandbox` **sin scripts**, sin acceso al origen de BC y sin
   referrer. Los enlaces se abren en una pestaña nueva.
@@ -77,6 +109,7 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Codeunit | 99206 | IKA Mail Entity Mgt. (todo lo que depende del tipo de entidad) |
 | Codeunit | 99211 | IKA Mail Attach Mgt. (adjuntar, vínculos, datos del visor; evento `OnAfterAttach`) |
 | Codeunit | 99216 | IKA Mail Json Helper |
+| Codeunit | 99221 | IKA Mail Address Search (búsqueda por dirección/asunto en Outlook) |
 | ControlAddIn | — | IKA Mail Workspace (`src/controladdin/MailWorkspace`) |
 | Page | 99201 | IKA Mail Setup |
 | Page | 99206 | IKA Mail Mailboxes (*Cuentas de Outlook 365*) |
@@ -85,7 +118,10 @@ Por eso el origen y los destinos están **en la misma página**, dentro de un *c
 | Page | 99221 | IKA Mail Compose (responder / reenviar) |
 | Page | 99226 / 99231 | IKA Mail Links / Linked Emails (FactBox) |
 | Page | 99236 | IKA Mail Secret Input |
-| PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto) |
+| Page | 99241 | IKA Mail Address Emails (FactBox *Emails enviados y recibidos*) |
+| Page | 99246 | IKA Mail Address Email List (lista completa) |
+| Page | 99251 | IKA Mail Address Filter (diálogo de filtros) |
+| PageExt | 99201–99241 | FactBox *Emails vinculados* en las fichas de entidad (+ *Documentos adjuntos* en Banco y Contacto); *Emails enviados y recibidos* en cliente, proveedor y contacto |
 | PermissionSet | 99201 | IKA Mail Workspace |
 
 Para añadir otro tipo de entidad: un valor en el enum `IKA Mail Entity Type` y un caso en cada procedimiento de

@@ -76,7 +76,6 @@ codeunit 99201 "IKA Mail Graph Client"
     var
         MailMessage: Record "IKA Mail Message";
         GraphId: Text;
-        ReceivedAt: DateTime;
         IsNew: Boolean;
     begin
         GraphId := JsonHelper.GetText(MessageJson, 'id');
@@ -90,6 +89,19 @@ codeunit 99201 "IKA Mail Graph Client"
             MailMessage."Graph Id" := CopyStr(GraphId, 1, MaxStrLen(MailMessage."Graph Id"));
         end;
 
+        TransferMessageFields(MailMessage, MessageJson);
+        // Si se abrió antes desde una búsqueda, ya es un email normal de la bandeja
+        MailMessage."Search Only" := false;
+        if IsNew then
+            MailMessage.Insert(true)
+        else
+            MailMessage.Modify(true);
+    end;
+
+    local procedure TransferMessageFields(var MailMessage: Record "IKA Mail Message"; MessageJson: JsonObject)
+    var
+        ReceivedAt: DateTime;
+    begin
         MailMessage."Internet Message Id" := CopyStr(JsonHelper.GetText(MessageJson, 'internetMessageId'), 1, MaxStrLen(MailMessage."Internet Message Id"));
         MailMessage."Conversation Id" := CopyStr(JsonHelper.GetText(MessageJson, 'conversationId'), 1, MaxStrLen(MailMessage."Conversation Id"));
         if Evaluate(ReceivedAt, JsonHelper.GetText(MessageJson, 'receivedDateTime'), 9) then
@@ -104,10 +116,7 @@ codeunit 99201 "IKA Mail Graph Client"
         MailMessage."Has Attachments" := JsonHelper.GetBoolean(MessageJson, 'hasAttachments');
         MailMessage.Importance := CopyStr(JsonHelper.GetText(MessageJson, 'importance'), 1, MaxStrLen(MailMessage.Importance));
         MailMessage."Web Link" := CopyStr(JsonHelper.GetText(MessageJson, 'webLink'), 1, MaxStrLen(MailMessage."Web Link"));
-        if IsNew then
-            MailMessage.Insert(true)
-        else
-            MailMessage.Modify(true);
+        MailMessage."Is Sent" := (MailMessage."From Address" <> '') and (LowerCase(MailMessage."From Address") = LowerCase(CurrentMailbox.Address));
     end;
 
     local procedure RecipientsToText(MessageJson: JsonObject; PropertyName: Text): Text
@@ -131,6 +140,61 @@ codeunit 99201 "IKA Mail Graph Client"
                 Result += Address;
         end;
         exit(Result);
+    end;
+
+    // =====================================================================
+    // Búsqueda por dirección (FactBox de cliente, proveedor, contacto...)
+    // =====================================================================
+
+    /// <summary>
+    /// Busca en todas las carpetas de la cuenta (recibidos, enviados, archivados...) con una consulta KQL
+    /// de Graph ($search), p.ej. participants:ana@cliente.com AND subject:pedido, y añade los resultados
+    /// a la tabla temporal. No toca la caché local. Los borradores se descartan y, si el mismo email
+    /// ya está en el resultado (otra cuenta), no se repite.
+    /// </summary>
+    procedure SearchMessages(var Mailbox: Record "IKA Mail Mailbox"; KqlQuery: Text; MaxResults: Integer; var TempMailMessage: Record "IKA Mail Message" temporary): Integer
+    var
+        ResponseJson: JsonObject;
+        MessageArray: JsonArray;
+        MessageToken: JsonToken;
+        MessageJson: JsonObject;
+        InternetMessageId: Text;
+        Url: Text;
+        NextEntryNo: Integer;
+        FoundCount: Integer;
+    begin
+        SetMailbox(Mailbox);
+        // $search ordena por fecha (más recientes primero) y no admite $orderby ni $filter
+        Url := GetMailboxUrl() + '/messages' +
+            '?$search=' + UriHelper.EscapeDataString('"' + KqlQuery + '"') +
+            '&$top=' + Format(MaxResults) +
+            '&$select=' + MessageSelectTok + ',isDraft';
+        ResponseJson := SendGraphRequest('GET', Url, '');
+        if not JsonHelper.GetArray(ResponseJson, 'value', MessageArray) then
+            exit(0);
+
+        TempMailMessage.Reset();
+        if TempMailMessage.FindLast() then
+            NextEntryNo := TempMailMessage."Entry No.";
+        foreach MessageToken in MessageArray do begin
+            MessageJson := MessageToken.AsObject();
+            if not JsonHelper.GetBoolean(MessageJson, 'isDraft') then begin
+                InternetMessageId := JsonHelper.GetText(MessageJson, 'internetMessageId');
+                TempMailMessage.SetRange("Internet Message Id", CopyStr(InternetMessageId, 1, MaxStrLen(TempMailMessage."Internet Message Id")));
+                if (InternetMessageId = '') or TempMailMessage.IsEmpty() then begin
+                    NextEntryNo += 1;
+                    TempMailMessage.Init();
+                    TempMailMessage."Entry No." := NextEntryNo;
+                    TempMailMessage."Mailbox Code" := Mailbox.Code;
+                    TempMailMessage."Graph Id" := CopyStr(JsonHelper.GetText(MessageJson, 'id'), 1, MaxStrLen(TempMailMessage."Graph Id"));
+                    TransferMessageFields(TempMailMessage, MessageJson);
+                    TempMailMessage.Insert();
+                    FoundCount += 1;
+                end;
+                TempMailMessage.SetRange("Internet Message Id");
+            end;
+        end;
+        exit(FoundCount);
     end;
 
     // =====================================================================

@@ -73,6 +73,19 @@ page 99201 "IKA Mail Setup"
                     ToolTip = 'Tamaño máximo de un fichero para adjuntarlo a una entidad de BC.';
                 }
             }
+            group(AddressEmails)
+            {
+                Caption = 'Emails en fichas (cliente, proveedor, contacto)';
+
+                field("Address Emails Auto Load"; Rec."Address Emails Auto Load")
+                {
+                    ApplicationArea = All;
+                }
+                field("Address Emails to Show"; Rec."Address Emails to Show")
+                {
+                    ApplicationArea = All;
+                }
+            }
         }
     }
 
