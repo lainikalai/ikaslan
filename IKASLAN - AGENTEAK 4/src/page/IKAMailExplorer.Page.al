@@ -15,6 +15,8 @@ page 99251 "IKA Mail Explorer"
     DeleteAllowed = false;
     ModifyAllowed = false;
     LinksAllowed = false;
+    // Título: la cuenta y la carpeta que se están viendo (no la clave de la tabla de preferencias)
+    DataCaptionExpression = HeaderCaption;
 
     layout
     {
@@ -281,11 +283,13 @@ page 99251 "IKA Mail Explorer"
         CurrentFolderId: Text;
         DefaultFolderId: Text;
         SelectedEntryNo: Integer;
+        HeaderCaption: Text;
         NoAccountsMsg: Label 'Todavía no hay ninguna cuenta de Outlook 365 configurada a la que tenga acceso. Añada su cuenta en la página que se abre a continuación.';
         SyncedMsg: Label '%1 email(s) descargado(s).', Comment = '%1 = count';
         MovedMsg: Label 'Email movido.';
         MovedToDeletedMsg: Label 'Email movido a Elementos eliminados.';
         DeletedForeverMsg: Label 'Email eliminado definitivamente.';
+        OutlookViewLbl: Label 'Outlook 365';
         AddinNotReadyMsg: Label 'La vista Outlook todavía no se ha cargado en el navegador (no se ven las carpetas ni la lista). Recargue la página con Ctrl+F5; si sigue en blanco, abra las herramientas del navegador (F12) > Consola y envíe el error que aparezca.';
         NoMailboxForUserMsg: Label 'El usuario %1 no tiene acceso a ninguna cuenta de Outlook 365 activa. Revise en "Cuentas de Outlook 365" el campo "Solo para el usuario" y que la cuenta esté activa.', Comment = '%1 = user id';
         NoMessageSelectedErr: Label 'Seleccione primero un email de la lista.';
@@ -302,6 +306,7 @@ page 99251 "IKA Mail Explorer"
         end;
         UserSetting.GetForCurrentUser();
         ReadingPaneVisible := not UserSetting."Hide Reading Pane";
+        HeaderCaption := GetHeaderCaption(ExplorerMgt.GetInitialMailbox(UserSetting), '');
         Rec.FilterGroup(2);
         Rec.SetRange("User ID", UserSetting."User ID");
         Rec.FilterGroup(0);
@@ -364,6 +369,38 @@ page 99251 "IKA Mail Explorer"
         CurrPage.Explorer.SetMessage('');
         RenderMessages();
         ExplorerMgt.SaveLocation(CurrentMailboxCode, CurrentFolderId);
+        UpdateHeaderCaption();
+    end;
+
+    local procedure UpdateHeaderCaption()
+    var
+        NewCaption: Text;
+    begin
+        NewCaption := GetHeaderCaption(CurrentMailboxCode, CurrentFolderId);
+        if NewCaption = HeaderCaption then
+            exit;
+        HeaderCaption := NewCaption;
+        CurrPage.Update(false);
+    end;
+
+    /// <summary>
+    /// "cuenta@empresa.com · Bandeja de entrada" (sin carpeta, solo la cuenta).
+    /// </summary>
+    local procedure GetHeaderCaption(MailboxCode: Code[20]; FolderId: Text): Text
+    var
+        Mailbox: Record "IKA Mail Mailbox";
+        MailFolder: Record "IKA Mail Folder";
+        Result: Text;
+    begin
+        if (MailboxCode = '') or not Mailbox.Get(MailboxCode) then
+            exit(OutlookViewLbl);
+        Result := Mailbox.Address;
+        if Result = '' then
+            Result := Mailbox.Code;
+        if FolderId <> '' then
+            if MailFolder.Get(MailboxCode, CopyStr(FolderId, 1, MaxStrLen(MailFolder."Folder Id"))) then
+                Result += ' · ' + MailFolder."Display Name";
+        exit(Result);
     end;
 
     local procedure RenderFolders()
