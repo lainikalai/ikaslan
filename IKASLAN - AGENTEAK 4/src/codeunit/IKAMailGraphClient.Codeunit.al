@@ -119,9 +119,11 @@ codeunit 99201 "IKA Mail Graph Client"
         IsNew: Boolean;
     begin
         GraphId := JsonHelper.GetText(MessageJson, 'id');
-        FolderId := JsonHelper.GetText(MessageJson, 'parentFolderId');
+        // La carpeta es la que se ha sincronizado, con el mismo Id que el árbol de carpetas y la vista Outlook
+        // (el parentFolderId del email puede venir en otro formato, p.ej. con Id inmutables, y no coincidir)
+        FolderId := SyncedFolderId;
         if FolderId = '' then
-            FolderId := SyncedFolderId;
+            FolderId := JsonHelper.GetText(MessageJson, 'parentFolderId');
         MailMessage.SetCurrentKey("Mailbox Code", "Graph Id");
         MailMessage.SetRange("Mailbox Code", MailboxCode);
         MailMessage.SetRange("Graph Id", CopyStr(GraphId, 1, MaxStrLen(MailMessage."Graph Id")));
@@ -426,12 +428,20 @@ codeunit 99201 "IKA Mail Graph Client"
         SetMailboxByCode(MailMessage."Mailbox Code");
         DeletedItemsFolderId := GetDeletedItemsFolderId(MailMessage."Mailbox Code");
         if (DeletedItemsFolderId = '') or (MailMessage."Folder Id" <> DeletedItemsFolderId) then begin
-            MoveMessage(MailMessage, 'deleteditems');
+            if DeletedItemsFolderId <> '' then
+                MoveMessage(MailMessage, DeletedItemsFolderId)
+            else
+                MoveMessage(MailMessage, 'deleteditems');
             exit(false);
         end;
         SendGraphRequest('DELETE', GetMessageUrl(MailMessage), '');
         MailMessage.Delete(true);
         exit(true);
+    end;
+
+    local procedure IsFolderAlias(FolderId: Text): Boolean
+    begin
+        exit(LowerCase(FolderId) in ['inbox', 'drafts', 'sentitems', 'deleteditems', 'junkemail', 'archive', 'outbox']);
     end;
 
     /// <summary>
@@ -453,7 +463,11 @@ codeunit 99201 "IKA Mail Graph Client"
         NewId := JsonHelper.GetText(ResponseJson, 'id');
         if NewId <> '' then
             MailMessage."Graph Id" := CopyStr(NewId, 1, MaxStrLen(MailMessage."Graph Id"));
-        NewFolderId := JsonHelper.GetText(ResponseJson, 'parentFolderId');
+        // Con un Id de carpeta (del árbol) se guarda ese, para que coincida con la vista; con un alias
+        // (deleteditems...) se usa el que devuelve Graph
+        NewFolderId := DestinationFolderId;
+        if IsFolderAlias(DestinationFolderId) then
+            NewFolderId := JsonHelper.GetText(ResponseJson, 'parentFolderId');
         if NewFolderId = '' then
             NewFolderId := DestinationFolderId;
         MailMessage."Folder Id" := CopyStr(NewFolderId, 1, MaxStrLen(MailMessage."Folder Id"));
