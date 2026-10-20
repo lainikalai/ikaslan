@@ -34,6 +34,10 @@ page 99251 "IKA Mail Explorer"
                     CurrPage.Explorer.SetReadingPane(ReadingPaneVisible);
                     UserSetting.GetForCurrentUser();
                     MailboxCode := ExplorerMgt.GetInitialMailbox(UserSetting);
+                    if MailboxCode = '' then begin
+                        CurrPage.Explorer.ShowStatus(StrSubstNo(NoMailboxForUserMsg, UserId()), true);
+                        exit;
+                    end;
                     if MailboxCode = UserSetting."Last Mailbox Code" then
                         WantedFolderId := UserSetting."Last Folder Id";
                     OpenMailbox(MailboxCode, WantedFolderId);
@@ -282,6 +286,8 @@ page 99251 "IKA Mail Explorer"
         MovedMsg: Label 'Email movido.';
         MovedToDeletedMsg: Label 'Email movido a Elementos eliminados.';
         DeletedForeverMsg: Label 'Email eliminado definitivamente.';
+        AddinNotReadyMsg: Label 'La vista Outlook todavía no se ha cargado en el navegador (no se ven las carpetas ni la lista). Recargue la página con Ctrl+F5; si sigue en blanco, abra las herramientas del navegador (F12) > Consola y envíe el error que aparezca.';
+        NoMailboxForUserMsg: Label 'El usuario %1 no tiene acceso a ninguna cuenta de Outlook 365 activa. Revise en "Cuentas de Outlook 365" el campo "Solo para el usuario" y que la cuenta esté activa.', Comment = '%1 = user id';
         NoMessageSelectedErr: Label 'Seleccione primero un email de la lista.';
 
     trigger OnOpenPage()
@@ -374,8 +380,15 @@ page 99251 "IKA Mail Explorer"
     var
         SyncedCount: Integer;
     begin
-        if not AddinReady or (CurrentMailboxCode = '') then
+        // Sin el control cargado o sin cuenta no hay nada que sincronizar: se dice por qué
+        if not AddinReady then begin
+            Message(AddinNotReadyMsg);
             exit;
+        end;
+        if CurrentMailboxCode = '' then begin
+            Message(NoMailboxForUserMsg, UserId());
+            exit;
+        end;
         SyncedCount := ExplorerMgt.SyncFolder(CurrentMailboxCode, CurrentFolderId, LoadOlderMessages);
         RenderFolders();
         RenderMessages();
