@@ -30,8 +30,8 @@
 
     function iconFor(kind) {
         switch (kind) {
-            case 'email': return '✉';      // sobre
-            case 'item': return '✉';
+            case 'email': return '\u2709';      // sobre
+            case 'item': return '\u2709';
             case 'reference': return '\u{1F517}'; // enlace
             default: return '\u{1F4CE}';         // clip
         }
@@ -60,17 +60,17 @@
         var left = el('section', 'ika-left');
         bodyFrame = createBodyFrame('');
         left.appendChild(bodyFrame);
-        left.appendChild(el('div', 'ika-section-title', 'Email y adjuntos — arrastre a un destino'));
+        left.appendChild(el('div', 'ika-section-title', 'Email y adjuntos \u2014 arrastre a un destino'));
         itemsList = el('div', 'ika-items');
         left.appendChild(itemsList);
 
         var right = el('section', 'ika-right');
-        right.appendChild(el('div', 'ika-section-title', 'Adjuntar a…'));
+        right.appendChild(el('div', 'ika-section-title', 'Adjuntar a\u2026'));
         targetsList = el('div', 'ika-targets');
         right.appendChild(targetsList);
         right.appendChild(el('div', 'ika-hint',
-            'Arrastre el email o un adjunto sobre una entidad. También puede soltar ficheros desde el escritorio. ' +
-            'En pantallas táctiles: toque un elemento y después "Adjuntar aquí".'));
+            'Arrastre el email o un adjunto sobre una entidad. Tambi\u00e9n puede soltar ficheros desde el escritorio. ' +
+            'En pantallas t\u00e1ctiles: toque un elemento y despu\u00e9s "Adjuntar aqu\u00ed".'));
 
         main.appendChild(left);
         main.appendChild(right);
@@ -89,7 +89,7 @@
             chip.setAttribute('draggable', draggable ? 'true' : 'false');
             chip.setAttribute('tabindex', '0');
             chip.title = draggable ? 'Arrastre a un destino. Doble clic para descargar.' :
-                'Enlace a OneDrive/SharePoint: ábralo desde Outlook.';
+                'Enlace a OneDrive/SharePoint: \u00e1bralo desde Outlook.';
             if (state.selectedItemId === item.id) { chip.classList.add('ika-selected'); }
 
             chip.appendChild(el('span', 'ika-icon', iconFor(item.kind)));
@@ -97,12 +97,12 @@
             text.appendChild(el('span', 'ika-item-name', item.name));
             if (item.size) { text.appendChild(el('span', 'ika-item-size', item.size)); }
             if (item.links && item.links.length) {
-                text.appendChild(el('span', 'ika-item-links', '✓ ' + item.links.join(', ')));
+                text.appendChild(el('span', 'ika-item-links', '\u2713 ' + item.links.join(', ')));
             }
             chip.appendChild(text);
 
             if (draggable) {
-                var download = el('button', 'ika-btn ika-btn-icon', '⬇');
+                var download = el('button', 'ika-btn ika-btn-icon', '\u2b07');
                 download.title = 'Descargar';
                 download.addEventListener('click', function (e) {
                     e.stopPropagation();
@@ -146,7 +146,7 @@
         targetsList.innerHTML = '';
         if (!state.targets.length) {
             targetsList.appendChild(el('div', 'ika-empty',
-                'No hay destinos. Elija un tipo y nº de entidad en "Destino" o fije entidades para tenerlas siempre a mano.'));
+                'No hay destinos. Elija un tipo y n\u00ba de entidad en "Destino" o fije entidades para tenerlas siempre a mano.'));
             return;
         }
         state.targets.forEach(function (target) {
@@ -158,7 +158,7 @@
             pin.title = target.pinned ? 'Quitar de fijados' : 'Fijar este destino';
             pin.addEventListener('click', function () { invoke('PinToggled', [target.id]); });
             head.appendChild(pin);
-            var open = el('button', 'ika-btn ika-btn-icon', '↗');
+            var open = el('button', 'ika-btn ika-btn-icon', '\u2197');
             open.title = 'Abrir ficha';
             open.addEventListener('click', function () { invoke('OpenTargetRequested', [target.id]); });
             head.appendChild(open);
@@ -168,7 +168,7 @@
             card.appendChild(el('div', 'ika-target-name', target.name || ''));
 
             if (state.selectedItemId) {
-                var attach = el('button', 'ika-btn ika-btn-primary', 'Adjuntar aquí');
+                var attach = el('button', 'ika-btn ika-btn-primary', 'Adjuntar aqu\u00ed');
                 attach.addEventListener('click', function () {
                     invoke('ItemDropped', [state.selectedItemId, target.id]);
                     state.selectedItemId = null;
@@ -177,7 +177,7 @@
                 });
                 card.appendChild(attach);
             } else {
-                card.appendChild(el('div', 'ika-drop-hint', 'Suelte aquí'));
+                card.appendChild(el('div', 'ika-drop-hint', 'Suelte aqu\u00ed'));
             }
 
             card.addEventListener('dragenter', function (e) {

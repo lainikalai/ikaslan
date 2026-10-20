@@ -2,7 +2,7 @@
   "id": "9e91ec32-9be3-4ad1-8de0-1a39fff5d1ce",
   "name": "Ikaslan Outlook Mail Workspace",
   "publisher": "PUBLISHER",
-  "version": "1.4.2.0",
+  "version": "1.4.3.0",
   "brief": "Bandeja de correo de Outlook 365 dentro de Business Central, con respuesta y adjuntar a entidades mediante drag & drop.",
   "description": "Muestra los emails de buzones de Outlook 365 (Microsoft Graph) en Business Central, permite abrirlos, ver y descargar adjuntos, responder/reenviar y adjuntar el email (.eml) o sus ficheros a clientes, proveedores, bancos, recursos, contactos, productos, empleados, activos y proyectos arrastrándolos a zonas de destino.",
   "privacyStatement": "",

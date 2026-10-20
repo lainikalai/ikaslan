@@ -98,7 +98,7 @@
 
     // Búsqueda sin distinguir mayúsculas ni acentos
     function normalize(text) {
-        return String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
     function loadCollapsed() {
@@ -125,7 +125,7 @@
             case 'drafts': return '\u{1F4DD}';
             case 'sentitems': return '\u{1F4E4}';
             case 'deleteditems': return '\u{1F5D1}';
-            case 'junkemail': return '⚠';
+            case 'junkemail': return '\u26a0';
             case 'archive': return '\u{1F5C4}';
             default: return '\u{1F4C1}';
         }
@@ -163,7 +163,7 @@
     function buildToolbar() {
         var bar = el('div', 'mx-toolbar');
 
-        ui.menuButton = button('mx-tool mx-menu', '☰', 'Carpetas', function () {
+        ui.menuButton = button('mx-tool mx-menu', '\u2630', 'Carpetas', function () {
             state.foldersOpen = !state.foldersOpen;
             updateLayout();
         });
@@ -181,7 +181,7 @@
         });
         bar.appendChild(ui.mailboxSelect);
 
-        bar.appendChild(iconButton('mx-tool', '⟳', 'Sincronizar', 'Descargar los últimos emails de la carpeta (F5 en la página)', function () {
+        bar.appendChild(iconButton('mx-tool', '\u27f3', 'Sincronizar', 'Descargar los \u00faltimos emails de la carpeta (F5 en la p\u00e1gina)', function () {
             setBusy(true);
             invoke('SyncRequested');
         }));
@@ -195,7 +195,7 @@
         });
         bar.appendChild(ui.search);
 
-        ui.paneToggle = iconButton('mx-tool mx-toggle', '◧', '', 'Mostrar u ocultar el panel de lectura', function () {
+        ui.paneToggle = iconButton('mx-tool mx-toggle', '\u25e7', '', 'Mostrar u ocultar el panel de lectura', function () {
             state.readingPane = !state.readingPane;
             state.readerOpen = false;
             updateLayout();
@@ -211,7 +211,7 @@
         ui.folderPane = el('nav', 'mx-pane mx-folders');
         var header = el('div', 'mx-pane-header');
         header.appendChild(el('span', 'mx-pane-title', 'Carpetas'));
-        header.appendChild(button('mx-icon', '↻', 'Volver a leer las carpetas de Outlook', function () {
+        header.appendChild(button('mx-icon', '\u21bb', 'Volver a leer las carpetas de Outlook', function () {
             setBusy(true);
             invoke('RefreshFoldersRequested');
         }));
@@ -245,7 +245,7 @@
 
     function buildReadingPane() {
         ui.readingPane = el('section', 'mx-pane mx-reading');
-        ui.readerBack = button('mx-tool mx-back', '← Volver a la lista', '', function () {
+        ui.readerBack = button('mx-tool mx-back', '\u2190 Volver a la lista', '', function () {
             state.readerOpen = false;
             updateLayout();
         });
@@ -294,7 +294,7 @@
         ui.root.classList.toggle('mx-no-reading', !state.readingPane);
         ui.root.classList.toggle('mx-folders-open', narrow && state.foldersOpen);
         ui.root.classList.toggle('mx-reader-open', narrow && state.readingPane && state.readerOpen);
-        setIconLabel(ui.paneToggle, '◧', state.readingPane ? 'Ocultar lectura' : 'Mostrar lectura');
+        setIconLabel(ui.paneToggle, '\u25e7', state.readingPane ? 'Ocultar lectura' : 'Mostrar lectura');
         ui.paneToggle.classList.toggle('mx-active', state.readingPane);
     }
 
@@ -337,7 +337,7 @@
         row.style.paddingLeft = (6 + f.level * 14) + 'px';
         row.title = f.path;
 
-        var caret = el('span', 'mx-caret', f.children ? (collapsed ? '▸' : '▾') : '');
+        var caret = el('span', 'mx-caret', f.children ? (collapsed ? '\u25b8' : '\u25be') : '');
         if (f.children) {
             caret.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -393,16 +393,16 @@
         if (!all.length) {
             ui.list.appendChild(el('div', 'mx-empty', 'No hay emails descargados en esta carpeta. Pulse Sincronizar.'));
         } else if (!list.length) {
-            ui.list.appendChild(el('div', 'mx-empty', 'Ningún email coincide con la búsqueda.'));
+            ui.list.appendChild(el('div', 'mx-empty', 'Ning\u00fan email coincide con la b\u00fasqueda.'));
         }
         list.forEach(function (m) { ui.list.appendChild(renderMessageRow(m)); });
 
         if (all.length) {
             var footer = el('div', 'mx-list-footer');
             if (state.messages.truncated) {
-                footer.appendChild(el('div', 'mx-note', 'Se muestran los 500 más recientes.'));
+                footer.appendChild(el('div', 'mx-note', 'Se muestran los 500 m\u00e1s recientes.'));
             }
-            footer.appendChild(button('mx-link', 'Cargar anteriores', 'Descargar de Outlook emails más antiguos de esta carpeta', function () {
+            footer.appendChild(button('mx-link', 'Cargar anteriores', 'Descargar de Outlook emails m\u00e1s antiguos de esta carpeta', function () {
                 setBusy(true);
                 invoke('LoadOlderRequested');
             }));
@@ -516,30 +516,30 @@
 
     function appendMessageActions(container, id, isRead, includeOpen) {
         if (includeOpen) {
-            container.appendChild(button('mx-action mx-primary', 'Abrir', 'Abrir la ficha del email (también con doble clic o Intro)', function () {
+            container.appendChild(button('mx-action mx-primary', 'Abrir', 'Abrir la ficha del email (tambi\u00e9n con doble clic o Intro)', function () {
                 invoke('MessageOpened', [id]);
             }));
         }
-        container.appendChild(button('mx-action', '↩ Responder', 'Responder al remitente', function () {
+        container.appendChild(button('mx-action', '\u21a9 Responder', 'Responder al remitente', function () {
             invoke('ComposeRequested', [id, 'reply']);
         }));
-        container.appendChild(button('mx-action', '↩↩ A todos', 'Responder a todos', function () {
+        container.appendChild(button('mx-action', '\u21a9\u21a9 A todos', 'Responder a todos', function () {
             invoke('ComposeRequested', [id, 'replyAll']);
         }));
-        container.appendChild(button('mx-action', '↪ Reenviar', 'Reenviar', function () {
+        container.appendChild(button('mx-action', '\u21aa Reenviar', 'Reenviar', function () {
             invoke('ComposeRequested', [id, 'forward']);
         }));
-        container.appendChild(button('mx-action', 'Mover…', 'Mover a otra carpeta de Outlook', function () {
+        container.appendChild(button('mx-action', 'Mover\u2026', 'Mover a otra carpeta de Outlook', function () {
             invoke('MoveRequested', [id]);
         }));
         container.appendChild(iconButton('mx-action mx-danger', 'trash', 'Eliminar', 'Mover a Elementos eliminados (Supr). En Elementos eliminados, borrar definitivamente.', function () {
             requestDelete(id);
         }));
-        container.appendChild(button('mx-action', isRead ? 'Marcar no leído' : 'Marcar leído', '', function () {
+        container.appendChild(button('mx-action', isRead ? 'Marcar no le\u00eddo' : 'Marcar le\u00eddo', '', function () {
             invoke('ToggleReadRequested', [id]);
         }));
         if (!includeOpen) {
-            container.appendChild(button('mx-action', '\u{1F4CE} Adjuntar a BC…', 'Abrir la ficha del email para arrastrar el email o sus adjuntos a clientes, proveedores...', function () {
+            container.appendChild(button('mx-action', '\u{1F4CE} Adjuntar a BC\u2026', 'Abrir la ficha del email para arrastrar el email o sus adjuntos a clientes, proveedores...', function () {
                 invoke('MessageOpened', [id]);
             }));
         }
@@ -583,7 +583,7 @@
         ui.readerHeader.appendChild(from);
         appendHeaderLine('Para', d.to);
         appendHeaderLine('CC', d.cc);
-        var meta = d.date + (d.folder ? ' · ' + d.folder : '') + (d.links ? ' · \u{1F517} ' + d.links + ' vínculo(s) con BC' : '');
+        var meta = d.date + (d.folder ? ' \u00b7 ' + d.folder : '') + (d.links ? ' \u00b7 \u{1F517} ' + d.links + ' v\u00ednculo(s) con BC' : '');
         ui.readerHeader.appendChild(el('div', 'mx-reader-meta', meta));
 
         ui.readerActions.innerHTML = '';
@@ -592,7 +592,7 @@
         ui.readerAttachments.innerHTML = '';
         (d.attachments || []).forEach(function (a) {
             var chip = button('mx-chip', (a.reference ? '\u{1F517} ' : '\u{1F4CE} ') + a.name + (a.size ? ' (' + a.size + ')' : ''),
-                a.reference ? 'Enlace a OneDrive/SharePoint: ábralo desde Outlook' : 'Descargar', function () {
+                a.reference ? 'Enlace a OneDrive/SharePoint: \u00e1bralo desde Outlook' : 'Descargar', function () {
                     invoke('DownloadAttachmentRequested', [d.id, a.line]);
                 });
             ui.readerAttachments.appendChild(chip);
